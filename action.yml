@@ -1,0 +1,16 @@
+name: 'Setup Clojure'
+description: 'Setup your runner with Clojure build tools'
+author: 'DeLaGuardo'
+branding:
+  icon: 'gift'
+  color: 'blue'
+inputs:
+  liningen:
+    description: 'The Leiningen version to make available on the path.'
+  boot:
+    description: 'The boot-clj version to make available on the path.'
+  tools-deps:
+    description: 'The tools deps version to make available on the path.'
+runs:
+  using: 'node12'
+  main: 'lib/setup-clojure.js'
