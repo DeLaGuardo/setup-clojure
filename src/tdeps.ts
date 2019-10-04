@@ -122,7 +122,6 @@ async function readWriteAsync(
 
     fs.writeFile(file, newValue, 'utf-8', function(err) {
       if (err) throw err;
-      console.log('filelistAsync complete');
     });
   });
 }
