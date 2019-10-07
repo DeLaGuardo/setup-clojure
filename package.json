@@ -6,8 +6,6 @@
   "main": "lib/setup-clojure.js",
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
     "test": "jest"
   },
   "repository": {
@@ -31,7 +29,6 @@
     "@types/jest": "^24.0.13",
     "@types/node": "^12.0.4",
     "@types/semver": "^6.0.0",
-    "husky": "^3.0.0",
     "jest": "^24.8.0",
     "jest-circus": "^24.7.1",
     "prettier": "^1.17.1",
