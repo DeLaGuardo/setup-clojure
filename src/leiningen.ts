@@ -70,28 +70,19 @@ async function installLeiningen(
         await io.mv(bin, path.join(binDir, `lein`));
         fs.chmodSync(path.join(binDir, `lein`), '0755');
 
-        core.exportVariable('LEIN_HOME', path.join(destinationFolder, 'leiningen'));
-        core.addPath(path.join(destinationFolder, 'leiningen', 'bin'));
-        await exec.exec('lein -h');
+        await exec.exec(
+            './lein',
+            [],
+            {
+                cwd: path.join(destinationFolder, 'leiningen', 'bin'),
+                env: {
+                    'LEIN_HOME': path.join(destinationFolder, 'leiningen')
+                }
+            }
+        );
 
         return path.join(destinationFolder, 'leiningen');
     } else {
         throw new Error('Not a file');
     }
-}
-
-async function readWriteAsync(
-    file: string,
-    toReplace: string,
-    replacement: string
-): Promise<void> {
-    fs.readFile(file, 'utf-8', function(err, data) {
-        if (err) throw err;
-
-        var newValue = data.replace(toReplace, replacement);
-
-        fs.writeFile(file, newValue, 'utf-8', function(err) {
-            if (err) throw err;
-        });
-    });
 }
