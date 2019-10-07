@@ -8,13 +8,18 @@ import * as os from 'os';
 import * as utils from './utils';
 
 let tempDirectory = process.env['RUNNER_TEMP'] || '';
+const IS_WINDOWS = process.platform === 'win32';
 
 if (!tempDirectory) {
     let baseLocation;
-    if (process.platform === 'darwin') {
-        baseLocation = '/Users';
+    if (IS_WINDOWS) {
+        baseLocation = process.env['USERPROFILE'] || 'C:\\';
     } else {
-        baseLocation = '/home';
+        if (process.platform === 'darwin') {
+            baseLocation = '/Users';
+        } else {
+            baseLocation = '/home';
+        }
     }
     tempDirectory = path.join(baseLocation, 'actions', 'temp');
 }
@@ -30,7 +35,7 @@ export async function setup(version: string): Promise<void> {
         core.debug(`Leiningen found in cache ${toolPath}`);
     } else {
         let leiningenFile = await tc.downloadTool(
-            `https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein`
+            `https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein${IS_WINDOWS ? '.bat' : ''}`
         );
         let tempDir: string = path.join(
             tempDirectory,
@@ -70,7 +75,7 @@ async function installLeiningen(
         fs.chmodSync(path.join(binDir, `lein`), '0755');
 
         await exec.exec(
-            './lein',
+            './lein version',
             [],
             {
                 cwd: path.join(destinationFolder, 'leiningen', 'bin'),
