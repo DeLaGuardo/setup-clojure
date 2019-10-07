@@ -59,6 +59,7 @@ export async function setup(version: string): Promise<void> {
     );
   }
 
+  core.exportVariable('LEIN_LIB_DIR', toolPath);
   core.addPath(path.join(toolPath, 'bin'));
 }
 
@@ -88,14 +89,14 @@ async function installLeiningen(
     if (IS_WINDOWS) {
       await readWriteAsync(
         path.join(binDir, 'lein.bat'),
-        '!LEIN_HOME!self-installsleiningen-!LEIN_VERSION!-standalone.jar',
-        '..libexecleiningen-standalone.jar'
+        '!LEIN_HOME!\self-installs\leiningen-!LEIN_VERSION!-standalone.jar',
+        '!LEIN_LIB_DIR!\libexec\leiningen-standalone.jar'
       );
     } else {
       await readWriteAsync(
         path.join(binDir, 'lein'),
         '/usr/share/java/leiningen-$LEIN_VERSION-standalone.jar',
-        '../libexec/leiningen-standalone.jar'
+        '$LEIN_LIB_DIR/libexec/leiningen-standalone.jar'
       );
     }
 
