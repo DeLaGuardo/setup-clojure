@@ -19,12 +19,12 @@ async function run() {
       boot.setup(Boot);
     }
 
-      if (Tdeps) {
-          if (IS_WINDOWS) {
-              throw new Error('Windows is not supported yet');
-          } else {
-              tdeps.setup(Tdeps);
-          }
+    if (Tdeps) {
+      if (IS_WINDOWS) {
+        throw new Error('Windows is not supported yet');
+      } else {
+        tdeps.setup(Tdeps);
+      }
     }
 
     if (!Boot && !Lein && !Tdeps) {
