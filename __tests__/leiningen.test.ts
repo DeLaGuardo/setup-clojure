@@ -8,8 +8,8 @@ import path = require('path');
 const toolDir = path.join(__dirname, 'runner', 'tools', 'leiningen');
 const tempDir = path.join(__dirname, 'runner', 'temp', 'leiningen');
 
-process.env['RUNNER_TOOL_CACHE'] = toolDir;
-process.env['RUNNER_TEMP'] = tempDir;
+process.env['RUNNER_TOOL_CACHE'] = path.join(__dirname, 'runner', 'tools');
+process.env['RUNNER_TEMP'] = path.join(__dirname, 'runner', 'temp');
 import * as leiningen from '../src/leiningen';
 
 describe('leiningen tests', () => {

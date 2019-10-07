@@ -7,8 +7,8 @@ import path = require('path');
 const toolDir = path.join(__dirname, 'runner', 'tools', 'tdeps');
 const tempDir = path.join(__dirname, 'runner', 'temp', 'tdeps');
 
-process.env['RUNNER_TOOL_CACHE'] = toolDir;
-process.env['RUNNER_TEMP'] = tempDir;
+process.env['RUNNER_TOOL_CACHE'] = path.join(__dirname, 'runner', 'tools');
+process.env['RUNNER_TEMP'] = path.join(__dirname, 'runner', 'temp');
 import * as tdeps from '../src/tdeps';
 
 describe('tdeps tests', () => {
