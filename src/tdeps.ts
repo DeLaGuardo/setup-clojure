@@ -27,7 +27,7 @@ export async function setup(version: string): Promise<void> {
     );
 
     if (toolPath) {
-        core.debug(`Clojure CLI found in cache ${toolPath}`);
+        core.info(`Clojure CLI found in cache ${toolPath}`);
     } else {
         let clojureToolsFile = await tc.downloadTool(
             `https://download.clojure.org/install/clojure-tools-${version}.tar.gz`

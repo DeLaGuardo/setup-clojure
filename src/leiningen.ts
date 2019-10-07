@@ -32,7 +32,7 @@ export async function setup(version: string): Promise<void> {
     );
 
     if (toolPath) {
-        core.debug(`Leiningen found in cache ${toolPath}`);
+        core.info(`Leiningen found in cache ${toolPath}`);
     } else {
         let leiningenFile = await tc.downloadTool(
             `https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein${IS_WINDOWS ? '.bat' : ''}`
@@ -49,8 +49,7 @@ export async function setup(version: string): Promise<void> {
         toolPath = await tc.cacheDir(
             leiningenDir,
             'ClojureLeiningen',
-            utils.getCacheVersionString(version),
-            os.arch()
+            utils.getCacheVersionString(version)
         );
     }
 
