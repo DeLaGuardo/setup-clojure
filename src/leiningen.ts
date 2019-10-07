@@ -89,8 +89,8 @@ async function installLeiningen(
     if (IS_WINDOWS) {
       await readWriteAsync(
         path.join(binDir, 'lein.bat'),
-        '!LEIN_HOME!self-installsleiningen-!LEIN_VERSION!-standalone.jar',
-        '!LEIN_LIB_DIR!libexecleiningen-standalone.jar'
+        '!LEIN_HOME!\\self-installs\\leiningen-!LEIN_VERSION!-standalone.jar',
+        '!LEIN_LIB_DIR!\\libexec\\leiningen-standalone.jar'
       );
     } else {
       await readWriteAsync(
