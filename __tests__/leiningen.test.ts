@@ -45,12 +45,14 @@ describe('leiningen tests', () => {
       os.arch()
     );
 
-      expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
-      if (IS_WINDOWS) {
-          expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein.bat'))).toBe(true);
-      } else {
-          expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
-      }
+    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
+    if (IS_WINDOWS) {
+      expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein.bat'))).toBe(
+        true
+      );
+    } else {
+      expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
+    }
   }, 100000);
 
   it('Uses version of leiningen installed in cache', async () => {
