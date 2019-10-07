@@ -26,17 +26,6 @@ describe('tdeps tests', () => {
     }
   }, 100000);
 
-  if (IS_WINDOWS) {
-    // it('Throws', async () => {
-    //   let thrown = false;
-    //   try {
-    //     await tdeps.setup('1.10.1.469');
-    //   } catch {
-    //     thrown = true;
-    //   }
-    //   expect(thrown).toBe(true);
-    // });
-  } else {
     it('Throws if invalid version', async () => {
       let thrown = false;
       try {
@@ -90,5 +79,4 @@ describe('tdeps tests', () => {
       expect(thrown).toBe(true);
       return;
     });
-  }
 });

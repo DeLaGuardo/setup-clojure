@@ -10,10 +10,6 @@ let tempDirectory = process.env['RUNNER_TEMP'] || '';
 
 const IS_WINDOWS = process.platform === 'win32';
 
-if (IS_WINDOWS) {
-  throw new Error('Windows is not supported yet.');
-}
-
 if (!tempDirectory) {
   let baseLocation;
 

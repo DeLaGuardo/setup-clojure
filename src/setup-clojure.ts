@@ -3,6 +3,8 @@ import * as lein from './leiningen';
 import * as boot from './boot';
 import * as tdeps from './tdeps';
 
+const IS_WINDOWS = process.platform === 'win32';
+
 async function run() {
   try {
     const Lein = core.getInput('lein');
@@ -17,8 +19,12 @@ async function run() {
       boot.setup(Boot);
     }
 
-    if (Tdeps) {
-      tdeps.setup(Tdeps);
+      if (Tdeps) {
+          if (IS_WINDOWS) {
+              throw new Error('Windows is not supported yet');
+          } else {
+              tdeps.setup(Tdeps);
+          }
     }
 
     if (!Boot && !Lein && !Tdeps) {
