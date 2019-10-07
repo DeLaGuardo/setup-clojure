@@ -48,12 +48,6 @@ describe('leiningen tests', () => {
 
         expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
         expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
-
-        const leinPath: string = await io.which('lein', true)
-        core.debug(`Leiningen path: ${leinPath}`);
-
-        await exec.exec('echo $LEIN_HOME');
-        await exec.exec('lein');
     }, 100000);
 
     it('Uses version of leiningen installed in cache', async () => {
