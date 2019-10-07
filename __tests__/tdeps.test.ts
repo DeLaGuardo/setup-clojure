@@ -47,7 +47,7 @@ describe('tdeps tests', () => {
 
         expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
         expect(fs.existsSync(path.join(clojureDir, 'bin', 'clojure'))).toBe(true);
-        exec.exec('clj -Sdescribe');
+        exec.exec('clojure -Sdescribe');
     }, 100000);
 
     it('Uses version of clojure tools-deps installed in cache', async () => {
