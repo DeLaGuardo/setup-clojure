@@ -37,12 +37,5 @@
     "prettier": "^1.17.1",
     "ts-jest": "^24.0.2",
     "typescript": "^3.5.1"
-  },
-  "husky": {
-    "skipCI": true,
-    "hooks": {
-      "pre-commit": "npm run build && npm run format",
-      "post-commit": "npm prune --production && git add node_modules/* && git commit -m \"Husky commit correct node modules\""
-    }
   }
 }
