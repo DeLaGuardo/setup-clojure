@@ -6,33 +6,33 @@ import * as tdeps from './tdeps';
 const IS_WINDOWS = process.platform === 'win32';
 
 async function run() {
-  try {
-    const Lein = core.getInput('lein');
-    const Boot = core.getInput('boot');
-    const Tdeps = core.getInput('tools-deps');
+    try {
+        const Lein = core.getInput('lein');
+        const Boot = core.getInput('boot');
+        const Tdeps = core.getInput('tools-deps');
 
-    if (Lein) {
-      lein.setup(Lein);
-    }
+        if (IS_WINDOWS) {
+            throw new Error('Windows is not supported yet.');
+        }
 
-    if (Boot) {
-      boot.setup(Boot);
-    }
+        if (Lein) {
+            lein.setup(Lein);
+        }
 
-    if (Tdeps) {
-      if (IS_WINDOWS) {
-        throw new Error('Windows is not supported yet');
-      } else {
-        tdeps.setup(Tdeps);
-      }
-    }
+        if (Boot) {
+            boot.setup(Boot);
+        }
 
-    if (!Boot && !Lein && !Tdeps) {
-      throw new Error('You must specify at least one clojure tool.');
+        if (Tdeps) {
+            tdeps.setup(Tdeps);
+        }
+
+        if (!Boot && !Lein && !Tdeps) {
+            throw new Error('You must specify at least one clojure tool.');
+        }
+    } catch (error) {
+        core.setFailed(error.message);
     }
-  } catch (error) {
-    core.setFailed(error.message);
-  }
 }
 
 run();
