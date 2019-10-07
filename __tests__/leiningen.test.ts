@@ -54,7 +54,6 @@ describe('leiningen tests', () => {
       await exec.exec('lein.bat');
     } else {
       expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
-      await exec.exec('lein');
     }
   }, 100000);
 
