@@ -1,4 +1,5 @@
 import io = require('@actions/io');
+import exec = require('@actions/exec');
 import os = require('os');
 import fs = require('fs');
 import path = require('path');
