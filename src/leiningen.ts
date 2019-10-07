@@ -40,11 +40,12 @@ export async function setup(version: string): Promise<void> {
             leiningenFile,
             tempDir
         );
-        core.debug(`clojure tools deps installed to ${leiningenDir}`);
+        core.debug(`Leiningen installed to ${leiningenDir}`);
         toolPath = await tc.cacheDir(
             leiningenDir,
             'ClojureLeiningen',
-            utils.getCacheVersionString(version)
+            utils.getCacheVersionString(version),
+            os.arch()
         );
     }
 
@@ -62,10 +63,8 @@ async function installLeiningen(
     const binStats = fs.statSync(bin);
     if (binStats.isFile()) {
         const binDir = path.join(destinationFolder, 'leiningen', 'bin');
-        const libDir = path.join(destinationFolder, 'leiningen', 'libexec');
 
         await io.mkdirP(binDir);
-        await io.mkdirP(libDir);
 
         await io.mv(bin, path.join(binDir, `lein`));
         fs.chmodSync(path.join(binDir, `lein`), '0755');
