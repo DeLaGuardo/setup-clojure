@@ -8,8 +8,8 @@ import path = require('path');
 const toolDir = path.join(__dirname, 'runner', 'tools', 'leiningen');
 const tempDir = path.join(__dirname, 'runner', 'temp', 'leiningen');
 
-process.env['RUNNER_TOOL_CACHE'] = path.join(__dirname, 'runner', 'tools');
-process.env['RUNNER_TEMP'] = path.join(__dirname, 'runner', 'temp');
+process.env['RUNNER_TOOL_CACHE'] = toolDir;
+process.env['RUNNER_TEMP'] = tempDir;
 import * as leiningen from '../src/leiningen';
 
 describe('leiningen tests', () => {
@@ -48,7 +48,6 @@ describe('leiningen tests', () => {
 
         expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
         expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
-        await exec.exec('lein version');
     }, 100000);
 
     it('Uses version of leiningen installed in cache', async () => {
