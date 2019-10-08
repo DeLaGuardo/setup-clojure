@@ -26,7 +26,7 @@ if (!tempDirectory) {
 
 export async function setup(version: string): Promise<void> {
     let toolPath = tc.find(
-        'ClojureBoot',
+        'Boot',
         utils.getCacheVersionString(version),
         os.arch()
     );
@@ -49,7 +49,7 @@ export async function setup(version: string): Promise<void> {
         core.debug(`Boot installed to ${bootDir}`);
         toolPath = await tc.cacheDir(
             bootDir,
-            'ClojureBoot',
+            'Boot',
             utils.getCacheVersionString(version)
         );
     }

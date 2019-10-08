@@ -26,7 +26,7 @@ if (!tempDirectory) {
 
 export async function setup(version: string): Promise<void> {
     let toolPath = tc.find(
-        'ClojureLeiningen',
+        'Leiningen',
         utils.getCacheVersionString(version),
         os.arch()
     );
@@ -48,7 +48,7 @@ export async function setup(version: string): Promise<void> {
         core.debug(`Leiningen installed to ${leiningenDir}`);
         toolPath = await tc.cacheDir(
             leiningenDir,
-            'ClojureLeiningen',
+            'Leiningen',
             utils.getCacheVersionString(version)
         );
     }

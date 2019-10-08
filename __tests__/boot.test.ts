@@ -39,7 +39,7 @@ describe('boot tests', () => {
         await boot.setup('2.8.3');
         const clojureDir = path.join(
             toolDir,
-            'ClojureBoot',
+            'Boot',
             '2.8.3',
             os.arch()
         );
@@ -51,7 +51,7 @@ describe('boot tests', () => {
     it('Uses version of boot installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,
-            'ClojureBoot',
+            'Boot',
             '2.8.3',
             os.arch()
         );
@@ -64,7 +64,7 @@ describe('boot tests', () => {
     it('Doesnt use version of clojure that was only partially installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,
-            'ClojureBoot',
+            'Boot',
             '2.8.3',
             os.arch()
         );

@@ -39,7 +39,7 @@ describe('leiningen tests', () => {
         await leiningen.setup('2.9.1');
         const clojureDir = path.join(
             toolDir,
-            'ClojureLeiningen',
+            'Leiningen',
             '2.9.1',
             os.arch()
         );
@@ -51,7 +51,7 @@ describe('leiningen tests', () => {
     it('Uses version of leiningen installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,
-            'ClojureLeiningen',
+            'Leiningen',
             '2.9.1',
             os.arch()
         );
@@ -64,7 +64,7 @@ describe('leiningen tests', () => {
     it('Doesnt use version of clojure that was only partially installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,
-            'ClojureLeiningen',
+            'Leiningen',
             '2.9.1',
             os.arch()
         );
