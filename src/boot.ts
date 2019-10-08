@@ -31,7 +31,7 @@ export async function setup(version: string): Promise<void> {
         os.arch()
     );
 
-    if (toolPath) {
+    if (toolPath && version !== 'latest') {
         core.info(`Boot found in cache ${toolPath}`);
     } else {
         let bootBootstrapFile = await tc.downloadTool(
@@ -76,15 +76,24 @@ async function installBoot(
         await io.mv(bin, path.join(binDir, `boot`));
         fs.chmodSync(path.join(binDir, `boot`), '0755');
 
+        let env = {};
+        if (version === 'latest') {
+            env = {
+                BOOT_HOME: path.join(destinationFolder, 'boot')
+            };
+        } else {
+            env = {
+                BOOT_HOME: path.join(destinationFolder, 'boot'),
+                BOOT_VERSION: version
+            }
+        }
+
         await exec.exec(
-            './boot -V',
+            `./boot ${version === 'latest' ? '-u' : '-V'}`,
             [],
             {
                 cwd: path.join(destinationFolder, 'boot', 'bin'),
-                env: {
-                    'BOOT_HOME': path.join(destinationFolder, 'boot'),
-                    'BOOT_VERSION': version
-                }
+                env: env
             }
         );
 

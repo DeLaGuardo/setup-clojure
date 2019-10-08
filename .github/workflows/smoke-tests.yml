@@ -58,7 +58,7 @@ jobs:
       - name: Check boot version
         run: boot -V
 
-  test-all-together:
+  test-all-together-with-latest-versions:
 
     runs-on: ubuntu-latest
 
@@ -71,9 +71,9 @@ jobs:
       - name: Install all the tools together
         uses: DeLaGuardo/setup-clojure@master
         with:
-          tools-deps: 1.10.1.469
-          lein: 2.9.1
-          boot: 2.8.3
+          tools-deps: latest
+          lein: latest
+          boot: latest
 
       - name: Run checks
         run: |

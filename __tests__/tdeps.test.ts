@@ -49,6 +49,19 @@ describe('tdeps tests', () => {
         expect(fs.existsSync(path.join(clojureDir, 'bin', 'clojure'))).toBe(true);
     }, 100000);
 
+    it('Install latest clojure tools deps', async () => {
+        await tdeps.setup('latest');
+        const clojureDir = path.join(
+            toolDir,
+            'ClojureToolsDeps',
+            'latest.0.0',
+            os.arch()
+        );
+
+        expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
+        expect(fs.existsSync(path.join(clojureDir, 'bin', 'clojure'))).toBe(true);
+    }, 100000);
+
     it('Uses version of clojure tools-deps installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,

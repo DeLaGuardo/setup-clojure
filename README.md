@@ -3,8 +3,8 @@
 This action sets up clojure tools environment for using in GitHub Actions.
 
 * clojure cli
-* leiningen (not yet available)
-* boot-clj (not yet available)
+* leiningen
+* boot-clj
 
 # Usage
 
@@ -19,6 +19,8 @@ steps:
     tools-deps: '1.10.1.469'
 - run: clojure -Sdescribe
 ```
+
+For more usecases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/master/.github/workflows/smoke-tests.yml)
 
 # License
 

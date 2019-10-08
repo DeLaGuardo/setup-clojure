@@ -48,6 +48,19 @@ describe('leiningen tests', () => {
         expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
     }, 100000);
 
+    it('Install latest leiningen', async () => {
+        await leiningen.setup('latest');
+        const clojureDir = path.join(
+            toolDir,
+            'Leiningen',
+            'latest.0.0',
+            os.arch()
+        );
+
+        expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
+        expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true);
+    }, 100000);
+
     it('Uses version of leiningen installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,

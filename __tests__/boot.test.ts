@@ -48,6 +48,19 @@ describe('boot tests', () => {
         expect(fs.existsSync(path.join(clojureDir, 'bin', 'boot'))).toBe(true);
     }, 100000);
 
+    it('Install latest boot', async () => {
+        await boot.setup('latest');
+        const clojureDir = path.join(
+            toolDir,
+            'Boot',
+            'latest.0.0',
+            os.arch()
+        );
+
+        expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true);
+        expect(fs.existsSync(path.join(clojureDir, 'bin', 'boot'))).toBe(true);
+    }, 100000);
+
     it('Uses version of boot installed in cache', async () => {
         const clojureDir: string = path.join(
             toolDir,

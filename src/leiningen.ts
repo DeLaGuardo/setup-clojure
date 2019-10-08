@@ -31,11 +31,11 @@ export async function setup(version: string): Promise<void> {
         os.arch()
     );
 
-    if (toolPath) {
+    if (toolPath && version !== 'latest') {
         core.info(`Leiningen found in cache ${toolPath}`);
     } else {
         let leiningenFile = await tc.downloadTool(
-            `https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein${IS_WINDOWS ? '.bat' : ''}`
+            `https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.bat' : ''}`
         );
         let tempDir: string = path.join(
             tempDirectory,

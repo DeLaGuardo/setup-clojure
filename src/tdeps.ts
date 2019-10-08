@@ -26,11 +26,11 @@ export async function setup(version: string): Promise<void> {
         os.arch()
     );
 
-    if (toolPath) {
+    if (toolPath && version !== 'latest') {
         core.info(`Clojure CLI found in cache ${toolPath}`);
     } else {
         let clojureToolsFile = await tc.downloadTool(
-            `https://download.clojure.org/install/clojure-tools-${version}.tar.gz`
+            `https://download.clojure.org/install/clojure-tools${version === 'latest' ? '' : '-' + version}.tar.gz`
         );
         let tempDir: string = path.join(
             tempDirectory,
@@ -86,8 +86,9 @@ async function installClojureToolsDeps(
 
         await io.mv(path.join(sourceDir, 'deps.edn'), clojureLibDir);
         await io.mv(path.join(sourceDir, 'example-deps.edn'), clojureLibDir);
+        let downloadedJar: string = fs.readdirSync(sourceDir).filter(file => file.endsWith('jar'))[0];
         await io.mv(
-            path.join(sourceDir, `clojure-tools-${version}.jar`),
+            path.join(sourceDir, downloadedJar),
             clojureLibexecDir
         );
         await readWriteAsync(
