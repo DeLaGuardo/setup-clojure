@@ -55,7 +55,9 @@ export async function setup(version: string): Promise<void> {
     }
 
     core.exportVariable('BOOT_HOME', toolPath);
-    core.exportVariable('BOOT_VERSION', version);
+    if (version !== 'latest') {
+        core.exportVariable('BOOT_VERSION', version);
+    }
     core.addPath(path.join(toolPath, 'bin'));
 }
 
