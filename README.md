@@ -11,7 +11,7 @@ This action sets up clojure tools environment for using in GitHub Actions.
 ```yaml
 steps:
 - uses: actions/checkout@latest
-- uses: action/setup-java@v1
+- uses: actions/setup-java@v1
   with:
     java-version: '9.0.4' // The JDK version to make available on the path. Required to run any clojure command line tools.
 - uses: DeLaGuardo/setup-clojure@1.0
