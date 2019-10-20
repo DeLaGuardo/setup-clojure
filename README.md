@@ -14,7 +14,7 @@ steps:
 - uses: actions/setup-java@v1
   with:
     java-version: '9.0.4' // The JDK version to make available on the path. Required to run any clojure command line tools.
-- uses: DeLaGuardo/setup-clojure@1.0
+- uses: DeLaGuardo/setup-clojure@2.0
   with:
     tools-deps: '1.10.1.469'
 - run: clojure -Sdescribe
