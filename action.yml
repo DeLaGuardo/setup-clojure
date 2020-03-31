@@ -5,7 +5,7 @@ branding:
   icon: 'gift'
   color: 'blue'
 inputs:
-  liningen:
+  lein:
     description: 'The Leiningen version to make available on the path.'
   boot:
     description: 'The boot-clj version to make available on the path.'
