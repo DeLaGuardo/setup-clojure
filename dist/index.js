@@ -3298,15 +3298,7 @@ function installLeiningen(binScript, destinationFolder) {
             if (!IS_WINDOWS) {
                 fs.chmodSync(path.join(binDir, `lein`), '0755');
             }
-            if (IS_WINDOWS) {
-                yield exec.exec('powershell .\\lein.ps1 self-install', [], {
-                    cwd: path.join(destinationFolder, 'leiningen', 'bin'),
-                    env: {
-                        LEIN_HOME: path.join(destinationFolder, 'leiningen')
-                    }
-                });
-            }
-            const version_cmd = IS_WINDOWS ? 'powershell .\\lein.ps1 version' : './lein version';
+            const version_cmd = IS_WINDOWS ? 'powershell .\\lein.ps1 self-install' : './lein version';
             yield exec.exec(version_cmd, [], {
                 cwd: path.join(destinationFolder, 'leiningen', 'bin'),
                 env: {
