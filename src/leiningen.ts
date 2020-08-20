@@ -61,8 +61,10 @@ async function installLeiningen(
       fs.chmodSync(path.join(binDir, `lein`), '0755')
     }
 
+    const version_cmd = IS_WINDOWS ? 'powershell .\\lein.ps1 version' : './lein version'
+
     await exec.exec(
-      `${IS_WINDOWS ? 'powershell ' : ''}.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.bat' : ''} version`,
+      version_cmd,
       [],
       {
         cwd: path.join(destinationFolder, 'leiningen', 'bin'),
