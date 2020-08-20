@@ -1,34 +1,34 @@
-import * as path from 'path';
+import * as path from 'path'
 
-export function getCacheVersionString(version: string) {
-  const versionArray = version.split('.');
-  const major = versionArray[0];
-  const minor = versionArray.length > 1 ? versionArray[1] : '0';
-  const patch = versionArray.length > 2 ? versionArray.slice(2).join('-') : '0';
-  return `${major}.${minor}.${patch}`;
+export function getCacheVersionString(version: string): string {
+  const versionArray = version.split('.')
+  const major = versionArray[0]
+  const minor = versionArray.length > 1 ? versionArray[1] : '0'
+  const patch = versionArray.length > 2 ? versionArray.slice(2).join('-') : '0'
+  return `${major}.${minor}.${patch}`
 }
 
-export function getTempDir() {
-  let tempDirectory = process.env.RUNNER_TEMP;
+export function getTempDir(): string {
+  let tempDirectory = process.env.RUNNER_TEMP
   if (tempDirectory === undefined) {
-    let baseLocation;
+    let baseLocation
     if (isWindows()) {
       // On windows use the USERPROFILE env variable
       baseLocation = process.env['USERPROFILE']
         ? process.env['USERPROFILE']
-        : 'C:\\';
+        : 'C:\\'
     } else {
       if (process.platform === 'darwin') {
-        baseLocation = '/Users';
+        baseLocation = '/Users'
       } else {
-        baseLocation = '/home';
+        baseLocation = '/home'
       }
     }
-    tempDirectory = path.join(baseLocation, 'actions', 'temp');
+    tempDirectory = path.join(baseLocation, 'actions', 'temp')
   }
-  return tempDirectory;
+  return tempDirectory
 }
 
-export function isWindows() {
-  return process.platform === 'win32';
+export function isWindows(): boolean {
+  return process.platform === 'win32'
 }
