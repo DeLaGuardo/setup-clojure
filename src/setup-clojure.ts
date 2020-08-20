@@ -11,9 +11,9 @@ async function run() {
         const Boot = core.getInput('boot');
         const Tdeps = core.getInput('tools-deps');
 
-        if (IS_WINDOWS) {
-            throw new Error('Windows is not supported yet.');
-        }
+        // if (IS_WINDOWS) {
+        //     throw new Error('Windows is not supported yet.');
+        // }
 
         if (Lein) {
             lein.setup(Lein);

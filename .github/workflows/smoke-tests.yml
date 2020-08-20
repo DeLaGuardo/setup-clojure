@@ -6,7 +6,11 @@ jobs:
 
   test-tools-deps:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
 
     steps:
       - name: Prepare java
@@ -24,7 +28,11 @@ jobs:
 
   test-leiningen:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
 
     steps:
       - name: Prepare java
@@ -42,7 +50,11 @@ jobs:
 
   test-boot:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
 
     steps:
       - name: Prepare java
@@ -60,7 +72,11 @@ jobs:
 
   test-all-together-with-latest-versions:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
 
     steps:
       - name: Prepare java
