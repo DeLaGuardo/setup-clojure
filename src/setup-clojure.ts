@@ -3,17 +3,11 @@ import * as lein from './leiningen';
 import * as boot from './boot';
 import * as tdeps from './tdeps';
 
-// const IS_WINDOWS = process.platform === 'win32';
-
 async function run() {
     try {
         const Lein = core.getInput('lein');
         const Boot = core.getInput('boot');
         const Tdeps = core.getInput('tools-deps');
-
-        // if (IS_WINDOWS) {
-        //     throw new Error('Windows is not supported yet.');
-        // }
 
         if (Lein) {
             lein.setup(Lein);
