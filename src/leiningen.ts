@@ -23,7 +23,7 @@ export async function setup(version: string): Promise<void> {
     const leiningenFile = await tc.downloadTool(
       `https://raw.githubusercontent.com/technomancy/leiningen/${
         version === 'latest' ? 'stable' : version
-      }/bin/lein${IS_WINDOWS ? '.bat' : ''}`
+      }/bin/lein${IS_WINDOWS ? '.ps1' : ''}`
     )
     const tempDir: string = path.join(
       tempDirectory,
@@ -55,14 +55,14 @@ async function installLeiningen(
 
     await io.mkdirP(binDir)
 
-    await io.mv(bin, path.join(binDir, `lein${IS_WINDOWS ? '.bat' : ''}`))
+    await io.mv(bin, path.join(binDir, `lein${IS_WINDOWS ? '.ps1' : ''}`))
 
     if (!IS_WINDOWS) {
       fs.chmodSync(path.join(binDir, `lein`), '0755')
     }
 
     await exec.exec(
-      `.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.bat' : ''} version`,
+      `${IS_WINDOWS ? 'powershell ' : ''}.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.bat' : ''} version`,
       [],
       {
         cwd: path.join(destinationFolder, 'leiningen', 'bin'),
