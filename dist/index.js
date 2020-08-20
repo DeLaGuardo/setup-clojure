@@ -3275,7 +3275,7 @@ function setup(version) {
             core.info(`Leiningen found in cache ${toolPath}`);
         }
         else {
-            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.ps1' : ''}`);
+            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.bat' : ''}`);
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const leiningenDir = yield installLeiningen(leiningenFile, tempDir);
             core.debug(`Leiningen installed to ${leiningenDir}`);
@@ -3294,11 +3294,11 @@ function installLeiningen(binScript, destinationFolder) {
         if (binStats.isFile()) {
             const binDir = path.join(destinationFolder, 'leiningen', 'bin');
             yield io.mkdirP(binDir);
-            yield io.mv(bin, path.join(binDir, `lein${IS_WINDOWS ? '.ps1' : ''}`));
+            yield io.mv(bin, path.join(binDir, `lein${IS_WINDOWS ? '.bat' : ''}`));
             if (!IS_WINDOWS) {
                 fs.chmodSync(path.join(binDir, `lein`), '0755');
             }
-            yield exec.exec(`.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.ps1' : ''} version`, [], {
+            yield exec.exec(`.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.bat' : ''} version`, [], {
                 cwd: path.join(destinationFolder, 'leiningen', 'bin'),
                 env: {
                     LEIN_HOME: path.join(destinationFolder, 'leiningen')
@@ -5205,14 +5205,16 @@ function bytesToUuid(buf, offset) {
   var i = offset || 0;
   var bth = byteToHex;
   // join used to fix memory issue caused by concatenation: https://bugs.chromium.org/p/v8/issues/detail?id=3175#c4
-  return ([bth[buf[i++]], bth[buf[i++]], 
-	bth[buf[i++]], bth[buf[i++]], '-',
-	bth[buf[i++]], bth[buf[i++]], '-',
-	bth[buf[i++]], bth[buf[i++]], '-',
-	bth[buf[i++]], bth[buf[i++]], '-',
-	bth[buf[i++]], bth[buf[i++]],
-	bth[buf[i++]], bth[buf[i++]],
-	bth[buf[i++]], bth[buf[i++]]]).join('');
+  return ([
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]]
+  ]).join('');
 }
 
 module.exports = bytesToUuid;
