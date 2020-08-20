@@ -3,7 +3,7 @@ import * as lein from './leiningen';
 import * as boot from './boot';
 import * as tdeps from './tdeps';
 
-const IS_WINDOWS = process.platform === 'win32';
+// const IS_WINDOWS = process.platform === 'win32';
 
 async function run() {
     try {

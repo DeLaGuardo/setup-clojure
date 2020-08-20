@@ -7,22 +7,8 @@ import * as path from 'path';
 import * as os from 'os';
 import * as utils from './utils';
 
-let tempDirectory = process.env['RUNNER_TEMP'] || '';
-const IS_WINDOWS = process.platform === 'win32';
-
-if (!tempDirectory) {
-    let baseLocation;
-    if (IS_WINDOWS) {
-        baseLocation = process.env['USERPROFILE'] || 'C:\\';
-    } else {
-        if (process.platform === 'darwin') {
-            baseLocation = '/Users';
-        } else {
-            baseLocation = '/home';
-        }
-    }
-    tempDirectory = path.join(baseLocation, 'actions', 'temp');
-}
+const tempDirectory = utils.getTempDir();
+const IS_WINDOWS = utils.isWindows();
 
 export async function setup(version: string): Promise<void> {
     let toolPath = tc.find(
@@ -71,7 +57,10 @@ async function installLeiningen(
         await io.mkdirP(binDir);
 
         await io.mv(bin, path.join(binDir, `lein${IS_WINDOWS ? '.ps1' : ''}`));
-        fs.chmodSync(path.join(binDir, `lein`), '0755');
+
+        if (!IS_WINDOWS) {
+            fs.chmodSync(path.join(binDir, `lein`), '0755');
+        }
 
         await exec.exec(
             `.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.ps1' : ''} version`,
