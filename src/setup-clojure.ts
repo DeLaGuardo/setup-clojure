@@ -2,6 +2,9 @@ import * as core from '@actions/core'
 import * as lein from './leiningen'
 import * as boot from './boot'
 import * as tdeps from './tdeps'
+import * as utils from './utils'
+
+const IS_WINDOWS = utils.isWindows()
 
 async function run(): Promise<void> {
   try {
@@ -14,10 +17,16 @@ async function run(): Promise<void> {
     }
 
     if (Boot) {
+      if (IS_WINDOWS) {
+        throw new Error('Boot on windows is not supported yet.')
+      }
       boot.setup(Boot)
     }
 
     if (Tdeps) {
+      if (IS_WINDOWS) {
+        throw new Error('Clojure tools.deps on windows is not supported yet.')
+      }
       tdeps.setup(Tdeps)
     }
 

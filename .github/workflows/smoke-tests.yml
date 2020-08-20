@@ -4,30 +4,30 @@ on: [push]
 
 jobs:
 
-  # test-tools-deps:
+  test-tools-deps:
 
-  #   strategy:
-  #     matrix:
-  #       operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest]
 
-  #   runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.operating-system }}
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-  #     - name: Prepare java
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: 1.8
+      - name: Prepare java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
 
-  #     - name: Install clojure tools-deps
-  #       uses: ./
-  #       with:
-  #         tools-deps: 1.10.1.469
+      - name: Install clojure tools-deps
+        uses: ./
+        with:
+          tools-deps: 1.10.1.469
 
-  #     - name: Execute clojure code
-  #       run: clojure -e "(+ 1 1)"
+      - name: Execute clojure code
+        run: clojure -e "(+ 1 1)"
 
   test-leiningen:
 
@@ -54,57 +54,27 @@ jobs:
       - name: Check leiningen version
         run: lein version
 
-  # test-boot:
+  test-boot:
 
-  #   strategy:
-  #     matrix:
-  #       operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest]
 
-  #   runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.operating-system }}
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-  #     - name: Prepare java
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: 1.8
+      - name: Prepare java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
 
-  #     - name: Install boot
-  #       uses: ./
-  #       with:
-  #         boot: 2.8.3
+      - name: Install boot
+        uses: ./
+        with:
+          boot: 2.8.3
 
-  #     - name: Check boot version
-  #       run: boot -V
-
-  # test-all-together-with-latest-versions:
-
-  #   strategy:
-  #     matrix:
-  #       operating-system: [ubuntu-latest, macOS-latest, windows-latest]
-
-  #   runs-on: ${{ matrix.operating-system }}
-
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-
-  #     - name: Prepare java
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: 1.8
-
-  #     - name: Install all the tools together
-  #       uses: ./
-  #       with:
-  #         tools-deps: latest
-  #         lein: latest
-  #         boot: latest
-
-  #     - name: Run checks
-  #       run: |
-  #         clojure -e "(+ 1 1)"
-  #         lein -v
-  #         boot -V
+      - name: Check boot version
+        run: boot -V

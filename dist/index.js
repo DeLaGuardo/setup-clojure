@@ -3298,7 +3298,9 @@ function installLeiningen(binScript, destinationFolder) {
             if (!IS_WINDOWS) {
                 fs.chmodSync(path.join(binDir, `lein`), '0755');
             }
-            const version_cmd = IS_WINDOWS ? 'powershell .\\lein.ps1 self-install' : './lein version';
+            const version_cmd = IS_WINDOWS
+                ? 'powershell .\\lein.ps1 self-install'
+                : './lein version';
             yield exec.exec(version_cmd, [], {
                 cwd: path.join(destinationFolder, 'leiningen', 'bin'),
                 env: {
@@ -3354,6 +3356,8 @@ const core = __importStar(__webpack_require__(470));
 const lein = __importStar(__webpack_require__(451));
 const boot = __importStar(__webpack_require__(160));
 const tdeps = __importStar(__webpack_require__(530));
+const utils = __importStar(__webpack_require__(611));
+const IS_WINDOWS = utils.isWindows();
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -3364,9 +3368,15 @@ function run() {
                 lein.setup(Lein);
             }
             if (Boot) {
+                if (IS_WINDOWS) {
+                    throw new Error('Boot on windows is not supported yet.');
+                }
                 boot.setup(Boot);
             }
             if (Tdeps) {
+                if (IS_WINDOWS) {
+                    throw new Error('Clojure tools.deps on windows is not supported yet.');
+                }
                 tdeps.setup(Tdeps);
             }
             if (!Boot && !Lein && !Tdeps) {
