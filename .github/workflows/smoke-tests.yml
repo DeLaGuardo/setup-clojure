@@ -13,6 +13,9 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Prepare java
         uses: actions/setup-java@v1
         with:
@@ -35,6 +38,9 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Prepare java
         uses: actions/setup-java@v1
         with:
@@ -57,6 +63,9 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Prepare java
         uses: actions/setup-java@v1
         with:
@@ -79,6 +88,9 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Prepare java
         uses: actions/setup-java@v1
         with:
