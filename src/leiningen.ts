@@ -74,7 +74,7 @@ async function installLeiningen(
         fs.chmodSync(path.join(binDir, `lein`), '0755');
 
         await exec.exec(
-            `lein${IS_WINDOWS ? '.ps1' : ''} version`,
+            `.${IS_WINDOWS ? '\\' : '/'}lein${IS_WINDOWS ? '.ps1' : ''} version`,
             [],
             {
                 cwd: path.join(destinationFolder, 'leiningen', 'bin'),
