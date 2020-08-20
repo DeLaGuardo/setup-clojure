@@ -35,7 +35,7 @@ export async function setup(version: string): Promise<void> {
         core.info(`Leiningen found in cache ${toolPath}`);
     } else {
         let leiningenFile = await tc.downloadTool(
-            `https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.bat' : ''}`
+            `https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.ps1' : ''}`
         );
         let tempDir: string = path.join(
             tempDirectory,
@@ -70,11 +70,11 @@ async function installLeiningen(
 
         await io.mkdirP(binDir);
 
-        await io.mv(bin, path.join(binDir, `lein`));
+        await io.mv(bin, path.join(binDir, `lein${IS_WINDOWS ? '.ps1' : ''}`));
         fs.chmodSync(path.join(binDir, `lein`), '0755');
 
         await exec.exec(
-            './lein version',
+            `lein${IS_WINDOWS ? '.ps1' : ''} version`,
             [],
             {
                 cwd: path.join(destinationFolder, 'leiningen', 'bin'),
