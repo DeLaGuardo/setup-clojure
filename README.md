@@ -6,6 +6,8 @@ This action sets up Clojure tools environment for using in GitHub Actions.
 * Leiningen
 * boot-clj
 
+All three major tools available for MacOS and ubuntu based runners, Leiningen also available on Windows
+
 # Usage
 
 Here is a snippet for your workflow file:
@@ -19,7 +21,7 @@ steps:
 - uses: DeLaGuardo/setup-graalvm@2.0
   with:
     graalvm-version: '19.3.1.java11'
-- uses: DeLaGuardo/setup-clojure@2.0
+- uses: DeLaGuardo/setup-clojure@master
   with:
     tools-deps: '1.10.1.469'
 - run: clojure -Sdescribe

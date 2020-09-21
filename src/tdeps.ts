@@ -6,18 +6,7 @@ import * as path from 'path'
 import * as os from 'os'
 import * as utils from './utils'
 
-let tempDirectory = process.env['RUNNER_TEMP'] || ''
-
-if (!tempDirectory) {
-  let baseLocation
-
-  if (process.platform === 'darwin') {
-    baseLocation = '/Users'
-  } else {
-    baseLocation = '/home'
-  }
-  tempDirectory = path.join(baseLocation, 'actions', 'temp')
-}
+const tempDirectory = utils.getTempDir()
 
 export async function setup(version: string): Promise<void> {
   let toolPath = tc.find(
