@@ -13,4 +13,4 @@ inputs:
     description: 'The tools deps version to make available on the path.'
 runs:
   using: 'node12'
-  main: 'lib/setup-clojure.js'
+  main: 'dist/index.js'

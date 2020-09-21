@@ -1,5 +1,0 @@
-pre-commit:
-  parallel: true
-  commands:
-    build:
-      run: npm run build && git add ./lib/*
