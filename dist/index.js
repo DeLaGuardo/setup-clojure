@@ -3664,17 +3664,7 @@ const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
 const os = __importStar(__webpack_require__(87));
 const utils = __importStar(__webpack_require__(611));
-let tempDirectory = process.env['RUNNER_TEMP'] || '';
-if (!tempDirectory) {
-    let baseLocation;
-    if (process.platform === 'darwin') {
-        baseLocation = '/Users';
-    }
-    else {
-        baseLocation = '/home';
-    }
-    tempDirectory = path.join(baseLocation, 'actions', 'temp');
-}
+const tempDirectory = utils.getTempDir();
 function setup(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('ClojureToolsDeps', utils.getCacheVersionString(version), os.arch());
@@ -3712,10 +3702,13 @@ function installClojureToolsDeps(installScript, destinationFolder) {
             yield io.mkdirP(clojureLibexecDir);
             yield io.mv(path.join(sourceDir, 'deps.edn'), clojureLibDir);
             yield io.mv(path.join(sourceDir, 'example-deps.edn'), clojureLibDir);
-            const downloadedJar = fs
+            yield Promise.all(fs
                 .readdirSync(sourceDir)
-                .filter(f => f.endsWith('jar'))[0];
-            yield io.mv(path.join(sourceDir, downloadedJar), clojureLibexecDir);
+                .filter(f => f.endsWith('jar'))
+                .map((f) => __awaiter(this, void 0, void 0, function* () {
+                core.info(`Copy jar: #{f}`);
+                yield io.mv(path.join(sourceDir, f), clojureLibexecDir);
+            })));
             yield readWriteAsync(path.join(sourceDir, 'clojure'), '"$CLOJURE_INSTALL_DIR"');
             yield io.mv(path.join(sourceDir, 'clj'), binDir);
             yield io.mv(path.join(sourceDir, 'clojure'), binDir);

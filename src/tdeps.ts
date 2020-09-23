@@ -75,10 +75,17 @@ async function installClojureToolsDeps(
 
     await io.mv(path.join(sourceDir, 'deps.edn'), clojureLibDir)
     await io.mv(path.join(sourceDir, 'example-deps.edn'), clojureLibDir)
-    const downloadedJar: string = fs
-      .readdirSync(sourceDir)
-      .filter(f => f.endsWith('jar'))[0]
-    await io.mv(path.join(sourceDir, downloadedJar), clojureLibexecDir)
+    await Promise.all(
+      fs
+        .readdirSync(sourceDir)
+        .filter(f => f.endsWith('jar'))
+        .map(
+          async (f): Promise<void> => {
+            core.info(`Copy jar: #{f}`)
+            await io.mv(path.join(sourceDir, f), clojureLibexecDir)
+          }
+        )
+    )
     await readWriteAsync(
       path.join(sourceDir, 'clojure'),
       '"$CLOJURE_INSTALL_DIR"'
