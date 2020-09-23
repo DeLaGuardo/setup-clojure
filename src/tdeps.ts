@@ -80,10 +80,8 @@ async function installClojureToolsDeps(
         .readdirSync(sourceDir)
         .filter(f => f.endsWith('jar'))
         .map(
-          async (f): Promise<void> => {
-            core.info(`Copy jar: ${f}`)
+          async (f): Promise<void> =>
             await io.mv(path.join(sourceDir, f), clojureLibexecDir)
-          }
         )
     )
     await readWriteAsync(
