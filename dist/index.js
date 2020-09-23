@@ -3706,7 +3706,7 @@ function installClojureToolsDeps(installScript, destinationFolder) {
                 .readdirSync(sourceDir)
                 .filter(f => f.endsWith('jar'))
                 .map((f) => __awaiter(this, void 0, void 0, function* () {
-                core.info(`Copy jar: #{f}`);
+                core.info(`Copy jar: ${f}`);
                 yield io.mv(path.join(sourceDir, f), clojureLibexecDir);
             })));
             yield readWriteAsync(path.join(sourceDir, 'clojure'), '"$CLOJURE_INSTALL_DIR"');
