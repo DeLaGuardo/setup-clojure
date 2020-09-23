@@ -22,9 +22,10 @@ jobs:
           java-version: 1.8
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@master
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
         with:
-          tools-deps: 1.10.1.469
+          tools-deps: 1.10.1.693
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
