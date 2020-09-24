@@ -3355,31 +3355,38 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const lein = __importStar(__webpack_require__(451));
 const boot = __importStar(__webpack_require__(160));
-const tdeps = __importStar(__webpack_require__(530));
+const cli = __importStar(__webpack_require__(516));
 const utils = __importStar(__webpack_require__(611));
 const IS_WINDOWS = utils.isWindows();
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const Lein = core.getInput('lein');
-            const Boot = core.getInput('boot');
-            const Tdeps = core.getInput('tools-deps');
-            if (Lein) {
-                lein.setup(Lein);
+            const LEIN_VERSION = core.getInput('lein');
+            const BOOT_VERSION = core.getInput('boot');
+            const TDEPS_VERSION = core.getInput('tools-deps');
+            const CLI_VERSION = core.getInput('cli');
+            if (LEIN_VERSION) {
+                lein.setup(LEIN_VERSION);
             }
-            if (Boot) {
+            if (BOOT_VERSION) {
                 if (IS_WINDOWS) {
                     throw new Error('Boot on windows is not supported yet.');
                 }
-                boot.setup(Boot);
+                boot.setup(BOOT_VERSION);
             }
-            if (Tdeps) {
+            if (CLI_VERSION) {
+                if (IS_WINDOWS) {
+                    throw new Error('Clojure CLI on windows is not supported yet.');
+                }
+                cli.setup(CLI_VERSION);
+            }
+            if (TDEPS_VERSION) {
                 if (IS_WINDOWS) {
                     throw new Error('Clojure tools.deps on windows is not supported yet.');
                 }
-                tdeps.setup(Tdeps);
+                cli.setup(TDEPS_VERSION);
             }
-            if (!Boot && !Lein && !Tdeps) {
+            if (!BOOT_VERSION && !LEIN_VERSION && !TDEPS_VERSION && !CLI_VERSION) {
                 throw new Error('You must specify at least one clojure tool.');
             }
         }
@@ -3622,7 +3629,7 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 530:
+/***/ 516:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
