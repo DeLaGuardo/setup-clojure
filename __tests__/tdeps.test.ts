@@ -9,7 +9,7 @@ const tempDir = path.join(__dirname, 'runner', 'temp', 'tdeps')
 
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
-import * as tdeps from '../src/tdeps'
+import * as tdeps from '../src/cli'
 
 describe('tdeps tests', () => {
   beforeAll(async () => {

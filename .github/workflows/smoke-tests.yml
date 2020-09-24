@@ -4,6 +4,8 @@ on: [push]
 
 jobs:
 
+  # Deprecated version identifier
+  # Please use `cli: version` as in job `clojure-cli`
   test-tools-deps:
 
     strategy:
@@ -26,6 +28,32 @@ jobs:
         uses: ./
         with:
           tools-deps: 1.10.1.693
+
+      - name: Execute clojure code
+        run: clojure -e "(+ 1 1)"
+
+  clojure-cli:
+
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Install clojure tools-deps
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
+        with:
+          cli: 1.10.1.693
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"

@@ -10,7 +10,9 @@ inputs:
   boot:
     description: 'The boot-clj version to make available on the path.'
   tools-deps:
-    description: 'The tools deps version to make available on the path.'
+    description: '[DEPRECATED] The tools deps version to make available on the path.'
+  cli:
+    description: 'Clojure CLI version to make availablr on the path.'
 runs:
   using: 'node12'
   main: 'dist/index.js'
