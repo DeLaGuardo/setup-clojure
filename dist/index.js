@@ -3425,9 +3425,11 @@ function run() {
             }
             if (CLI_VERSION) {
                 if (IS_WINDOWS) {
-                    throw new Error('Clojure CLI on windows is not supported yet.');
+                    cli.setupWindows(CLI_VERSION);
                 }
-                cli.setup(CLI_VERSION);
+                else {
+                    cli.setup(CLI_VERSION);
+                }
             }
             if (TDEPS_VERSION) {
                 if (IS_WINDOWS) {
@@ -3728,10 +3730,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setup = void 0;
+exports.setupWindows = exports.setup = void 0;
 const core = __importStar(__webpack_require__(470));
 const io = __importStar(__webpack_require__(1));
 const tc = __importStar(__webpack_require__(533));
+const exec = __importStar(__webpack_require__(986));
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
 const os = __importStar(__webpack_require__(87));
@@ -3756,6 +3759,13 @@ function setup(version) {
     });
 }
 exports.setup = setup;
+function setupWindows(version) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = `download.clojure.org/install/win-install-${version}.ps1`;
+        exec.exec('iwr', ['-useb', url, '|', 'iex']);
+    });
+}
+exports.setupWindows = setupWindows;
 function installClojureToolsDeps(installScript, destinationFolder) {
     return __awaiter(this, void 0, void 0, function* () {
         yield io.mkdirP(destinationFolder);

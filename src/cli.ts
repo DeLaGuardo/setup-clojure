@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
+import * as exec from '@actions/exec'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
@@ -42,6 +43,11 @@ export async function setup(version: string): Promise<void> {
   const installDir = path.join(toolPath, 'lib', 'clojure')
   core.exportVariable('CLOJURE_INSTALL_DIR', installDir)
   core.addPath(path.join(toolPath, 'bin'))
+}
+
+export async function setupWindows(version: string): Promise<void> {
+  const url = `download.clojure.org/install/win-install-${version}.ps1`
+  exec.exec('iwr', ['-useb', url, '|', 'iex'])
 }
 
 async function installClojureToolsDeps(

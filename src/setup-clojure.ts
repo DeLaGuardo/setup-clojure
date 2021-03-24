@@ -26,9 +26,10 @@ async function run(): Promise<void> {
 
     if (CLI_VERSION) {
       if (IS_WINDOWS) {
-        throw new Error('Clojure CLI on windows is not supported yet.')
+        cli.setupWindows(CLI_VERSION)
+      } else {
+        cli.setup(CLI_VERSION)
       }
-      cli.setup(CLI_VERSION)
     }
 
     if (TDEPS_VERSION) {
