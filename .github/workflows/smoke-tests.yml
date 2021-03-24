@@ -36,15 +36,13 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        shell: [bash, powershell]
-        exclude:
+        include:
           - os: windows-latest
-            shell: bash
+            shell: powershell
           - os: ubuntu-latest
-            shell: powershell
+            shell: bash
           - os: macOS-latest
-            shell: powershell
+            shell: bash
 
     runs-on: ${{ matrix.os }}
 
