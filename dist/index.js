@@ -3762,7 +3762,7 @@ exports.setup = setup;
 function setupWindows(version) {
     return __awaiter(this, void 0, void 0, function* () {
         const url = `download.clojure.org/install/win-install-${version}.ps1`;
-        exec.exec('iwr', ['-useb', url, '|', 'iex']);
+        exec.exec(`powershell -c "iwr -useb ${url} | iex"`);
     });
 }
 exports.setupWindows = setupWindows;
