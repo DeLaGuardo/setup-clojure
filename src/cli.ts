@@ -47,7 +47,9 @@ export async function setup(version: string): Promise<void> {
 
 export async function setupWindows(version: string): Promise<void> {
   const url = `download.clojure.org/install/win-install-${version}.ps1`
-  exec.exec(`powershell -c "iwr -useb ${url} | iex"`)
+  exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
+    input: Buffer.from('1')
+  })
 }
 
 async function installClojureToolsDeps(
