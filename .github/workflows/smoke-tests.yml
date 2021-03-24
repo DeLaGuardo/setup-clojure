@@ -36,9 +36,9 @@ jobs:
 
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -55,8 +55,15 @@ jobs:
         with:
           cli: 1.10.1.693
 
-      - name: Execute clojure code
+      - name: Execute clojure code on Linux and MacOS
+        if: ${{ matrix.os != 'windows-latest' }}
         run: clojure -e "(+ 1 1)"
+        shell: bash
+
+      - name: Execute clojure code on Windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: clojure -e "(+ 1 1)"
+        shell: powershell
 
   test-leiningen:
 
