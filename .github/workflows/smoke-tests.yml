@@ -36,9 +36,17 @@ jobs:
 
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        shell: [bash, powershell]
+        exclude:
+          - os: windows-latest
+            shell: bash
+          - os: ubuntu-latest
+            shell: powershell
+          - os: macOS-latest
+            shell: powershell
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -57,6 +65,7 @@ jobs:
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
+        shell: ${{ matrix.shell }}
 
   test-leiningen:
 
