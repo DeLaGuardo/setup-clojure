@@ -3453,9 +3453,9 @@ function run() {
                     cli.setup(CLI_VERSION);
                 }
             }
-            if (TDEPS_VERSION) {
+            if (TDEPS_VERSION && !CLI_VERSION) {
                 if (IS_WINDOWS) {
-                    throw new Error('Clojure tools.deps on windows is not supported yet.');
+                    cli.setupWindows(TDEPS_VERSION);
                 }
                 cli.setup(TDEPS_VERSION);
             }
