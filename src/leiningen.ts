@@ -65,11 +65,20 @@ async function installLeiningen(
       ? 'powershell .\\lein.ps1 self-install'
       : './lein version'
 
+    let env: {[key: string]: string} = {
+        LEIN_HOME: path.join(destinationFolder, 'leiningen'),
+    }
+
+    if (process.env['PATH']) {
+        env['PATH'] = process.env['PATH']
+    }
+    if (process.env['JAVA_CMD']) {
+        env['JAVA_CMD'] = process.env['JAVA_CMD']
+    }
+
     await exec.exec(version_cmd, [], {
       cwd: path.join(destinationFolder, 'leiningen', 'bin'),
-      env: {
-        LEIN_HOME: path.join(destinationFolder, 'leiningen')
-      }
+      env: env
     })
 
     return path.join(destinationFolder, 'leiningen')

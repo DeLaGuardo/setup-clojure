@@ -74,7 +74,7 @@ async function installBoot(
     await io.mv(bin, path.join(binDir, `boot`))
     fs.chmodSync(path.join(binDir, `boot`), '0755')
 
-    let env = {}
+    let env: {[key: string]: string} = {};
     if (version === 'latest') {
       env = {
         BOOT_HOME: path.join(destinationFolder, 'boot')
@@ -84,6 +84,13 @@ async function installBoot(
         BOOT_HOME: path.join(destinationFolder, 'boot'),
         BOOT_VERSION: version
       }
+    }
+
+    if (process.env['PATH']) {
+        env['PATH'] = process.env['PATH']
+    }
+    if (process.env['JAVA_CMD']) {
+        env['JAVA_CMD'] = process.env['JAVA_CMD']
     }
 
     await exec.exec(`./boot ${version === 'latest' ? '-u' : '-V'}`, [], {
