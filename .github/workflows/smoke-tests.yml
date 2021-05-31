@@ -83,7 +83,8 @@ jobs:
           java-version: 1.8
 
       - name: Install leiningen
-        uses: DeLaGuardo/setup-clojure@master
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
         with:
           lein: 2.9.1
 
@@ -108,7 +109,8 @@ jobs:
           java-version: 1.8
 
       - name: Install boot
-        uses: DeLaGuardo/setup-clojure@master
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
         with:
           boot: 2.8.3
 
