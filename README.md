@@ -37,7 +37,7 @@ jobs:
           java-version: 1.8
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@3.2
+        uses: DeLaGuardo/setup-clojure@3.4
         with:
           # Install just one or all simultaneously
           cli: 1.10.1.693 # Clojure CLI based on tools.deps
