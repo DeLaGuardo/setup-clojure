@@ -19,9 +19,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: 'zulu'
+          java-version: '8'
 
       - name: Install clojure tools-deps
         # uses: DeLaGuardo/setup-clojure@master
@@ -45,9 +46,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: 'zulu'
+          java-version: '8'
 
       - name: Install clojure tools-deps
         # uses: DeLaGuardo/setup-clojure@master
@@ -78,9 +80,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: 'zulu'
+          java-version: '8'
 
       - name: Install leiningen
         # uses: DeLaGuardo/setup-clojure@master
@@ -104,9 +107,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: 'zulu'
+          java-version: '8'
 
       - name: Install boot
         # uses: DeLaGuardo/setup-clojure@master

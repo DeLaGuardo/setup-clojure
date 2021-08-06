@@ -32,9 +32,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: 'zulu'
+          java-version: '8'
 
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.4
