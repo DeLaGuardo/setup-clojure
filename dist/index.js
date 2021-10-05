@@ -3493,9 +3493,6 @@ function run() {
                 lein.setup(LEIN_VERSION);
             }
             if (BOOT_VERSION) {
-                if (IS_WINDOWS) {
-                    throw new Error('Boot on windows is not supported yet.');
-                }
                 boot.setup(BOOT_VERSION);
             }
             if (CLI_VERSION) {

@@ -18,9 +18,6 @@ async function run(): Promise<void> {
     }
 
     if (BOOT_VERSION) {
-      if (IS_WINDOWS) {
-        throw new Error('Boot on windows is not supported yet.')
-      }
       boot.setup(BOOT_VERSION)
     }
 
