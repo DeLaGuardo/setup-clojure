@@ -4052,9 +4052,12 @@ function setup(version) {
             core.info(`Clojure CLI found in cache ${toolPath}`);
         }
         else {
-            const clojureToolsFile = yield tc.downloadTool(`https://download.clojure.org/install/clojure-tools${version === 'latest' ? '' : `-${version}`}.tar.gz`);
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
-            const clojureToolsDir = yield installClojureToolsDeps(clojureToolsFile, tempDir);
+            const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install${version === 'latest' ? '' : `-${version}`}.sh`);
+            if (utils.isMacOS()) {
+                yield MacOSDeps(clojureInstallScript);
+            }
+            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, tempDir);
             core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
             toolPath = yield tc.cacheDir(clojureToolsDir, 'ClojureToolsDeps', utils.getCacheVersionString(version));
         }
@@ -4064,6 +4067,28 @@ function setup(version) {
     });
 }
 exports.setup = setup;
+function runLinuxInstall(installScript, destinationFolder) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield io.mkdirP(destinationFolder);
+        const file = path.normalize(installScript);
+        yield exec.exec('bash', [file, '--prefix', destinationFolder]);
+        return destinationFolder;
+    });
+}
+function MacOSDeps(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        fs.readFile(file, 'utf-8', function (err, data) {
+            if (err)
+                throw err;
+            const newValue = data.replace(/install -D/gim, '$(brew --prefix coreutils)/bin/ginstall -D');
+            fs.writeFile(file, newValue, 'utf-8', function (e) {
+                if (e)
+                    throw e;
+            });
+        });
+        yield exec.exec(`brew install coreutils`);
+    });
+}
 function setupWindows(version) {
     return __awaiter(this, void 0, void 0, function* () {
         const url = `download.clojure.org/install/win-install-${version}.ps1`;
@@ -4073,53 +4098,6 @@ function setupWindows(version) {
     });
 }
 exports.setupWindows = setupWindows;
-function installClojureToolsDeps(installScript, destinationFolder) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield io.mkdirP(destinationFolder);
-        const file = path.normalize(installScript);
-        const stats = fs.statSync(file);
-        if (stats.isFile()) {
-            const binDir = path.join(destinationFolder, 'clojure', 'bin');
-            const libDir = path.join(destinationFolder, 'clojure', 'lib');
-            const manDir = path.join(destinationFolder, 'clojure', 'share', 'man', 'man1');
-            const clojureLibDir = path.join(libDir, 'clojure');
-            const clojureLibexecDir = path.join(clojureLibDir, 'libexec');
-            yield tc.extractTar(file, destinationFolder);
-            const sourceDir = path.join(destinationFolder, 'clojure-tools');
-            yield io.mkdirP(binDir);
-            yield io.mkdirP(manDir);
-            yield io.mkdirP(clojureLibexecDir);
-            yield Promise.all(fs
-                .readdirSync(sourceDir)
-                .filter(f => f.endsWith('jar') || f.endsWith('edn'))
-                .map((f) => __awaiter(this, void 0, void 0, function* () {
-                return yield io.mv(path.join(sourceDir, f), f.endsWith('jar') ? clojureLibexecDir : clojureLibDir);
-            })));
-            yield readWriteAsync(path.join(sourceDir, 'clojure'), '"$CLOJURE_INSTALL_DIR"');
-            yield io.mv(path.join(sourceDir, 'clj'), binDir);
-            yield io.mv(path.join(sourceDir, 'clojure'), binDir);
-            yield io.mv(path.join(sourceDir, 'clojure.1'), manDir);
-            yield io.mv(path.join(sourceDir, 'clj.1'), manDir);
-            return path.join(destinationFolder, 'clojure');
-        }
-        else {
-            throw new Error(`Not a file`);
-        }
-    });
-}
-function readWriteAsync(file, replacement) {
-    return __awaiter(this, void 0, void 0, function* () {
-        fs.readFile(file, 'utf-8', function (err, data) {
-            if (err)
-                throw err;
-            const newValue = data.replace(/PREFIX/gim, replacement);
-            fs.writeFile(file, newValue, 'utf-8', function (e) {
-                if (e)
-                    throw e;
-            });
-        });
-    });
-}
 
 
 /***/ }),
@@ -5373,7 +5351,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isWindows = exports.getTempDir = exports.getCacheVersionString = void 0;
+exports.isMacOS = exports.isWindows = exports.getTempDir = exports.getCacheVersionString = void 0;
 const path = __importStar(__webpack_require__(622));
 const version_1 = __webpack_require__(775);
 function getCacheVersionString(version) {
@@ -5411,6 +5389,10 @@ function isWindows() {
     return process.platform === 'win32';
 }
 exports.isWindows = isWindows;
+function isMacOS() {
+    return process.platform === 'darwin';
+}
+exports.isMacOS = isMacOS;
 
 
 /***/ }),
