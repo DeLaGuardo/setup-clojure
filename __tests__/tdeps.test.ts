@@ -10,6 +10,7 @@ const tempDir = path.join(__dirname, 'runner', 'temp', 'tdeps')
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
 import * as tdeps from '../src/cli'
+import {getCacheVersionString} from '../src/utils'
 
 describe('tdeps tests', () => {
   beforeAll(async () => {
@@ -41,7 +42,7 @@ describe('tdeps tests', () => {
     const clojureDir = path.join(
       toolDir,
       'ClojureToolsDeps',
-      '1.10.1-469',
+      getCacheVersionString('1.10.1.469'),
       os.arch()
     )
 
@@ -54,7 +55,7 @@ describe('tdeps tests', () => {
     const clojureDir = path.join(
       toolDir,
       'ClojureToolsDeps',
-      'latest.0.0',
+      getCacheVersionString('latest'),
       os.arch()
     )
 
@@ -66,7 +67,7 @@ describe('tdeps tests', () => {
     const clojureDir: string = path.join(
       toolDir,
       'ClojureToolsDeps',
-      '1.10.1-469',
+      getCacheVersionString('1.10.1.469'),
       os.arch()
     )
     await io.mkdirP(clojureDir)

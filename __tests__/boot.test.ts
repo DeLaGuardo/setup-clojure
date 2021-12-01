@@ -9,6 +9,7 @@ const tempDir = path.join(__dirname, 'runner', 'temp', 'boot')
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
 import * as boot from '../src/boot'
+import {getCacheVersionString} from '../src/utils'
 
 describe('boot tests', () => {
   beforeAll(async () => {
@@ -37,7 +38,12 @@ describe('boot tests', () => {
 
   it('Install boot with normal version', async () => {
     await boot.setup('2.8.3')
-    const clojureDir = path.join(toolDir, 'Boot', '2.8.3', os.arch())
+    const clojureDir = path.join(
+      toolDir,
+      'Boot',
+      getCacheVersionString('2.8.3'),
+      os.arch()
+    )
 
     expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(clojureDir, 'bin', 'boot'))).toBe(true)
@@ -45,7 +51,12 @@ describe('boot tests', () => {
 
   it('Install latest boot', async () => {
     await boot.setup('latest')
-    const clojureDir = path.join(toolDir, 'Boot', 'latest.0.0', os.arch())
+    const clojureDir = path.join(
+      toolDir,
+      'Boot',
+      getCacheVersionString('latest'),
+      os.arch()
+    )
 
     expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(clojureDir, 'bin', 'boot'))).toBe(true)
