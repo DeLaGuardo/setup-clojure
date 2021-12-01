@@ -1,11 +1,12 @@
 import * as path from 'path'
+import {VERSION} from './version'
 
 export function getCacheVersionString(version: string): string {
   const versionArray = version.split('.')
   const major = versionArray[0]
   const minor = versionArray.length > 1 ? versionArray[1] : '0'
   const patch = versionArray.length > 2 ? versionArray.slice(2).join('-') : '0'
-  return `${major}.${minor}.${patch}`
+  return `${major}.${minor}.${patch}-${VERSION}`
 }
 
 export function getTempDir(): string {

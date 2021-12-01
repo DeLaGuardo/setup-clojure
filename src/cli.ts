@@ -81,15 +81,16 @@ async function installClojureToolsDeps(
     await io.mkdirP(manDir)
     await io.mkdirP(clojureLibexecDir)
 
-    await io.mv(path.join(sourceDir, 'deps.edn'), clojureLibDir)
-    await io.mv(path.join(sourceDir, 'example-deps.edn'), clojureLibDir)
     await Promise.all(
       fs
         .readdirSync(sourceDir)
-        .filter(f => f.endsWith('jar'))
+        .filter(f => f.endsWith('jar') || f.endsWith('edn'))
         .map(
           async (f): Promise<void> =>
-            await io.mv(path.join(sourceDir, f), clojureLibexecDir)
+            await io.mv(
+              path.join(sourceDir, f),
+              f.endsWith('jar') ? clojureLibexecDir : clojureLibDir
+            )
         )
     )
     await readWriteAsync(
