@@ -43,7 +43,7 @@ async function run(): Promise<void> {
       throw new Error('You must specify at least one clojure tool.')
     }
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed((error as Error).message)
   }
 }
 

@@ -9,6 +9,7 @@ const tempDir = path.join(__dirname, 'runner', 'temp', 'leiningen')
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
 import * as leiningen from '../src/leiningen'
+import {getCacheVersionString} from '../src/utils'
 
 describe('leiningen tests', () => {
   beforeAll(async () => {
@@ -37,7 +38,12 @@ describe('leiningen tests', () => {
 
   it('Install leiningen with normal version', async () => {
     await leiningen.setup('2.9.1')
-    const clojureDir = path.join(toolDir, 'Leiningen', '2.9.1', os.arch())
+    const clojureDir = path.join(
+      toolDir,
+      'Leiningen',
+      getCacheVersionString('2.9.1'),
+      os.arch()
+    )
 
     expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true)
@@ -45,7 +51,12 @@ describe('leiningen tests', () => {
 
   it('Install latest leiningen', async () => {
     await leiningen.setup('latest')
-    const clojureDir = path.join(toolDir, 'Leiningen', 'latest.0.0', os.arch())
+    const clojureDir = path.join(
+      toolDir,
+      'Leiningen',
+      getCacheVersionString('latest'),
+      os.arch()
+    )
 
     expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true)
