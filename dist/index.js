@@ -4085,7 +4085,7 @@ function MacOSDeps(file, githubToken) {
         const env = githubToken
             ? { env: { HOMEBREW_GITHUB_API_TOKEN: githubToken } }
             : undefined;
-        yield exec.exec(`brew`, [`install`, 'coreutils'], env);
+        yield exec.exec('brew', ['install', 'coreutils'], env);
     });
 }
 function setupWindows(version) {

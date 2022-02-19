@@ -73,7 +73,7 @@ async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
   const env = githubToken
     ? {env: {HOMEBREW_GITHUB_API_TOKEN: githubToken}}
     : undefined
-  await exec.exec(`brew`, [`install`, 'coreutils'], env)
+  await exec.exec('brew', ['install', 'coreutils'], env)
 }
 
 export async function setupWindows(version: string): Promise<void> {
