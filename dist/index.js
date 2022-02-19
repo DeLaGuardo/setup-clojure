@@ -4047,7 +4047,7 @@ const path = __importStar(__webpack_require__(622));
 const os = __importStar(__webpack_require__(87));
 const utils = __importStar(__webpack_require__(611));
 const tempDirectory = utils.getTempDir();
-function setup(version) {
+function setup(version, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('ClojureToolsDeps', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
@@ -4057,7 +4057,7 @@ function setup(version) {
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install${version === 'latest' ? '' : `-${version}`}.sh`);
             if (utils.isMacOS()) {
-                yield MacOSDeps(clojureInstallScript);
+                yield MacOSDeps(clojureInstallScript, githubToken);
             }
             const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, tempDir);
             core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
@@ -4077,18 +4077,15 @@ function runLinuxInstall(installScript, destinationFolder) {
         return destinationFolder;
     });
 }
-function MacOSDeps(file) {
+function MacOSDeps(file, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
-        fs.readFile(file, 'utf-8', function (err, data) {
-            if (err)
-                throw err;
-            const newValue = data.replace(/install -D/gim, '$(brew --prefix coreutils)/bin/ginstall -D');
-            fs.writeFile(file, newValue, 'utf-8', function (e) {
-                if (e)
-                    throw e;
-            });
-        });
-        yield exec.exec(`brew install coreutils`);
+        const linuxScript = String(fs.readFileSync(file, 'utf-8'));
+        const macosScript = linuxScript.replace(/install -D/gim, '$(brew --prefix coreutils)/bin/ginstall -D');
+        fs.writeFileSync(file, macosScript, 'utf-8');
+        const env = githubToken
+            ? { env: { HOMEBREW_GITHUB_API_TOKEN: githubToken } }
+            : undefined;
+        yield exec.exec(`brew`, [`install`, 'coreutils'], env);
     });
 }
 function setupWindows(version) {

@@ -9,7 +9,10 @@ import * as utils from './utils'
 
 const tempDirectory = utils.getTempDir()
 
-export async function setup(version: string): Promise<void> {
+export async function setup(
+  version: string,
+  githubToken?: string
+): Promise<void> {
   let toolPath = tc.find(
     'ClojureToolsDeps',
     utils.getCacheVersionString(version),
@@ -30,7 +33,7 @@ export async function setup(version: string): Promise<void> {
     )
 
     if (utils.isMacOS()) {
-      await MacOSDeps(clojureInstallScript)
+      await MacOSDeps(clojureInstallScript, githubToken)
     }
 
     const clojureToolsDir = await runLinuxInstall(clojureInstallScript, tempDir)
@@ -59,20 +62,18 @@ async function runLinuxInstall(
   return destinationFolder
 }
 
-async function MacOSDeps(file: string): Promise<void> {
-  fs.readFile(file, 'utf-8', function (err, data) {
-    if (err) throw err
+async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
+  const linuxScript = String(fs.readFileSync(file, 'utf-8'))
+  const macosScript = linuxScript.replace(
+    /install -D/gim,
+    '$(brew --prefix coreutils)/bin/ginstall -D'
+  )
+  fs.writeFileSync(file, macosScript, 'utf-8')
 
-    const newValue = data.replace(
-      /install -D/gim,
-      '$(brew --prefix coreutils)/bin/ginstall -D'
-    )
-
-    fs.writeFile(file, newValue, 'utf-8', function (e) {
-      if (e) throw e
-    })
-  })
-  await exec.exec(`brew install coreutils`)
+  const env = githubToken
+    ? {env: {HOMEBREW_GITHUB_API_TOKEN: githubToken}}
+    : undefined
+  await exec.exec(`brew`, [`install`, 'coreutils'], env)
 }
 
 export async function setupWindows(version: string): Promise<void> {
