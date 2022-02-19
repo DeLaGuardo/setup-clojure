@@ -10,7 +10,10 @@ import * as utils from './utils'
 const tempDirectory = utils.getTempDir()
 const IS_WINDOWS = utils.isWindows()
 
-export async function setup(version: string): Promise<void> {
+export async function setup(
+  version: string,
+  githubAuth?: string
+): Promise<void> {
   let toolPath = tc.find(
     'Leiningen',
     utils.getCacheVersionString(version),
@@ -23,7 +26,9 @@ export async function setup(version: string): Promise<void> {
     const leiningenFile = await tc.downloadTool(
       `https://raw.githubusercontent.com/technomancy/leiningen/${
         version === 'latest' ? 'stable' : version
-      }/bin/lein${IS_WINDOWS ? '.ps1' : ''}`
+      }/bin/lein${IS_WINDOWS ? '.ps1' : ''}`,
+      undefined,
+      githubAuth
     )
     const tempDir: string = path.join(
       tempDirectory,

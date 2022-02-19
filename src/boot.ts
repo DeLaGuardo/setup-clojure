@@ -24,7 +24,10 @@ if (!tempDirectory) {
   tempDirectory = path.join(baseLocation, 'actions', 'temp')
 }
 
-export async function setup(version: string): Promise<void> {
+export async function setup(
+  version: string,
+  githubAuth?: string
+): Promise<void> {
   let toolPath = tc.find(
     'Boot',
     utils.getCacheVersionString(version),
@@ -35,7 +38,9 @@ export async function setup(version: string): Promise<void> {
     core.info(`Boot found in cache ${toolPath}`)
   } else {
     const bootBootstrapFile = await tc.downloadTool(
-      `https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`
+      `https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`,
+      undefined,
+      githubAuth
     )
     const tempDir: string = path.join(
       tempDirectory,

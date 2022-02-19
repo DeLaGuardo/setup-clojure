@@ -90,6 +90,7 @@ jobs:
         uses: ./
         with:
           lein: 2.9.1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check leiningen version
         run: lein version
@@ -117,6 +118,7 @@ jobs:
         uses: ./
         with:
           boot: 2.8.3
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check boot version
         run: boot -V

@@ -1621,14 +1621,14 @@ if (!tempDirectory) {
     }
     tempDirectory = path.join(baseLocation, 'actions', 'temp');
 }
-function setup(version) {
+function setup(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Boot', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Boot found in cache ${toolPath}`);
         }
         else {
-            const bootBootstrapFile = yield tc.downloadTool(`https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`);
+            const bootBootstrapFile = yield tc.downloadTool(`https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`, undefined, githubAuth);
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const bootDir = yield installBoot(bootBootstrapFile, tempDir, version);
             core.debug(`Boot installed to ${bootDir}`);
@@ -3541,14 +3541,14 @@ const os = __importStar(__webpack_require__(87));
 const utils = __importStar(__webpack_require__(611));
 const tempDirectory = utils.getTempDir();
 const IS_WINDOWS = utils.isWindows();
-function setup(version) {
+function setup(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Leiningen', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Leiningen found in cache ${toolPath}`);
         }
         else {
-            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.ps1' : ''}`);
+            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.ps1' : ''}`, undefined, githubAuth);
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const leiningenDir = yield installLeiningen(leiningenFile, tempDir);
             core.debug(`Leiningen installed to ${leiningenDir}`);
@@ -3645,14 +3645,16 @@ function run() {
             const BOOT_VERSION = core.getInput('boot');
             const TDEPS_VERSION = core.getInput('tools-deps');
             const CLI_VERSION = core.getInput('cli');
+            const githubToken = core.getInput('github-token');
+            const githubAuth = githubToken ? `token ${githubToken}` : undefined;
             if (LEIN_VERSION) {
-                lein.setup(LEIN_VERSION);
+                lein.setup(LEIN_VERSION, githubAuth);
             }
             if (BOOT_VERSION) {
                 if (IS_WINDOWS) {
                     throw new Error('Boot on windows is not supported yet.');
                 }
-                boot.setup(BOOT_VERSION);
+                boot.setup(BOOT_VERSION, githubAuth);
             }
             if (CLI_VERSION) {
                 if (IS_WINDOWS) {
