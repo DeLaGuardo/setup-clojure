@@ -44,6 +44,9 @@ jobs:
           cli: 1.10.1.693 # Clojure CLI based on tools.deps
           lein: 2.9.1     # or use 'latest' to always provision latest version of leiningen
           boot: 2.8.3     # or use 'latest' to always provision latest version of boot
+          
+          # (optional) To avoid rate limit errors please provide github token
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Execute clojure code on Linux and MacOS
         if: ${{ matrix.os != 'windows-latest' }}
