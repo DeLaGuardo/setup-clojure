@@ -13,15 +13,18 @@ async function run(): Promise<void> {
     const TDEPS_VERSION = core.getInput('tools-deps')
     const CLI_VERSION = core.getInput('cli')
 
+    const githubToken = core.getInput('github-token')
+    const githubAuth = githubToken ? `token ${githubToken}` : undefined
+
     if (LEIN_VERSION) {
-      lein.setup(LEIN_VERSION)
+      lein.setup(LEIN_VERSION, githubAuth)
     }
 
     if (BOOT_VERSION) {
       if (IS_WINDOWS) {
         throw new Error('Boot on windows is not supported yet.')
       }
-      boot.setup(BOOT_VERSION)
+      boot.setup(BOOT_VERSION, githubAuth)
     }
 
     if (CLI_VERSION) {

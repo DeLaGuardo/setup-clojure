@@ -12,7 +12,11 @@ inputs:
   tools-deps:
     description: '[DEPRECATED] The tools deps version to make available on the path.'
   cli:
-    description: 'Clojure CLI version to make availablr on the path.'
+    description: 'Clojure CLI version to make available on the path.'
+  github-token:
+    description: >+
+      To fix rate limit errors, provide `secrets.GITHUB_TOKEN` value to this field.
+      More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
 runs:
   using: 'node12'
   main: 'dist/index.js'
