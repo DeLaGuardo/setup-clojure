@@ -1621,14 +1621,14 @@ if (!tempDirectory) {
     }
     tempDirectory = path.join(baseLocation, 'actions', 'temp');
 }
-function setup(version, githubAuth) {
+function setup(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Boot', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Boot found in cache ${toolPath}`);
         }
         else {
-            const bootBootstrapFile = yield tc.downloadTool(`https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`, undefined, githubAuth);
+            const bootBootstrapFile = yield tc.downloadTool(`https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`);
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const bootDir = yield installBoot(bootBootstrapFile, tempDir, version);
             core.debug(`Boot installed to ${bootDir}`);
@@ -3541,14 +3541,14 @@ const os = __importStar(__webpack_require__(87));
 const utils = __importStar(__webpack_require__(611));
 const tempDirectory = utils.getTempDir();
 const IS_WINDOWS = utils.isWindows();
-function setup(version, githubAuth) {
+function setup(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Leiningen', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Leiningen found in cache ${toolPath}`);
         }
         else {
-            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.ps1' : ''}`, undefined, githubAuth);
+            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${IS_WINDOWS ? '.ps1' : ''}`);
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const leiningenDir = yield installLeiningen(leiningenFile, tempDir);
             core.debug(`Leiningen installed to ${leiningenDir}`);
@@ -3645,16 +3645,14 @@ function run() {
             const BOOT_VERSION = core.getInput('boot');
             const TDEPS_VERSION = core.getInput('tools-deps');
             const CLI_VERSION = core.getInput('cli');
-            const githubToken = core.getInput('github-token');
-            const githubAuth = githubToken ? `token ${githubToken}` : undefined;
             if (LEIN_VERSION) {
-                lein.setup(LEIN_VERSION, githubAuth);
+                lein.setup(LEIN_VERSION);
             }
             if (BOOT_VERSION) {
                 if (IS_WINDOWS) {
                     throw new Error('Boot on windows is not supported yet.');
                 }
-                boot.setup(BOOT_VERSION, githubAuth);
+                boot.setup(BOOT_VERSION);
             }
             if (CLI_VERSION) {
                 if (IS_WINDOWS) {
@@ -4047,7 +4045,7 @@ const path = __importStar(__webpack_require__(622));
 const os = __importStar(__webpack_require__(87));
 const utils = __importStar(__webpack_require__(611));
 const tempDirectory = utils.getTempDir();
-function setup(version, githubToken) {
+function setup(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('ClojureToolsDeps', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
@@ -4057,7 +4055,7 @@ function setup(version, githubToken) {
             const tempDir = path.join(tempDirectory, `temp_${Math.floor(Math.random() * 2000000000)}`);
             const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install${version === 'latest' ? '' : `-${version}`}.sh`);
             if (utils.isMacOS()) {
-                yield MacOSDeps(clojureInstallScript, githubToken);
+                yield MacOSDeps(clojureInstallScript);
             }
             const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, tempDir);
             core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
@@ -4077,15 +4075,18 @@ function runLinuxInstall(installScript, destinationFolder) {
         return destinationFolder;
     });
 }
-function MacOSDeps(file, githubToken) {
+function MacOSDeps(file) {
     return __awaiter(this, void 0, void 0, function* () {
-        const linuxScript = String(fs.readFileSync(file, 'utf-8'));
-        const macosScript = linuxScript.replace(/install -D/gim, '$(brew --prefix coreutils)/bin/ginstall -D');
-        fs.writeFileSync(file, macosScript, 'utf-8');
-        const env = githubToken
-            ? { env: { HOMEBREW_GITHUB_API_TOKEN: githubToken } }
-            : undefined;
-        yield exec.exec('brew', ['install', 'coreutils'], env);
+        fs.readFile(file, 'utf-8', function (err, data) {
+            if (err)
+                throw err;
+            const newValue = data.replace(/install -D/gim, '$(brew --prefix coreutils)/bin/ginstall -D');
+            fs.writeFile(file, newValue, 'utf-8', function (e) {
+                if (e)
+                    throw e;
+            });
+        });
+        yield exec.exec(`brew install coreutils`);
     });
 }
 function setupWindows(version) {

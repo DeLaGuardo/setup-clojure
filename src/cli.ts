@@ -63,13 +63,18 @@ async function runLinuxInstall(
 }
 
 async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
-  const linuxScript = String(fs.readFileSync(file, 'utf-8'))
-  const macosScript = linuxScript.replace(
-    /install -D/gim,
-    '$(brew --prefix coreutils)/bin/ginstall -D'
-  )
-  fs.writeFileSync(file, macosScript, 'utf-8')
+  fs.readFile(file, 'utf-8', function (err, data) {
+    if (err) throw err
 
+    const newValue = data.replace(
+      /install -D/gim,
+      '$(brew --prefix coreutils)/bin/ginstall -D'
+    )
+
+    fs.writeFile(file, newValue, 'utf-8', function (e) {
+      if (e) throw e
+    })
+  })
   const env = githubToken
     ? {env: {HOMEBREW_GITHUB_API_TOKEN: githubToken}}
     : undefined
