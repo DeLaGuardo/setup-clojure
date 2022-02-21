@@ -1,96 +1,117 @@
-import io = require('@actions/io')
-import exec = require('@actions/exec')
-import os = require('os')
-import fs = require('fs')
-import path = require('path')
+import * as _core from '@actions/core'
+import * as _exec from '@actions/exec'
+import * as _io from '@actions/io'
+import * as _tc from '@actions/tool-cache'
+import * as _os from 'os'
+import {join} from 'path'
 
-const toolDir = path.join(__dirname, 'runner', 'tools', 'tdeps')
-const tempDir = path.join(__dirname, 'runner', 'temp', 'tdeps')
-
-process.env['RUNNER_TOOL_CACHE'] = toolDir
-process.env['RUNNER_TEMP'] = tempDir
 import * as tdeps from '../src/cli'
-import {getCacheVersionString} from '../src/utils'
+
+const toolPath = join(__dirname, 'runner', 'tools', 'tdeps')
+const tempPath = join(__dirname, 'runner', 'temp', 'tdeps')
+const downloadPath = join(__dirname, 'runner', 'download')
+const cachePath = join(__dirname, 'runner', 'cache')
+
+jest.mock('@actions/core')
+const core: jest.Mocked<typeof _core> = _core as never
+
+jest.mock('@actions/exec')
+const exec: jest.Mocked<typeof _exec> = _exec as never
+
+jest.mock('@actions/io')
+const io: jest.Mocked<typeof _io> = _io as never
+
+jest.mock('@actions/tool-cache')
+const tc: jest.Mocked<typeof _tc> = _tc as never
+
+jest.mock('os')
+const os: jest.Mocked<typeof _os> = _os as never
 
 describe('tdeps tests', () => {
   beforeAll(async () => {
-    await io.rmRF(toolDir)
-    await io.rmRF(tempDir)
-  }, 300000)
+    process.env['RUNNER_TOOL_CACHE'] = toolPath
+    process.env['RUNNER_TEMP'] = tempPath
+    os.arch.mockReturnValue('x64')
+    os.platform.mockReturnValue('linux')
+    jest.spyOn(global.Math, 'random').mockReturnValue(1)
+  })
 
   afterAll(async () => {
-    try {
-      await io.rmRF(toolDir)
-      await io.rmRF(tempDir)
-    } catch {
-      console.log('Failed to remove test directories')
-    }
-  }, 100000)
+    jest.spyOn(global.Math, 'random').mockRestore()
+    jest.resetAllMocks()
+    delete process.env['RUNNER_TOOL_CACHE']
+    delete process.env['RUNNER_TEMP']
+  })
 
   it('Throws if invalid version', async () => {
-    let thrown = false
-    try {
-      await tdeps.setup('1000')
-    } catch {
-      thrown = true
-    }
-    expect(thrown).toBe(true)
+    const msg = 'Unexpected HTTP response: 403'
+    tc.downloadTool.mockRejectedValueOnce(new Error(msg))
+    await expect(tdeps.setup('1000')).rejects.toThrow(msg)
   })
 
   it('Install clojure tools deps with normal version', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
     await tdeps.setup('1.10.1.469')
-    const clojureDir = path.join(
-      toolDir,
-      'ClojureToolsDeps',
-      getCacheVersionString('1.10.1.469'),
-      os.arch()
+
+    expect(tc.downloadTool).toHaveBeenCalledWith(
+      'https://download.clojure.org/install/linux-install-1.10.1.469.sh'
     )
-
-    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
-    expect(fs.existsSync(path.join(clojureDir, 'bin', 'clojure'))).toBe(true)
-  }, 100000)
-
-  it('Install latest clojure tools deps', async () => {
-    await tdeps.setup('latest')
-    const clojureDir = path.join(
-      toolDir,
+    expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(exec.exec).toHaveBeenCalledWith('bash', [
+      downloadPath,
+      '--prefix',
+      join(tempPath, 'temp_2000000000')
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000'),
       'ClojureToolsDeps',
-      getCacheVersionString('latest'),
-      os.arch()
+      '1.10.1-469-3-6'
     )
-
-    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
-    expect(fs.existsSync(path.join(clojureDir, 'bin', 'clojure'))).toBe(true)
-  }, 100000)
-
-  it('Uses version of clojure tools-deps installed in cache', async () => {
-    const clojureDir: string = path.join(
-      toolDir,
-      'ClojureToolsDeps',
-      getCacheVersionString('1.10.1.469'),
-      os.arch()
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOJURE_INSTALL_DIR',
+      join(cachePath, 'lib', 'clojure')
     )
-    await io.mkdirP(clojureDir)
-    fs.writeFileSync(`${clojureDir}.complete`, 'hello')
-    await tdeps.setup('1.10.1.469')
-    return
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
   })
 
-  it('Doesnt use version of clojure that was only partially installed in cache', async () => {
-    const clojureDir: string = path.join(
-      toolDir,
-      'ClojureToolsDeps',
-      '1.10.1-469',
-      os.arch()
+  it('Install latest clojure tools deps', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await tdeps.setup('latest')
+
+    expect(tc.downloadTool).toHaveBeenCalledWith(
+      'https://download.clojure.org/install/linux-install.sh'
     )
-    await io.mkdirP(clojureDir)
-    let thrown = false
-    try {
-      await tdeps.setup('1000')
-    } catch {
-      thrown = true
-    }
-    expect(thrown).toBe(true)
-    return
+    expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(exec.exec).toHaveBeenCalledWith('bash', [
+      downloadPath,
+      '--prefix',
+      join(tempPath, 'temp_2000000000')
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000'),
+      'ClojureToolsDeps',
+      'latest.0.0-3-6'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOJURE_INSTALL_DIR',
+      join(cachePath, 'lib', 'clojure')
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+  })
+
+  it('Uses version of clojure tools-deps installed in cache', async () => {
+    tc.find.mockReturnValue(cachePath)
+
+    await tdeps.setup('1.10.1.469')
+
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOJURE_INSTALL_DIR',
+      join(cachePath, 'lib', 'clojure')
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
   })
 })

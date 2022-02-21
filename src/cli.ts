@@ -7,8 +7,6 @@ import * as path from 'path'
 import * as os from 'os'
 import * as utils from './utils'
 
-const tempDirectory = utils.getTempDir()
-
 export async function setup(
   version: string,
   githubToken?: string
@@ -23,7 +21,7 @@ export async function setup(
     core.info(`Clojure CLI found in cache ${toolPath}`)
   } else {
     const tempDir: string = path.join(
-      tempDirectory,
+      utils.getTempDir(),
       `temp_${Math.floor(Math.random() * 2000000000)}`
     )
     const clojureInstallScript = await tc.downloadTool(
