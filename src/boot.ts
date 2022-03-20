@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
 import * as io from '@actions/io'
-import * as ioUtil from '@actions/io/lib/io-util'
 import * as tc from '@actions/tool-cache'
 import * as exec from '@actions/exec'
 import * as path from 'path'
 import * as os from 'os'
+import * as fs from './fs'
 import * as utils from './utils'
 
 function getTempDirectory(): string {
@@ -72,14 +72,14 @@ async function installBoot(
   await io.mkdirP(destinationFolder)
 
   const bin = path.normalize(binScript)
-  const binStats = await ioUtil.stat(bin)
+  const binStats = await fs.stat(bin)
   if (binStats.isFile()) {
     const binDir = path.join(destinationFolder, 'boot', 'bin')
 
     await io.mkdirP(binDir)
 
     await io.mv(bin, path.join(binDir, `boot`))
-    await ioUtil.chmod(path.join(binDir, `boot`), '0755')
+    await fs.chmod(path.join(binDir, `boot`), '0755')
 
     let env: {[key: string]: string} = {}
     if (version === 'latest') {

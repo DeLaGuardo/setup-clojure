@@ -2,9 +2,9 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as exec from '@actions/exec'
-import * as ioUtil from '@actions/io/lib/io-util'
 import * as path from 'path'
 import * as os from 'os'
+import * as fs from './fs'
 import * as utils from './utils'
 
 export async function setup(
@@ -55,7 +55,7 @@ async function installLeiningen(
   await io.mkdirP(destinationFolder)
 
   const bin = path.normalize(binScript)
-  const binStats = await ioUtil.stat(bin)
+  const binStats = await fs.stat(bin)
   if (binStats.isFile()) {
     const binDir = path.join(destinationFolder, 'leiningen', 'bin')
 
@@ -64,7 +64,7 @@ async function installLeiningen(
     await io.mv(bin, path.join(binDir, `lein${isWindows ? '.ps1' : ''}`))
 
     if (!isWindows) {
-      await ioUtil.chmod(path.join(binDir, `lein`), '0755')
+      await fs.chmod(path.join(binDir, `lein`), '0755')
     }
 
     const version_cmd = isWindows

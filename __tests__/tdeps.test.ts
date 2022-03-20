@@ -3,6 +3,7 @@ import * as _exec from '@actions/exec'
 import * as _io from '@actions/io'
 import * as _tc from '@actions/tool-cache'
 import * as _os from 'os'
+import * as _fs from '../src/fs'
 import {join} from 'path'
 
 import * as tdeps from '../src/cli'
@@ -23,6 +24,9 @@ const io: jest.Mocked<typeof _io> = _io as never
 
 jest.mock('@actions/tool-cache')
 const tc: jest.Mocked<typeof _tc> = _tc as never
+
+jest.mock('../src/fs')
+const fs: jest.Mocked<typeof _fs> = _fs as never
 
 jest.mock('os')
 const os: jest.Mocked<typeof _os> = _os as never
@@ -86,6 +90,43 @@ describe('tdeps tests', () => {
       'https://download.clojure.org/install/linux-install.sh'
     )
     expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(exec.exec).toHaveBeenCalledWith('bash', [
+      downloadPath,
+      '--prefix',
+      join(tempPath, 'temp_2000000000')
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000'),
+      'ClojureToolsDeps',
+      'latest.0.0-3-6'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'CLOJURE_INSTALL_DIR',
+      join(cachePath, 'lib', 'clojure')
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+  })
+
+  it('Supports macOS', async () => {
+    os.platform.mockReturnValue('darwin')
+
+    fs.readFile.mockResolvedValueOnce('install -D')
+    fs.writeFile.mockResolvedValueOnce()
+
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await tdeps.setup('latest')
+
+    expect(tc.downloadTool).toHaveBeenCalledWith(
+      'https://download.clojure.org/install/linux-install.sh'
+    )
+    expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(__dirname, 'runner/download'),
+      '$(brew --prefix coreutils)/bin/ginstall -D',
+      'utf-8'
+    )
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',

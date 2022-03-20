@@ -1,7 +1,7 @@
 import * as _core from '@actions/core'
 import * as _exec from '@actions/exec'
 import * as _io from '@actions/io'
-import * as _ioUtil from '@actions/io/lib/io-util'
+import * as _fs from '../src/fs'
 import * as _tc from '@actions/tool-cache'
 import * as _os from 'os'
 import {join} from 'path'
@@ -22,14 +22,14 @@ const exec: jest.Mocked<typeof _exec> = _exec as never
 jest.mock('@actions/io')
 const io: jest.Mocked<typeof _io> = _io as never
 
-jest.mock('@actions/io/lib/io-util')
-const ioUtil: jest.Mocked<typeof _ioUtil> = _ioUtil as never
-
 jest.mock('@actions/tool-cache')
 const tc: jest.Mocked<typeof _tc> = _tc as never
 
 jest.mock('os')
 const os: jest.Mocked<typeof _os> = _os as never
+
+jest.mock('../src/fs')
+const fs: jest.Mocked<typeof _fs> = _fs as never
 
 describe('boot tests', () => {
   beforeAll(async () => {
@@ -55,7 +55,7 @@ describe('boot tests', () => {
 
   it('Install boot with normal version', async () => {
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
-    ioUtil.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
     await boot.setup('2.8.3')
@@ -93,7 +93,7 @@ describe('boot tests', () => {
 
   it('Install latest boot', async () => {
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
-    ioUtil.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
     await boot.setup('latest')
