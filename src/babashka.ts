@@ -11,7 +11,7 @@ export async function getLatestBabashka(githubToken?: string): Promise<string> {
   })
 
   const res = await client.getJson<{tag_name: string}>(
-    `/repos/babashka/babashka/releases/latest`,
+    `https://api.github.com/repos/babashka/babashka/releases/latest`,
     githubToken ? {Authorization: `bearer ${githubToken}`} : undefined
   )
 
@@ -41,7 +41,9 @@ export function getArtifactUrl(version: string): string {
 }
 
 export async function extract(source: string): Promise<string> {
-  return source.endsWith('.zip') ? tc.extractZip(source) : tc.extractTar(source)
+  return source.endsWith('.zip')
+    ? await tc.extractZip(source)
+    : await tc.extractTar(source)
 }
 
 export async function setup(

@@ -45,7 +45,7 @@ async function run(): Promise<void> {
     }
 
     if (BB_VERSION) {
-      bb.setup(BB_VERSION, githubToken)
+      await bb.setup(BB_VERSION, githubToken)
     }
 
     if (
