@@ -4,7 +4,7 @@ import * as http from '@actions/http-client'
 
 import * as os from 'os'
 
-export async function getLatestBabashka(githubToken?: string): Promise<string> {
+export async function getLatestBabashka(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-clojure', undefined, {
     allowRetries: true,
     maxRetries: 3
@@ -12,7 +12,7 @@ export async function getLatestBabashka(githubToken?: string): Promise<string> {
 
   const res = await client.getJson<{tag_name: string}>(
     `https://api.github.com/repos/babashka/babashka/releases/latest`,
-    githubToken ? {Authorization: `bearer ${githubToken}`} : undefined
+    githubAuth ? {Authorization: githubAuth} : undefined
   )
 
   const result = res.result?.tag_name?.replace(/^v/, '')
@@ -48,15 +48,15 @@ export async function extract(source: string): Promise<string> {
 
 export async function setup(
   version: string,
-  githubToken?: string
+  githubAuth?: string
 ): Promise<void> {
   const ver =
-    version === 'latest' ? await getLatestBabashka(githubToken) : version
+    version === 'latest' ? await getLatestBabashka(githubAuth) : version
 
   let toolDir = tc.find('Babashka', ver)
   if (!toolDir) {
     const archiveUrl = getArtifactUrl(ver)
-    const archiveDir = await tc.downloadTool(archiveUrl)
+    const archiveDir = await tc.downloadTool(archiveUrl, undefined, githubAuth)
     toolDir = await extract(archiveDir)
     await tc.cacheDir(toolDir, 'Babashka', ver)
   }
