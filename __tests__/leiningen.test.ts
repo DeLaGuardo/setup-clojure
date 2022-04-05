@@ -1,95 +1,139 @@
-import io = require('@actions/io')
-import os = require('os')
-import fs = require('fs')
-import path = require('path')
+import * as _core from '@actions/core'
+import * as _exec from '@actions/exec'
+import * as _io from '@actions/io'
+import * as _fs from '../src/fs'
+import * as _tc from '@actions/tool-cache'
+import * as _os from 'os'
+import {join} from 'path'
 
-const toolDir = path.join(__dirname, 'runner', 'tools', 'leiningen')
-const tempDir = path.join(__dirname, 'runner', 'temp', 'leiningen')
+const toolPath = join(__dirname, 'runner', 'tools', 'leiningen')
+const tempPath = join(__dirname, 'runner', 'temp', 'leiningen')
+const downloadPath = join(__dirname, 'runner', 'download')
+const cachePath = join(__dirname, 'runner', 'cache')
 
-process.env['RUNNER_TOOL_CACHE'] = toolDir
-process.env['RUNNER_TEMP'] = tempDir
 import * as leiningen from '../src/leiningen'
-import {getCacheVersionString} from '../src/utils'
+
+jest.mock('@actions/core')
+const core: jest.Mocked<typeof _core> = _core as never
+
+jest.mock('@actions/exec')
+const exec: jest.Mocked<typeof _exec> = _exec as never
+
+jest.mock('@actions/io')
+const io: jest.Mocked<typeof _io> = _io as never
+
+jest.mock('@actions/tool-cache')
+const tc: jest.Mocked<typeof _tc> = _tc as never
+
+jest.mock('os')
+const os: jest.Mocked<typeof _os> = _os as never
+
+jest.mock('../src/fs')
+const fs: jest.Mocked<typeof _fs> = _fs as never
 
 describe('leiningen tests', () => {
-  beforeAll(async () => {
-    await io.rmRF(toolDir)
-    await io.rmRF(tempDir)
-  }, 300000)
+  beforeEach(async () => {
+    process.env['RUNNER_TOOL_CACHE'] = toolPath
+    process.env['RUNNER_TEMP'] = tempPath
+    os.arch.mockReturnValue('x64')
+    os.platform.mockReturnValue('linux')
+    jest.spyOn(global.Math, 'random').mockReturnValue(1)
+  })
 
-  afterAll(async () => {
-    try {
-      await io.rmRF(toolDir)
-      await io.rmRF(tempDir)
-    } catch {
-      console.log('Failed to remove test directories')
-    }
-  }, 100000)
+  afterEach(async () => {
+    jest.spyOn(global.Math, 'random').mockRestore()
+    jest.resetAllMocks()
+    delete process.env['RUNNER_TOOL_CACHE']
+    delete process.env['RUNNER_TEMP']
+  })
 
   it('Throws if invalid version', async () => {
-    let thrown = false
-    try {
-      await leiningen.setup('1000')
-    } catch {
-      thrown = true
-    }
-    expect(thrown).toBe(true)
+    const msg = 'Unexpected HTTP response: 403'
+    tc.downloadTool.mockRejectedValueOnce(new Error(msg))
+    await expect(leiningen.setup('1000')).rejects.toThrow(msg)
   })
 
   it('Install leiningen with normal version', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
     await leiningen.setup('2.9.1')
-    const clojureDir = path.join(
-      toolDir,
-      'Leiningen',
-      getCacheVersionString('2.9.1'),
-      os.arch()
+
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      1,
+      join(tempPath, 'temp_2000000000')
     )
-
-    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
-    expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true)
-  }, 100000)
-
-  it('Install latest leiningen', async () => {
-    await leiningen.setup('latest')
-    const clojureDir = path.join(
-      toolDir,
-      'Leiningen',
-      getCacheVersionString('latest'),
-      os.arch()
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      2,
+      join(tempPath, 'temp_2000000000', 'leiningen', 'bin')
     )
-
-    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
-    expect(fs.existsSync(path.join(clojureDir, 'bin', 'lein'))).toBe(true)
-  }, 100000)
-
-  it('Uses version of leiningen installed in cache', async () => {
-    const clojureDir: string = path.join(
-      toolDir,
+    expect(exec.exec.mock.calls[0]).toMatchObject([
+      './lein version',
+      [],
+      {
+        cwd: join(tempPath, 'temp_2000000000', 'leiningen', 'bin'),
+        env: {
+          LEIN_HOME: join(tempPath, 'temp_2000000000', 'leiningen')
+        }
+      }
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000', 'leiningen'),
       'Leiningen',
-      '2.9.1',
-      os.arch()
+      '2.9.1-3-6'
     )
-    await io.mkdirP(clojureDir)
-    fs.writeFileSync(`${clojureDir}.complete`, 'hello')
-    await leiningen.setup('2.9.1')
-    return
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'LEIN_HOME',
+      join(cachePath)
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
   })
 
-  it('Doesnt use version of clojure that was only partially installed in cache', async () => {
-    const clojureDir: string = path.join(
-      toolDir,
-      'Leiningen',
-      '2.9.1',
-      os.arch()
+  it('Install latest leiningen', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await leiningen.setup('latest')
+
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      1,
+      join(tempPath, 'temp_2000000000')
     )
-    await io.mkdirP(clojureDir)
-    let thrown = false
-    try {
-      await leiningen.setup('1000')
-    } catch {
-      thrown = true
-    }
-    expect(thrown).toBe(true)
-    return
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      2,
+      join(tempPath, 'temp_2000000000', 'leiningen', 'bin')
+    )
+    expect(exec.exec.mock.calls[0]).toMatchObject([
+      './lein version',
+      [],
+      {
+        cwd: join(tempPath, 'temp_2000000000', 'leiningen', 'bin'),
+        env: {
+          LEIN_HOME: join(tempPath, 'temp_2000000000', 'leiningen')
+        }
+      }
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000', 'leiningen'),
+      'Leiningen',
+      'latest.0.0-3-6'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'LEIN_HOME',
+      join(cachePath)
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+  })
+
+  it('Uses version of leiningen installed in cache', async () => {
+    tc.find.mockReturnValue(cachePath)
+    await leiningen.setup('2.9.1')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'LEIN_HOME',
+      join(cachePath)
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
   })
 })

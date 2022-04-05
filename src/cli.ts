@@ -2,12 +2,10 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as exec from '@actions/exec'
-import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
+import * as fs from './fs'
 import * as utils from './utils'
-
-const tempDirectory = utils.getTempDir()
 
 export async function setup(
   version: string,
@@ -23,7 +21,7 @@ export async function setup(
     core.info(`Clojure CLI found in cache ${toolPath}`)
   } else {
     const tempDir: string = path.join(
-      tempDirectory,
+      utils.getTempDir(),
       `temp_${Math.floor(Math.random() * 2000000000)}`
     )
     const clojureInstallScript = await tc.downloadTool(
@@ -63,18 +61,12 @@ async function runLinuxInstall(
 }
 
 async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
-  fs.readFile(file, 'utf-8', function (err, data) {
-    if (err) throw err
-
-    const newValue = data.replace(
-      /install -D/gim,
-      '$(brew --prefix coreutils)/bin/ginstall -D'
-    )
-
-    fs.writeFile(file, newValue, 'utf-8', function (e) {
-      if (e) throw e
-    })
-  })
+  const data = await fs.readFile(file, 'utf-8')
+  const newValue = data.replace(
+    /install -D/gim,
+    '$(brew --prefix coreutils)/bin/ginstall -D'
+  )
+  await fs.writeFile(file, newValue, 'utf-8')
   const env = githubToken
     ? {env: {HOMEBREW_GITHUB_API_TOKEN: githubToken}}
     : undefined

@@ -1,3 +1,4 @@
+import os from 'os'
 import * as path from 'path'
 import {VERSION} from './version'
 
@@ -31,9 +32,9 @@ export function getTempDir(): string {
 }
 
 export function isWindows(): boolean {
-  return process.platform === 'win32'
+  return os.platform() === 'win32'
 }
 
 export function isMacOS(): boolean {
-  return process.platform === 'darwin'
+  return os.platform() === 'darwin'
 }

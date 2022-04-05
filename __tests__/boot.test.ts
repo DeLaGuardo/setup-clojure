@@ -1,85 +1,140 @@
-import io = require('@actions/io')
-import os = require('os')
-import fs = require('fs')
-import path = require('path')
+import * as _core from '@actions/core'
+import * as _exec from '@actions/exec'
+import * as _io from '@actions/io'
+import * as _fs from '../src/fs'
+import * as _tc from '@actions/tool-cache'
+import * as _os from 'os'
+import {join} from 'path'
 
-const toolDir = path.join(__dirname, 'runner', 'tools', 'boot')
-const tempDir = path.join(__dirname, 'runner', 'temp', 'boot')
-
-process.env['RUNNER_TOOL_CACHE'] = toolDir
-process.env['RUNNER_TEMP'] = tempDir
 import * as boot from '../src/boot'
-import {getCacheVersionString} from '../src/utils'
+
+const toolPath = join(__dirname, 'runner', 'tools', 'boot')
+const tempPath = join(__dirname, 'runner', 'temp', 'boot')
+const downloadPath = join(__dirname, 'runner', 'download')
+const cachePath = join(__dirname, 'runner', 'cache')
+
+jest.mock('@actions/core')
+const core: jest.Mocked<typeof _core> = _core as never
+
+jest.mock('@actions/exec')
+const exec: jest.Mocked<typeof _exec> = _exec as never
+
+jest.mock('@actions/io')
+const io: jest.Mocked<typeof _io> = _io as never
+
+jest.mock('@actions/tool-cache')
+const tc: jest.Mocked<typeof _tc> = _tc as never
+
+jest.mock('os')
+const os: jest.Mocked<typeof _os> = _os as never
+
+jest.mock('../src/fs')
+const fs: jest.Mocked<typeof _fs> = _fs as never
 
 describe('boot tests', () => {
   beforeAll(async () => {
-    await io.rmRF(toolDir)
-    await io.rmRF(tempDir)
-  }, 300000)
+    process.env['RUNNER_TOOL_CACHE'] = toolPath
+    process.env['RUNNER_TEMP'] = tempPath
+    os.arch.mockReturnValue('x64')
+    os.platform.mockReturnValue('linux')
+    jest.spyOn(global.Math, 'random').mockReturnValue(1)
+  })
 
   afterAll(async () => {
-    try {
-      await io.rmRF(toolDir)
-      await io.rmRF(tempDir)
-    } catch {
-      console.log('Failed to remove test directories')
-    }
-  }, 100000)
+    jest.spyOn(global.Math, 'random').mockRestore()
+    jest.resetAllMocks()
+    delete process.env['RUNNER_TOOL_CACHE']
+    delete process.env['RUNNER_TEMP']
+  })
 
   it('Throws if invalid version', async () => {
-    let thrown = false
-    try {
-      await boot.setup('1000')
-    } catch {
-      thrown = true
-    }
-    expect(thrown).toBe(true)
+    const msg = 'Unexpected HTTP response: 403'
+    tc.downloadTool.mockRejectedValueOnce(new Error(msg))
+    await expect(boot.setup('1000')).rejects.toThrow(msg)
   })
 
   it('Install boot with normal version', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
     await boot.setup('2.8.3')
-    const clojureDir = path.join(
-      toolDir,
-      'Boot',
-      getCacheVersionString('2.8.3'),
-      os.arch()
+
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      1,
+      join(tempPath, 'temp_2000000000')
     )
-
-    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
-    expect(fs.existsSync(path.join(clojureDir, 'bin', 'boot'))).toBe(true)
-  }, 100000)
-
-  it('Install latest boot', async () => {
-    await boot.setup('latest')
-    const clojureDir = path.join(
-      toolDir,
-      'Boot',
-      getCacheVersionString('latest'),
-      os.arch()
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      2,
+      join(tempPath, 'temp_2000000000', 'boot', 'bin')
     )
-
-    expect(fs.existsSync(`${clojureDir}.complete`)).toBe(true)
-    expect(fs.existsSync(path.join(clojureDir, 'bin', 'boot'))).toBe(true)
-  }, 100000)
-
-  it('Uses version of boot installed in cache', async () => {
-    const clojureDir: string = path.join(toolDir, 'Boot', '2.8.3', os.arch())
-    await io.mkdirP(clojureDir)
-    fs.writeFileSync(`${clojureDir}.complete`, 'hello')
-    await boot.setup('2.8.3')
-    return
+    expect(exec.exec.mock.calls[0]).toMatchObject([
+      './boot -V',
+      [],
+      {
+        cwd: join(tempPath, 'temp_2000000000', 'boot', 'bin'),
+        env: {
+          BOOT_HOME: join(tempPath, 'temp_2000000000', 'boot'),
+          BOOT_VERSION: '2.8.3'
+        }
+      }
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000', 'boot'),
+      'Boot',
+      '2.8.3-3-6'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'BOOT_HOME',
+      join(cachePath)
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
   })
 
-  it('Doesnt use version of clojure that was only partially installed in cache', async () => {
-    const clojureDir: string = path.join(toolDir, 'Boot', '2.8.3', os.arch())
-    await io.mkdirP(clojureDir)
-    let thrown = false
-    try {
-      await boot.setup('1000')
-    } catch {
-      thrown = true
-    }
-    expect(thrown).toBe(true)
-    return
+  it('Install latest boot', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await boot.setup('latest')
+
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      1,
+      join(tempPath, 'temp_2000000000')
+    )
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      2,
+      join(tempPath, 'temp_2000000000', 'boot', 'bin')
+    )
+    expect(exec.exec.mock.calls[0]).toMatchObject([
+      './boot -u',
+      [],
+      {
+        cwd: join(tempPath, 'temp_2000000000', 'boot', 'bin'),
+        env: {
+          BOOT_HOME: join(tempPath, 'temp_2000000000', 'boot')
+        }
+      }
+    ])
+    expect(tc.cacheDir).toHaveBeenCalledWith(
+      join(tempPath, 'temp_2000000000', 'boot'),
+      'Boot',
+      'latest.0.0-3-6'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'BOOT_HOME',
+      join(cachePath)
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+  })
+
+  it('Uses version of boot installed in cache', async () => {
+    tc.find.mockReturnValue(cachePath)
+    await boot.setup('2.8.3')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'BOOT_HOME',
+      join(cachePath)
+    )
+    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
   })
 })

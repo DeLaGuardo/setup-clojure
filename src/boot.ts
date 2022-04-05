@@ -2,26 +2,28 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as exec from '@actions/exec'
-import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
+import * as fs from './fs'
 import * as utils from './utils'
 
-let tempDirectory = process.env['RUNNER_TEMP'] || ''
-const IS_WINDOWS = process.platform === 'win32'
+function getTempDirectory(): string {
+  let tempDirectory = process.env['RUNNER_TEMP'] || ''
 
-if (!tempDirectory) {
-  let baseLocation
-  if (IS_WINDOWS) {
-    baseLocation = process.env['USERPROFILE'] || 'C:\\'
-  } else {
-    if (process.platform === 'darwin') {
-      baseLocation = '/Users'
+  if (!tempDirectory) {
+    let baseLocation
+    if (utils.isWindows()) {
+      baseLocation = process.env['USERPROFILE'] || 'C:\\'
     } else {
-      baseLocation = '/home'
+      if (process.platform === 'darwin') {
+        baseLocation = '/Users'
+      } else {
+        baseLocation = '/home'
+      }
     }
+    tempDirectory = path.join(baseLocation, 'actions', 'temp')
   }
-  tempDirectory = path.join(baseLocation, 'actions', 'temp')
+  return tempDirectory
 }
 
 export async function setup(
@@ -43,7 +45,7 @@ export async function setup(
       githubAuth
     )
     const tempDir: string = path.join(
-      tempDirectory,
+      getTempDirectory(),
       `temp_${Math.floor(Math.random() * 2000000000)}`
     )
     const bootDir = await installBoot(bootBootstrapFile, tempDir, version)
@@ -70,14 +72,14 @@ async function installBoot(
   await io.mkdirP(destinationFolder)
 
   const bin = path.normalize(binScript)
-  const binStats = fs.statSync(bin)
+  const binStats = await fs.stat(bin)
   if (binStats.isFile()) {
     const binDir = path.join(destinationFolder, 'boot', 'bin')
 
     await io.mkdirP(binDir)
 
     await io.mv(bin, path.join(binDir, `boot`))
-    fs.chmodSync(path.join(binDir, `boot`), '0755')
+    await fs.chmod(path.join(binDir, `boot`), '0755')
 
     let env: {[key: string]: string} = {}
     if (version === 'latest') {
