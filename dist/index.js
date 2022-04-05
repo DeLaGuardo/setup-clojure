@@ -538,11 +538,7 @@ function run() {
             if (BB_VERSION) {
                 yield bb.setup(BB_VERSION, githubAuth);
             }
-            if (!BOOT_VERSION &&
-                !LEIN_VERSION &&
-                !TDEPS_VERSION &&
-                !CLI_VERSION &&
-                !BB_VERSION) {
+            if (!(BOOT_VERSION || LEIN_VERSION || TDEPS_VERSION || CLI_VERSION || BB_VERSION)) {
                 throw new Error('You must specify at least one clojure tool.');
             }
         }

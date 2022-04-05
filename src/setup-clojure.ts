@@ -49,11 +49,13 @@ async function run(): Promise<void> {
     }
 
     if (
-      !BOOT_VERSION &&
-      !LEIN_VERSION &&
-      !TDEPS_VERSION &&
-      !CLI_VERSION &&
-      !BB_VERSION
+      !(
+        BOOT_VERSION ||
+        LEIN_VERSION ||
+        TDEPS_VERSION ||
+        CLI_VERSION ||
+        BB_VERSION
+      )
     ) {
       throw new Error('You must specify at least one clojure tool.')
     }
