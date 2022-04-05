@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as lein from './leiningen'
 import * as boot from './boot'
 import * as cli from './cli'
+import * as bb from './babashka'
 import * as utils from './utils'
 
 const IS_WINDOWS = utils.isWindows()
@@ -12,6 +13,7 @@ async function run(): Promise<void> {
     const BOOT_VERSION = core.getInput('boot')
     const TDEPS_VERSION = core.getInput('tools-deps')
     const CLI_VERSION = core.getInput('cli')
+    const BB_VERSION = core.getInput('bb')
 
     const githubToken = core.getInput('github-token')
     const githubAuth = githubToken ? `token ${githubToken}` : undefined
@@ -42,7 +44,17 @@ async function run(): Promise<void> {
       cli.setup(TDEPS_VERSION)
     }
 
-    if (!BOOT_VERSION && !LEIN_VERSION && !TDEPS_VERSION && !CLI_VERSION) {
+    if (BB_VERSION) {
+      await bb.setup(BB_VERSION, githubAuth)
+    }
+
+    if (
+      !BOOT_VERSION &&
+      !LEIN_VERSION &&
+      !TDEPS_VERSION &&
+      !CLI_VERSION &&
+      !BB_VERSION
+    ) {
       throw new Error('You must specify at least one clojure tool.')
     }
   } catch (error) {
