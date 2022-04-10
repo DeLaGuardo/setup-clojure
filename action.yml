@@ -11,6 +11,7 @@ inputs:
     description: 'The boot-clj version to make available on the path.'
   tools-deps:
     description: '[DEPRECATED] The tools deps version to make available on the path.'
+    deprecationMessage: 'Use the `cli` input instead'
   cli:
     description: 'Clojure CLI version to make available on the path.'
   bb:
@@ -19,6 +20,8 @@ inputs:
     description: >+
       To fix rate limit errors, provide `secrets.GITHUB_TOKEN` value to this field.
       More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
+    default: ${{ github.token }}
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
