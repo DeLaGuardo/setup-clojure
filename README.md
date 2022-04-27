@@ -42,10 +42,12 @@ jobs:
         uses: DeLaGuardo/setup-clojure@5.0
         with:
           # Install just one or all simultaneously
+          # The value must indicate a particular version of the tool, or use 'latest'
+          # to always provision the latest version
           cli: 1.10.1.693 # Clojure CLI based on tools.deps
-          lein: 2.9.1     # or use 'latest' to always provision latest version of leiningen
-          boot: 2.8.3     # or use 'latest' to always provision latest version of boot
-          bb: 0.7.8       # or use 'latest' to always provision latest version of babashka
+          lein: 2.9.1     # Leiningen
+          boot: 2.8.3     # Boot.clj
+          bb: 0.7.8       # Babashka
           
           # (optional) To avoid rate limit errors please provide github token
           github-token: ${{ secrets.GITHUB_TOKEN }}
