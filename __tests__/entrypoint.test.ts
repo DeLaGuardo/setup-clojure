@@ -3,6 +3,7 @@ import * as _lein from '../src/leiningen'
 import * as _boot from '../src/boot'
 import * as _cli from '../src/cli'
 import * as _bb from '../src/babashka'
+import * as _cljKondo from '../src/clj-kondo'
 import * as _utils from '../src/utils'
 import {run} from '../src/entrypoint'
 
@@ -20,6 +21,9 @@ const cli: jest.Mocked<typeof _cli> = _cli as never
 
 jest.mock('../src/babashka')
 const bb: jest.Mocked<typeof _bb> = _bb as never
+
+jest.mock('../src/clj-kondo')
+const cljKondo: jest.Mocked<typeof _cljKondo> = _cljKondo as never
 
 jest.mock('../src/utils')
 const utils: jest.Mocked<typeof _utils> = _utils as never
@@ -104,6 +108,15 @@ describe('setup-clojure', () => {
     await run()
 
     expect(bb.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+  })
+
+  it('sets up clj-kondo', async () => {
+    inputs['clj-kondo'] = '1.2.3'
+    inputs['github-token'] = 'abc'
+
+    await run()
+
+    expect(cljKondo.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
 
   it('throws if none of Clojure tools is specified', async () => {

@@ -150,3 +150,31 @@ jobs:
 
       - name: Check babashka version
         run: bb --version
+
+  test-clj-kondo:
+
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install clj-kondo
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
+        with:
+          clj-kondo: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check clj-kondo version
+        run: clj-kondo --version
