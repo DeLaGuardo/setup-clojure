@@ -15,7 +15,9 @@ inputs:
   cli:
     description: 'Clojure CLI version to make available on the path.'
   bb:
-    description: 'Babashka version to install, `latest` can be used. '
+    description: 'Babashka version to install, `latest` can be used.'
+  clj-kondo:
+    description: 'Clj-kondo version to install, `latest` can be used.'
   github-token:
     description: >+
       To fix rate limit errors, provide `secrets.GITHUB_TOKEN` value to this field.

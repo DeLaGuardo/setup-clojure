@@ -6,6 +6,7 @@ This action sets up Clojure tools environment for using in GitHub Actions.
 * Leiningen
 * boot-clj
 * Babashka
+* Clj-kondo
 
 All three major tools available for MacOS and ubuntu based runners, Leiningen and Clojure CLI also available on Windows
 
@@ -44,10 +45,11 @@ jobs:
           # Install just one or all simultaneously
           # The value must indicate a particular version of the tool, or use 'latest'
           # to always provision the latest version
-          cli: 1.10.1.693 # Clojure CLI based on tools.deps
-          lein: 2.9.1     # Leiningen
-          boot: 2.8.3     # Boot.clj
-          bb: 0.7.8       # Babashka
+          cli: 1.10.1.693       # Clojure CLI based on tools.deps
+          lein: 2.9.1           # Leiningen
+          boot: 2.8.3           # Boot.clj
+          bb: 0.7.8             # Babashka
+          clj-kondo: 2022.05.31 # Clj-kondo
           
           # (optional) To avoid rate limit errors please provide github token
           github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -3,6 +3,7 @@ import * as lein from './leiningen'
 import * as boot from './boot'
 import * as cli from './cli'
 import * as bb from './babashka'
+import * as cljKondo from './clj-kondo'
 import * as utils from './utils'
 
 export async function run(): Promise<void> {
@@ -12,6 +13,7 @@ export async function run(): Promise<void> {
     const TDEPS_VERSION = core.getInput('tools-deps')
     const CLI_VERSION = core.getInput('cli')
     const BB_VERSION = core.getInput('bb')
+    const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
 
     const githubToken = core.getInput('github-token')
     const githubAuth = githubToken ? `token ${githubToken}` : undefined
@@ -48,13 +50,18 @@ export async function run(): Promise<void> {
       await bb.setup(BB_VERSION, githubAuth)
     }
 
+    if (CLJ_KONDO_VERSION) {
+      await cljKondo.setup(CLJ_KONDO_VERSION, githubAuth)
+    }
+
     if (
       !(
         BOOT_VERSION ||
         LEIN_VERSION ||
         TDEPS_VERSION ||
         CLI_VERSION ||
-        BB_VERSION
+        BB_VERSION ||
+        CLJ_KONDO_VERSION
       )
     ) {
       throw new Error('You must specify at least one clojure tool.')
