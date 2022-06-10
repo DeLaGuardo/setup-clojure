@@ -334,6 +334,209 @@ exports.setupWindows = setupWindows;
 
 /***/ }),
 
+/***/ 736:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.setup = exports.getArtifactUrl = exports.getArtifactName = exports.getLatestCljKondo = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const http = __importStar(__nccwpck_require__(925));
+const os = __importStar(__nccwpck_require__(37));
+const tc = __importStar(__nccwpck_require__(784));
+function getLatestCljKondo(githubAuth) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        const client = new http.HttpClient('actions/setup-clj-kondo', undefined, {
+            allowRetries: true,
+            maxRetries: 3
+        });
+        const res = yield client.getJson(`https://api.github.com/repos/clj-kondo/clj-kondo/releases/latest`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
+        if (result) {
+            return result;
+        }
+        throw new Error(`Can't obtain latest clj-kondo version`);
+    });
+}
+exports.getLatestCljKondo = getLatestCljKondo;
+function getArtifactName(version) {
+    const platform = os.platform();
+    switch (platform) {
+        case 'win32':
+            return `clj-kondo-${version}-windows-amd64.zip`;
+        case 'darwin':
+            return `clj-kondo-${version}-macos-amd64.zip`;
+        default:
+            return `clj-kondo-${version}-linux-amd64.zip`;
+    }
+}
+exports.getArtifactName = getArtifactName;
+function getArtifactUrl(version) {
+    const archiveName = getArtifactName(version);
+    return `https://github.com/clj-kondo/clj-kondo/releases/download/v${version}/${archiveName}`;
+}
+exports.getArtifactUrl = getArtifactUrl;
+function setup(version, githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ver = version === 'latest' ? yield getLatestCljKondo(githubAuth) : version;
+        let toolDir = tc.find('clj-kondo', ver);
+        if (!toolDir) {
+            const archiveUrl = getArtifactUrl(ver);
+            core.info(`Downloading: ${archiveUrl}`);
+            const artifactFile = yield tc.downloadTool(archiveUrl, undefined, githubAuth);
+            const extractedDir = yield tc.extractZip(artifactFile);
+            toolDir = yield tc.cacheDir(extractedDir, 'clj-kondo', ver);
+            core.info(`Caching directory: ${toolDir}`);
+        }
+        else {
+            core.info(`Using cached directory: ${toolDir}`);
+        }
+        core.addPath(toolDir);
+    });
+}
+exports.setup = setup;
+
+
+/***/ }),
+
+/***/ 792:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const lein = __importStar(__nccwpck_require__(479));
+const boot = __importStar(__nccwpck_require__(478));
+const cli = __importStar(__nccwpck_require__(504));
+const bb = __importStar(__nccwpck_require__(501));
+const cljKondo = __importStar(__nccwpck_require__(736));
+const utils = __importStar(__nccwpck_require__(918));
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const LEIN_VERSION = core.getInput('lein');
+            const BOOT_VERSION = core.getInput('boot');
+            const TDEPS_VERSION = core.getInput('tools-deps');
+            const CLI_VERSION = core.getInput('cli');
+            const BB_VERSION = core.getInput('bb');
+            const CLJ_KONDO_VERSION = core.getInput('clj-kondo');
+            const githubToken = core.getInput('github-token');
+            const githubAuth = githubToken ? `token ${githubToken}` : undefined;
+            const tools = [];
+            if (LEIN_VERSION) {
+                tools.push(lein.setup(LEIN_VERSION, githubAuth));
+            }
+            const IS_WINDOWS = utils.isWindows();
+            if (BOOT_VERSION) {
+                if (IS_WINDOWS) {
+                    throw new Error('Boot on windows is not supported yet.');
+                }
+                tools.push(boot.setup(BOOT_VERSION, githubAuth));
+            }
+            if (CLI_VERSION) {
+                if (IS_WINDOWS) {
+                    tools.push(cli.setupWindows(CLI_VERSION));
+                }
+                else {
+                    tools.push(cli.setup(CLI_VERSION));
+                }
+            }
+            if (TDEPS_VERSION && !CLI_VERSION) {
+                if (IS_WINDOWS) {
+                    tools.push(cli.setupWindows(TDEPS_VERSION));
+                }
+                tools.push(cli.setup(TDEPS_VERSION));
+            }
+            if (BB_VERSION) {
+                tools.push(bb.setup(BB_VERSION, githubAuth));
+            }
+            if (CLJ_KONDO_VERSION) {
+                tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth));
+            }
+            if (tools.length === 0) {
+                throw new Error('You must specify at least one clojure tool.');
+            }
+            yield Promise.all(tools);
+        }
+        catch (err) {
+            const error = err instanceof Error ? err.message : String(err);
+            core.setFailed(error);
+        }
+    });
+}
+exports.run = run;
+
+
+/***/ }),
+
 /***/ 78:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -453,101 +656,6 @@ function installLeiningen(binScript, destinationFolder) {
         }
     });
 }
-
-
-/***/ }),
-
-/***/ 229:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
-const lein = __importStar(__nccwpck_require__(479));
-const boot = __importStar(__nccwpck_require__(478));
-const cli = __importStar(__nccwpck_require__(504));
-const bb = __importStar(__nccwpck_require__(501));
-const utils = __importStar(__nccwpck_require__(918));
-const IS_WINDOWS = utils.isWindows();
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const LEIN_VERSION = core.getInput('lein');
-            const BOOT_VERSION = core.getInput('boot');
-            const TDEPS_VERSION = core.getInput('tools-deps');
-            const CLI_VERSION = core.getInput('cli');
-            const BB_VERSION = core.getInput('bb');
-            const githubToken = core.getInput('github-token');
-            const githubAuth = githubToken ? `token ${githubToken}` : undefined;
-            if (LEIN_VERSION) {
-                lein.setup(LEIN_VERSION, githubAuth);
-            }
-            if (BOOT_VERSION) {
-                if (IS_WINDOWS) {
-                    throw new Error('Boot on windows is not supported yet.');
-                }
-                boot.setup(BOOT_VERSION, githubAuth);
-            }
-            if (CLI_VERSION) {
-                if (IS_WINDOWS) {
-                    cli.setupWindows(CLI_VERSION);
-                }
-                else {
-                    cli.setup(CLI_VERSION);
-                }
-            }
-            if (TDEPS_VERSION && !CLI_VERSION) {
-                if (IS_WINDOWS) {
-                    cli.setupWindows(TDEPS_VERSION);
-                }
-                cli.setup(TDEPS_VERSION);
-            }
-            if (BB_VERSION) {
-                yield bb.setup(BB_VERSION, githubAuth);
-            }
-            if (!(BOOT_VERSION || LEIN_VERSION || TDEPS_VERSION || CLI_VERSION || BB_VERSION)) {
-                throw new Error('You must specify at least one clojure tool.');
-            }
-        }
-        catch (error) {
-            core.setFailed(error.message);
-        }
-    });
-}
-run();
 
 
 /***/ }),
@@ -6206,13 +6314,19 @@ module.exports = require("util");
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(229);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const entrypoint_1 = __nccwpck_require__(792);
+(0, entrypoint_1.run)();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

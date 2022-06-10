@@ -18,8 +18,10 @@ export async function run(): Promise<void> {
     const githubToken = core.getInput('github-token')
     const githubAuth = githubToken ? `token ${githubToken}` : undefined
 
+    const tools = []
+
     if (LEIN_VERSION) {
-      lein.setup(LEIN_VERSION, githubAuth)
+      tools.push(lein.setup(LEIN_VERSION, githubAuth))
     }
 
     const IS_WINDOWS = utils.isWindows()
@@ -28,44 +30,37 @@ export async function run(): Promise<void> {
       if (IS_WINDOWS) {
         throw new Error('Boot on windows is not supported yet.')
       }
-      boot.setup(BOOT_VERSION, githubAuth)
+      tools.push(boot.setup(BOOT_VERSION, githubAuth))
     }
 
     if (CLI_VERSION) {
       if (IS_WINDOWS) {
-        cli.setupWindows(CLI_VERSION)
+        tools.push(cli.setupWindows(CLI_VERSION))
       } else {
-        cli.setup(CLI_VERSION)
+        tools.push(cli.setup(CLI_VERSION))
       }
     }
 
     if (TDEPS_VERSION && !CLI_VERSION) {
       if (IS_WINDOWS) {
-        cli.setupWindows(TDEPS_VERSION)
+        tools.push(cli.setupWindows(TDEPS_VERSION))
       }
-      cli.setup(TDEPS_VERSION)
+      tools.push(cli.setup(TDEPS_VERSION))
     }
 
     if (BB_VERSION) {
-      await bb.setup(BB_VERSION, githubAuth)
+      tools.push(bb.setup(BB_VERSION, githubAuth))
     }
 
     if (CLJ_KONDO_VERSION) {
-      await cljKondo.setup(CLJ_KONDO_VERSION, githubAuth)
+      tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth))
     }
 
-    if (
-      !(
-        BOOT_VERSION ||
-        LEIN_VERSION ||
-        TDEPS_VERSION ||
-        CLI_VERSION ||
-        BB_VERSION ||
-        CLJ_KONDO_VERSION
-      )
-    ) {
+    if (tools.length === 0) {
       throw new Error('You must specify at least one clojure tool.')
     }
+
+    await Promise.all(tools)
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err)
     core.setFailed(error)
