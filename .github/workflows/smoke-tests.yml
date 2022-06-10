@@ -178,3 +178,43 @@ jobs:
 
       - name: Check clj-kondo version
         run: clj-kondo --version
+
+  all-together:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install all the tools
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
+        with:
+          cli: latest
+          lein: latest
+          boot: latest
+          bb: latest
+          clj-kondo: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Clojure CLI
+        run: clojure -Sdescribe
+
+      - name: Check leiningen version
+        run: lein version
+
+      - name: Check boot version
+        run: boot -V
+
+      - name: Check babashka version
+        run: bb --version
+
+      - name: Check clj-kondo version
+        run: clj-kondo --version
