@@ -50,9 +50,6 @@ jobs:
           boot: 2.8.3           # Boot.clj
           bb: 0.7.8             # Babashka
           clj-kondo: 2022.05.31 # Clj-kondo
-          
-          # (optional) To avoid rate limit errors please provide github token
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Execute clojure code on Linux and MacOS
         if: ${{ matrix.os != 'windows-latest' }}
