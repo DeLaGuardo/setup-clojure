@@ -32,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Prepare java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '8'
@@ -52,9 +52,6 @@ jobs:
           bb: 0.7.8             # Babashka
           clj-kondo: 2022.05.31 # Clj-kondo
           cljstyle: 0.15.0      # cljstyle
-          
-          # (optional) To avoid rate limit errors please provide github token
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Execute clojure code on Linux and MacOS
         if: ${{ matrix.os != 'windows-latest' }}
