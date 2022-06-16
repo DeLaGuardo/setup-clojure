@@ -433,6 +433,103 @@ exports.setup = setup;
 
 /***/ }),
 
+/***/ 661:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.setup = exports.getArtifactUrl = exports.getArtifactName = exports.getLatestCljstyle = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const http = __importStar(__nccwpck_require__(255));
+const os = __importStar(__nccwpck_require__(37));
+const tc = __importStar(__nccwpck_require__(784));
+function getLatestCljstyle(githubAuth) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        const client = new http.HttpClient('actions/setup-clojure', undefined, {
+            allowRetries: true,
+            maxRetries: 3
+        });
+        const res = yield client.getJson(`https://api.github.com/repos/greglook/cljstyle/releases/latest`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
+        if (result) {
+            return result;
+        }
+        throw new Error(`Can't obtain latest cljstyle version`);
+    });
+}
+exports.getLatestCljstyle = getLatestCljstyle;
+function getArtifactName(version) {
+    const platform = os.platform();
+    switch (platform) {
+        case 'darwin':
+            return `cljstyle_${version}_macos.zip`;
+        default:
+            return `cljstyle_${version}_linux.zip`;
+    }
+}
+exports.getArtifactName = getArtifactName;
+function getArtifactUrl(version) {
+    const archiveName = getArtifactName(version);
+    return `https://github.com/greglook/cljstyle/releases/download/${version}/${archiveName}`;
+}
+exports.getArtifactUrl = getArtifactUrl;
+function setup(version, githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ver = version === 'latest' ? yield getLatestCljstyle(githubAuth) : version;
+        let toolDir = tc.find('cljstyle', ver);
+        if (!toolDir) {
+            const archiveUrl = getArtifactUrl(ver);
+            core.info(`Downloading: ${archiveUrl}`);
+            const artifactFile = yield tc.downloadTool(archiveUrl, undefined, githubAuth);
+            const extractedDir = yield tc.extractZip(artifactFile);
+            toolDir = yield tc.cacheDir(extractedDir, 'cljstyle', ver);
+            core.info(`Caching directory: ${toolDir}`);
+        }
+        else {
+            core.info(`Using cached directory: ${toolDir}`);
+        }
+        core.addPath(toolDir);
+    });
+}
+exports.setup = setup;
+
+
+/***/ }),
+
 /***/ 792:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -478,6 +575,7 @@ const boot = __importStar(__nccwpck_require__(478));
 const cli = __importStar(__nccwpck_require__(504));
 const bb = __importStar(__nccwpck_require__(501));
 const cljKondo = __importStar(__nccwpck_require__(736));
+const cljstyle = __importStar(__nccwpck_require__(661));
 const utils = __importStar(__nccwpck_require__(918));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -488,6 +586,7 @@ function run() {
             const CLI_VERSION = core.getInput('cli');
             const BB_VERSION = core.getInput('bb');
             const CLJ_KONDO_VERSION = core.getInput('clj-kondo');
+            const CLJSTYLE_VERSION = core.getInput('cljstyle');
             const githubToken = core.getInput('github-token');
             const githubAuth = githubToken ? `token ${githubToken}` : undefined;
             const tools = [];
@@ -520,6 +619,12 @@ function run() {
             }
             if (CLJ_KONDO_VERSION) {
                 tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth));
+            }
+            if (CLJSTYLE_VERSION) {
+                if (IS_WINDOWS) {
+                    throw new Error('cljstyle on windows is not supported yet.');
+                }
+                tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuth));
             }
             if (tools.length === 0) {
                 throw new Error('You must specify at least one clojure tool.');
@@ -1175,6 +1280,13 @@ Object.defineProperty(exports, "summary", ({ enumerable: true, get: function () 
  */
 var summary_2 = __nccwpck_require__(327);
 Object.defineProperty(exports, "markdownSummary", ({ enumerable: true, get: function () { return summary_2.markdownSummary; } }));
+/**
+ * Path exports
+ */
+var path_utils_1 = __nccwpck_require__(981);
+Object.defineProperty(exports, "toPosixPath", ({ enumerable: true, get: function () { return path_utils_1.toPosixPath; } }));
+Object.defineProperty(exports, "toWin32Path", ({ enumerable: true, get: function () { return path_utils_1.toWin32Path; } }));
+Object.defineProperty(exports, "toPlatformPath", ({ enumerable: true, get: function () { return path_utils_1.toPlatformPath; } }));
 //# sourceMappingURL=core.js.map
 
 /***/ }),
@@ -1309,6 +1421,71 @@ class OidcClient {
 }
 exports.OidcClient = OidcClient;
 //# sourceMappingURL=oidc-utils.js.map
+
+/***/ }),
+
+/***/ 981:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
+const path = __importStar(__nccwpck_require__(17));
+/**
+ * toPosixPath converts the given path to the posix form. On Windows, \\ will be
+ * replaced with /.
+ *
+ * @param pth. Path to transform.
+ * @return string Posix path.
+ */
+function toPosixPath(pth) {
+    return pth.replace(/[\\]/g, '/');
+}
+exports.toPosixPath = toPosixPath;
+/**
+ * toWin32Path converts the given path to the win32 form. On Linux, / will be
+ * replaced with \\.
+ *
+ * @param pth. Path to transform.
+ * @return string Win32 path.
+ */
+function toWin32Path(pth) {
+    return pth.replace(/[/]/g, '\\');
+}
+exports.toWin32Path = toWin32Path;
+/**
+ * toPlatformPath converts the given path to a platform-specific path. It does
+ * this by replacing instances of / and \ with the platform-specific path
+ * separator.
+ *
+ * @param pth The path to platformize.
+ * @return string The platform-specific path.
+ */
+function toPlatformPath(pth) {
+    return pth.replace(/[/\\]/g, path.sep);
+}
+exports.toPlatformPath = toPlatformPath;
+//# sourceMappingURL=path-utils.js.map
 
 /***/ }),
 
