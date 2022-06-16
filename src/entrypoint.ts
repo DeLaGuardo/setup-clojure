@@ -4,6 +4,7 @@ import * as boot from './boot'
 import * as cli from './cli'
 import * as bb from './babashka'
 import * as cljKondo from './clj-kondo'
+import * as cljstyle from './cljstyle'
 import * as utils from './utils'
 
 export async function run(): Promise<void> {
@@ -14,6 +15,7 @@ export async function run(): Promise<void> {
     const CLI_VERSION = core.getInput('cli')
     const BB_VERSION = core.getInput('bb')
     const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
+    const CLJSTYLE_VERSION = core.getInput('cljstyle')
 
     const githubToken = core.getInput('github-token')
     const githubAuth = githubToken ? `token ${githubToken}` : undefined
@@ -54,6 +56,13 @@ export async function run(): Promise<void> {
 
     if (CLJ_KONDO_VERSION) {
       tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth))
+    }
+
+    if (CLJSTYLE_VERSION) {
+      if (IS_WINDOWS) {
+        throw new Error('cljstyle on windows is not supported yet.')
+      }
+      tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuth))
     }
 
     if (tools.length === 0) {

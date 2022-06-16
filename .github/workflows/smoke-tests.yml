@@ -179,6 +179,34 @@ jobs:
       - name: Check clj-kondo version
         run: clj-kondo --version
 
+  test-cljstyle:
+
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install cljstyle
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
+        with:
+          cljstyle: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check cljstyle version
+        run: cljstyle version
+
   all-together:
 
     runs-on: ubuntu-latest
@@ -202,6 +230,7 @@ jobs:
           boot: latest
           bb: latest
           clj-kondo: latest
+          cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Clojure CLI
@@ -218,3 +247,6 @@ jobs:
 
       - name: Check clj-kondo version
         run: clj-kondo --version
+
+      - name: Check cljstyle version
+        run: cljstyle version
