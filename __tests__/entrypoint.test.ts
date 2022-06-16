@@ -4,6 +4,7 @@ import * as _boot from '../src/boot'
 import * as _cli from '../src/cli'
 import * as _bb from '../src/babashka'
 import * as _cljKondo from '../src/clj-kondo'
+import * as _cljstyle from '../src/cljstyle'
 import * as _utils from '../src/utils'
 import {run} from '../src/entrypoint'
 
@@ -24,6 +25,9 @@ const bb: jest.Mocked<typeof _bb> = _bb as never
 
 jest.mock('../src/clj-kondo')
 const cljKondo: jest.Mocked<typeof _cljKondo> = _cljKondo as never
+
+jest.mock('../src/cljstyle')
+const cljstyle: jest.Mocked<typeof _cljstyle> = _cljstyle as never
 
 jest.mock('../src/utils')
 const utils: jest.Mocked<typeof _utils> = _utils as never
@@ -117,6 +121,27 @@ describe('setup-clojure', () => {
     await run()
 
     expect(cljKondo.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+  })
+
+  it('sets up cljstyle', async () => {
+    inputs['cljstyle'] = '1.2.3'
+    inputs['github-token'] = 'abc'
+
+    await run()
+
+    expect(cljstyle.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+  })
+
+  it('throws on cljstyle setup in Windows', async () => {
+    inputs['cljstyle'] = '1.2.3'
+    inputs['github-token'] = 'abc'
+    utils.isWindows.mockReturnValue(true)
+
+    await run()
+
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'cljstyle on windows is not supported yet.'
+    )
   })
 
   it('throws if none of Clojure tools is specified', async () => {

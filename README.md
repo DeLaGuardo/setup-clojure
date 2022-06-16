@@ -7,6 +7,7 @@ This action sets up Clojure tools environment for using in GitHub Actions.
 * boot-clj
 * Babashka
 * Clj-kondo
+* cljstyle
 
 All three major tools available for MacOS and ubuntu based runners, Leiningen and Clojure CLI also available on Windows
 
@@ -50,6 +51,7 @@ jobs:
           boot: 2.8.3           # Boot.clj
           bb: 0.7.8             # Babashka
           clj-kondo: 2022.05.31 # Clj-kondo
+          cljstyle: 0.15.0      # cljstyle
 
       - name: Execute clojure code on Linux and MacOS
         if: ${{ matrix.os != 'windows-latest' }}
@@ -68,6 +70,17 @@ jobs:
         # Boot is not yet available for windows
         if: ${{ matrix.os != 'windows-latest' }}
         run: boot -V
+
+      - name: Get babashka version
+        run: bb --version
+
+      - name: Get clj-kondo version
+        run: clj-kondo --version
+
+      - name: Get cljstyle version
+        # cljstyle is not yet available for windows
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: cljstyle version
 ```
 
 For more application cases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/master/.github/workflows/smoke-tests.yml)
