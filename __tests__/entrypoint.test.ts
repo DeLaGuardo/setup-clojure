@@ -5,7 +5,7 @@ import * as _cli from '../src/cli'
 import * as _bb from '../src/babashka'
 import * as _cljKondo from '../src/clj-kondo'
 import * as _cljstyle from '../src/cljstyle'
-import * as _zprint from '../src/cljstyle'
+import * as _zprint from '../src/zprint'
 import * as _utils from '../src/utils'
 import {run} from '../src/entrypoint'
 
