@@ -144,7 +144,12 @@ describe('zprint tests', () => {
         undefined,
         'token 123'
       )
-      expect(tc.cacheFile).toHaveBeenCalledWith('/foo/zprint', 'zprint', 'zprint', '9.9.9')
+      expect(tc.cacheFile).toHaveBeenCalledWith(
+        '/foo/zprint',
+        'zprint',
+        'zprint',
+        '9.9.9'
+      )
       expect(core.addPath).toHaveBeenCalledWith('/bar/zprint')
     })
   })
