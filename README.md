@@ -8,6 +8,7 @@ This action sets up Clojure tools environment for using in GitHub Actions.
 * Babashka
 * Clj-kondo
 * cljstyle
+* zprint
 
 All three major tools available for MacOS and ubuntu based runners, Leiningen and Clojure CLI also available on Windows
 
@@ -81,6 +82,9 @@ jobs:
         # cljstyle is not yet available for windows
         if: ${{ matrix.os != 'windows-latest' }}
         run: cljstyle version
+
+      - name: Get zprint version
+        run: zprint --version
 ```
 
 For more application cases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/master/.github/workflows/smoke-tests.yml)

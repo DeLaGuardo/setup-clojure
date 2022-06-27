@@ -19,7 +19,7 @@ const tc: jest.Mocked<typeof _tc> = _tc as never
 jest.mock('@actions/core')
 const core: jest.Mocked<typeof _core> = _core as never
 
-describe('tdeps tests', () => {
+describe('babashka tests', () => {
   beforeEach(() => {
     jest.resetAllMocks()
   })

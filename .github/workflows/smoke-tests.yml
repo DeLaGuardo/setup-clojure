@@ -207,6 +207,34 @@ jobs:
       - name: Check cljstyle version
         run: cljstyle version
 
+  test-zprint:
+
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install zprint
+        # uses: DeLaGuardo/setup-clojure@master
+        uses: ./
+        with:
+          zprint: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check zprint version
+        run: zprint --version
+
   all-together:
 
     runs-on: ubuntu-latest
@@ -231,6 +259,7 @@ jobs:
           bb: latest
           clj-kondo: latest
           cljstyle: latest
+          zprint: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Clojure CLI
@@ -250,3 +279,6 @@ jobs:
 
       - name: Check cljstyle version
         run: cljstyle version
+
+      - name: Check zprint version
+        run: zprint --version
