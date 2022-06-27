@@ -1,7 +1,6 @@
 import _os from 'os'
 import * as _core from '@actions/core'
 import * as _tc from '@actions/tool-cache'
-import * as _fs from 'fs/promises'
 import * as zprint from '../src/zprint'
 
 const getJson = jest.fn()
@@ -20,8 +19,7 @@ const tc: jest.Mocked<typeof _tc> = _tc as never
 jest.mock('@actions/core')
 const core: jest.Mocked<typeof _core> = _core as never
 
-jest.mock('fs/promises')
-const fs: jest.Mocked<typeof _fs> = _fs as never
+jest.mock('../src/fs')
 
 describe('zprint tests', () => {
   beforeEach(() => {

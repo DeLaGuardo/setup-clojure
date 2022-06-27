@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as http from '@actions/http-client'
 import * as os from 'os'
 import * as tc from '@actions/tool-cache'
-import {chmod} from 'fs/promises'
+import * as fs from './fs'
 
 export async function getLatestZprint(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-zprint', undefined, {
@@ -57,7 +57,7 @@ export async function setup(
       githubAuth
     )
 
-    await chmod(artifactFile, '0755')
+    await fs.chmod(artifactFile, '0755')
 
     toolDir = await tc.cacheFile(artifactFile, 'zprint', 'zprint', ver)
     core.info(`Saved: ${toolDir}`)
