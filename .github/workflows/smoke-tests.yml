@@ -90,7 +90,7 @@ jobs:
 
       - name: Execute clojure from cmd.exe
         run: clojure --version
-        shell: cmd.exe
+        shell: cmd
 
   test-leiningen:
     strategy:
