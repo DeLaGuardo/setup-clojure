@@ -13,6 +13,7 @@ export async function run(): Promise<void> {
     const BOOT_VERSION = core.getInput('boot')
     const TDEPS_VERSION = core.getInput('tools-deps')
     const CLI_VERSION = core.getInput('cli')
+    const CMD_EXE_WORKAROUND = core.getInput('cmd-exe-workaround')
     const BB_VERSION = core.getInput('bb')
     const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
     const CLJSTYLE_VERSION = core.getInput('cljstyle')
@@ -37,7 +38,9 @@ export async function run(): Promise<void> {
 
     if (CLI_VERSION) {
       if (IS_WINDOWS) {
-        tools.push(cli.setupWindows(CLI_VERSION))
+        tools.push(
+          cli.setupWindows(CLI_VERSION, CMD_EXE_WORKAROUND, githubAuth)
+        )
       } else {
         tools.push(cli.setup(CLI_VERSION))
       }
@@ -45,7 +48,9 @@ export async function run(): Promise<void> {
 
     if (TDEPS_VERSION && !CLI_VERSION) {
       if (IS_WINDOWS) {
-        tools.push(cli.setupWindows(TDEPS_VERSION))
+        tools.push(
+          cli.setupWindows(TDEPS_VERSION, CMD_EXE_WORKAROUND, githubAuth)
+        )
       }
       tools.push(cli.setup(TDEPS_VERSION))
     }

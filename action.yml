@@ -14,6 +14,12 @@ inputs:
     deprecationMessage: 'Use the `cli` input instead'
   cli:
     description: 'Clojure CLI version to make available on the path.'
+  cmd-exe-workaround:
+    description: >+
+      On Windows platform, it will replace official Clojure CLI
+      with the `deps.clj` of its specific version, `latest` can be used.
+
+      Useful for running `clojure` command from `cmd.exe`.
   bb:
     description: 'Babashka version to install, `latest` can be used.'
   clj-kondo:
