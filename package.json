@@ -11,6 +11,7 @@
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map",
     "test": "jest",
+    "act": "npm run build && npm run package && act",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {

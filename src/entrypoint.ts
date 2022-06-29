@@ -7,7 +7,31 @@ import * as cljKondo from './clj-kondo'
 import * as cljstyle from './cljstyle'
 import * as utils from './utils'
 
-export async function run(): Promise<void> {
+type SetupClojureActionState = 'pre' | 'main' | 'post' | 'in-progress'
+
+export function ensureCurrentState(): SetupClojureActionState {
+  const st = core.getState('SETUP_CLOJURE')
+  const result =
+    st === 'pre' || st === 'main' || st === 'post' || st === 'in-progress'
+      ? st
+      : 'pre'
+  core.saveState('SETUP_CLOJURE', 'in-progress')
+  
+  return result
+}
+
+export function ensureNextState(prevState: 'pre' | 'main'): void {
+  const nextState: SetupClojureActionState =
+    prevState === 'pre' ? 'main' : 'post'
+  core.saveState('SETUP_CLOJURE', nextState)
+}
+
+export async function pre(): Promise<void> {
+  core.info(`>>>>>>>>>>>>>>>>>>>>>>> PRE <<<<<<<<<<<<<<<<<<<<<<<`)
+}
+
+export async function main(): Promise<void> {
+  core.info(`>>>>>>>>>>>>>>>>>>>>>>> MAIN <<<<<<<<<<<<<<<<<<<<<<<`)
   try {
     const LEIN_VERSION = core.getInput('lein')
     const BOOT_VERSION = core.getInput('boot')
@@ -73,5 +97,27 @@ export async function run(): Promise<void> {
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err)
     core.setFailed(error)
+  }
+}
+
+export async function post(): Promise<void> {
+  core.info(`>>>>>>>>>>>>>>>>>>>>>>> POST <<<<<<<<<<<<<<<<<<<<<<<`)
+}
+
+const entrypoints = {pre, main, post}
+
+export async function run(): Promise<void> {
+  const actionState = ensureCurrentState()
+
+  if (actionState === 'in-progress') {
+    core.setFailed('Previous phase was not completed correctly')
+    return
+  }
+
+  const entrypoint = entrypoints[actionState]
+  entrypoint()
+
+  if (actionState !== 'post') {
+    ensureNextState(actionState)
   }
 }
