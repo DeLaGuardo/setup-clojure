@@ -20,6 +20,8 @@ inputs:
     description: 'Clj-kondo version to install, `latest` can be used.'
   cljstyle:
     description: 'cljstyle version to install, `latest` can be used.'
+  zprint:
+    description: 'zprint version to install, `latest` can be used.'
   github-token:
     description: >+
       To fix rate limit errors, provide `secrets.GITHUB_TOKEN` value to this field.
