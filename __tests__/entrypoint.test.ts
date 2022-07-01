@@ -89,7 +89,7 @@ describe('setup-clojure', () => {
 
     await run()
 
-    expect(cli.setupWindows).toHaveBeenCalledWith('1.2.3')
+    expect(cli.setupWindows).toHaveBeenCalledWith('1.2.3', undefined, undefined)
   })
 
   it('sets up Clojure CLI tools', async () => {
@@ -106,7 +106,7 @@ describe('setup-clojure', () => {
 
     await run()
 
-    expect(cli.setupWindows).toHaveBeenCalledWith('1.2.3')
+    expect(cli.setupWindows).toHaveBeenCalledWith('1.2.3', undefined, undefined)
   })
 
   it('sets up Babashka', async () => {

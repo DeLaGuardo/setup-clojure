@@ -53,6 +53,7 @@ jobs:
           bb: 0.7.8             # Babashka
           clj-kondo: 2022.05.31 # Clj-kondo
           cljstyle: 0.15.0      # cljstyle
+          cmd-exe-workaround: 'latest' # Replace `clojure` with `deps.clj` on Windows
 
       - name: Execute clojure code on Linux and MacOS
         if: ${{ matrix.os != 'windows-latest' }}
