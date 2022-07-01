@@ -11,6 +11,7 @@
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map",
     "test": "jest",
+    "update-deps": "ncu -u",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
@@ -32,19 +33,20 @@
     "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
-    "@types/jest": "^28.1.1",
+    "@types/jest": "^28.1.4",
     "@types/node": "^18.0.0",
     "@types/semver": "^7.3.10",
-    "@typescript-eslint/parser": "^5.28.0",
+    "@typescript-eslint/parser": "^5.30.0",
     "@vercel/ncc": "^0.34.0",
-    "eslint": "^8.17.0",
+    "eslint": "^8.18.0",
     "eslint-plugin-github": "^4.3.6",
     "eslint-plugin-jest": "^26.5.3",
-    "jest": "^28.1.1",
-    "jest-circus": "^28.1.1",
+    "jest": "^28.1.2",
+    "jest-circus": "^28.1.2",
     "js-yaml": "^4.1.0",
+    "npm-check-updates": "^15.0.1",
     "prettier": "2.7.1",
     "ts-jest": "^28.0.5",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.4"
   }
 }

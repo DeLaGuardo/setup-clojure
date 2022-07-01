@@ -271,11 +271,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setupWindows = exports.setup = void 0;
+exports.setupWindows = exports.getLatestDepsClj = exports.setup = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const io = __importStar(__nccwpck_require__(436));
 const tc = __importStar(__nccwpck_require__(784));
 const exec = __importStar(__nccwpck_require__(514));
+const http = __importStar(__nccwpck_require__(255));
 const path = __importStar(__nccwpck_require__(17));
 const os = __importStar(__nccwpck_require__(37));
 const fs = __importStar(__nccwpck_require__(78));
@@ -321,10 +322,48 @@ function MacOSDeps(file, githubToken) {
         yield exec.exec('brew', ['install', 'coreutils'], env);
     });
 }
-function setupWindows(version) {
+function getLatestDepsClj(githubAuth) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
+        const client = new http.HttpClient('actions/setup-clojure', undefined, {
+            allowRetries: true,
+            maxRetries: 3
+        });
+        const res = yield client.getJson(`https://api.github.com/repos/borkdude/deps.clj/releases/latest`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
+        if (result) {
+            return result;
+        }
+        throw new Error(`Can't obtain latest deps.clj version`);
+    });
+}
+exports.getLatestDepsClj = getLatestDepsClj;
+function setupWindows(version, cmdExeWorkaround, githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (cmdExeWorkaround) {
+            let depsCljVersion = cmdExeWorkaround;
+            if (depsCljVersion === 'latest') {
+                depsCljVersion = yield getLatestDepsClj(githubAuth);
+            }
+            let clojureExePath = tc.find('deps.clj', depsCljVersion);
+            if (!clojureExePath) {
+                const archiveUrl = `https://github.com/borkdude/deps.clj/releases/download/v${depsCljVersion}/deps.clj-${depsCljVersion}-windows-amd64.zip`;
+                core.info(`archiveUrl = ${archiveUrl}`);
+                const archivePath = yield tc.downloadTool(archiveUrl, undefined, githubAuth);
+                core.info(`archivePath = ${archivePath}`);
+                const depsExePath = yield tc.extractZip(archivePath);
+                const depsExe = path.join(depsExePath, 'deps.exe');
+                core.info(`depsExe = ${depsExe}`);
+                clojureExePath = yield tc.cacheFile(depsExe, 'clojure.exe', 'deps.clj', depsCljVersion);
+                core.info(`clojureExePath = ${clojureExePath}`);
+                const clojureExe = path.join(clojureExePath, 'clojure.exe');
+                yield fs.chmod(clojureExe, '0755');
+            }
+            core.addPath(clojureExePath);
+            return;
+        }
         const url = `download.clojure.org/install/win-install${version === 'latest' ? '' : `-${version}`}.ps1`;
-        exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
+        yield exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
             input: Buffer.from('1')
         });
     });
@@ -576,6 +615,7 @@ const cli = __importStar(__nccwpck_require__(504));
 const bb = __importStar(__nccwpck_require__(501));
 const cljKondo = __importStar(__nccwpck_require__(736));
 const cljstyle = __importStar(__nccwpck_require__(661));
+const zprint = __importStar(__nccwpck_require__(982));
 const utils = __importStar(__nccwpck_require__(918));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -584,9 +624,11 @@ function run() {
             const BOOT_VERSION = core.getInput('boot');
             const TDEPS_VERSION = core.getInput('tools-deps');
             const CLI_VERSION = core.getInput('cli');
+            const CMD_EXE_WORKAROUND = core.getInput('cmd-exe-workaround');
             const BB_VERSION = core.getInput('bb');
             const CLJ_KONDO_VERSION = core.getInput('clj-kondo');
             const CLJSTYLE_VERSION = core.getInput('cljstyle');
+            const ZPRINT_VERSION = core.getInput('zprint');
             const githubToken = core.getInput('github-token');
             const githubAuth = githubToken ? `token ${githubToken}` : undefined;
             const tools = [];
@@ -602,7 +644,7 @@ function run() {
             }
             if (CLI_VERSION) {
                 if (IS_WINDOWS) {
-                    tools.push(cli.setupWindows(CLI_VERSION));
+                    tools.push(cli.setupWindows(CLI_VERSION, CMD_EXE_WORKAROUND, githubAuth));
                 }
                 else {
                     tools.push(cli.setup(CLI_VERSION));
@@ -610,7 +652,7 @@ function run() {
             }
             if (TDEPS_VERSION && !CLI_VERSION) {
                 if (IS_WINDOWS) {
-                    tools.push(cli.setupWindows(TDEPS_VERSION));
+                    tools.push(cli.setupWindows(TDEPS_VERSION, CMD_EXE_WORKAROUND, githubAuth));
                 }
                 tools.push(cli.setup(TDEPS_VERSION));
             }
@@ -625,6 +667,9 @@ function run() {
                     throw new Error('cljstyle on windows is not supported yet.');
                 }
                 tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuth));
+            }
+            if (ZPRINT_VERSION) {
+                tools.push(zprint.setup(ZPRINT_VERSION, githubAuth));
             }
             if (tools.length === 0) {
                 throw new Error('You must specify at least one clojure tool.');
@@ -852,6 +897,106 @@ exports.isMacOS = isMacOS;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
 exports.VERSION = '3-6';
+
+
+/***/ }),
+
+/***/ 982:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.setup = exports.getArtifactUrl = exports.getArtifactName = exports.getLatestZprint = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const http = __importStar(__nccwpck_require__(255));
+const os = __importStar(__nccwpck_require__(37));
+const tc = __importStar(__nccwpck_require__(784));
+const fs = __importStar(__nccwpck_require__(78));
+function getLatestZprint(githubAuth) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        const client = new http.HttpClient('actions/setup-zprint', undefined, {
+            allowRetries: true,
+            maxRetries: 3
+        });
+        const res = yield client.getJson(`https://api.github.com/repos/kkinnear/zprint/releases/latest`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
+        if (result) {
+            return result;
+        }
+        throw new Error(`Can't obtain latest zprint version`);
+    });
+}
+exports.getLatestZprint = getLatestZprint;
+function getArtifactName(version) {
+    const platform = os.platform();
+    switch (platform) {
+        case 'win32':
+            return `zprint-filter-${version}`;
+        case 'darwin':
+            return `zprintm-${version}`;
+        default:
+            return `zprintl-${version}`;
+    }
+}
+exports.getArtifactName = getArtifactName;
+function getArtifactUrl(version) {
+    const archiveName = getArtifactName(version);
+    return `https://github.com/kkinnear/zprint/releases/download/${version}/${archiveName}`;
+}
+exports.getArtifactUrl = getArtifactUrl;
+function setup(version, githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ver = version === 'latest' ? yield getLatestZprint(githubAuth) : version;
+        let toolDir = tc.find('zprint', ver);
+        if (!toolDir) {
+            const archiveUrl = getArtifactUrl(ver);
+            core.info(`Artifact: ${archiveUrl}`);
+            const artifactFile = yield tc.downloadTool(archiveUrl, undefined, githubAuth);
+            yield fs.chmod(artifactFile, '0755');
+            toolDir = yield tc.cacheFile(artifactFile, 'zprint', 'zprint', ver);
+            core.info(`Saved: ${toolDir}`);
+        }
+        else {
+            core.info(`Cached: ${toolDir}`);
+        }
+        core.addPath(toolDir);
+    });
+}
+exports.setup = setup;
 
 
 /***/ }),
