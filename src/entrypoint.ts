@@ -32,9 +32,6 @@ export async function run(): Promise<void> {
     const IS_WINDOWS = utils.isWindows()
 
     if (BOOT_VERSION) {
-      if (IS_WINDOWS) {
-        throw new Error('Boot on windows is not supported yet.')
-      }
       tools.push(boot.setup(BOOT_VERSION, githubAuth))
     }
 

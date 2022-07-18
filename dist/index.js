@@ -176,7 +176,7 @@ function setup(version, githubAuth) {
             core.info(`Boot found in cache ${toolPath}`);
         }
         else {
-            const bootBootstrapFile = yield tc.downloadTool(`https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`, undefined, githubAuth);
+            const bootBootstrapFile = yield tc.downloadTool(`https://github.com/boot-clj/boot-bin/releases/download/latest/boot.${utils.isWindows() ? 'exe' : 'sh'}`, undefined, githubAuth);
             const tempDir = path.join(getTempDirectory(), `temp_${Math.floor(Math.random() * 2000000000)}`);
             const bootDir = yield installBoot(bootBootstrapFile, tempDir, version);
             core.debug(`Boot installed to ${bootDir}`);
@@ -198,8 +198,10 @@ function installBoot(binScript, destinationFolder, version) {
         if (binStats.isFile()) {
             const binDir = path.join(destinationFolder, 'boot', 'bin');
             yield io.mkdirP(binDir);
-            yield io.mv(bin, path.join(binDir, `boot`));
-            yield fs.chmod(path.join(binDir, `boot`), '0755');
+            yield io.mv(bin, path.join(binDir, `boot${utils.isWindows() ? '.exe' : ''}`));
+            if (!utils.isWindows()) {
+                yield fs.chmod(path.join(binDir, `boot`), '0755');
+            }
             let env = {};
             if (version === 'latest') {
                 env = {
@@ -218,7 +220,19 @@ function installBoot(binScript, destinationFolder, version) {
             if (process.env['JAVA_CMD']) {
                 env['JAVA_CMD'] = process.env['JAVA_CMD'];
             }
-            yield exec.exec(`./boot ${version === 'latest' ? '-u' : '-V'}`, [], {
+            if (utils.isWindows()) {
+                let java_version = '';
+                yield exec.exec(`java -cp dist JavaVersion`, [], {
+                    listeners: {
+                        stdout: (data) => {
+                            java_version += data.toString();
+                        }
+                    }
+                });
+                yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`);
+                yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${process.env['JAVA_HOME']}" /f`);
+            }
+            yield exec.exec(`./boot${utils.isWindows() ? '.exe' : ''} ${version === 'latest' ? '-u' : '-V'}`, [], {
                 cwd: path.join(destinationFolder, 'boot', 'bin'),
                 env
             });
@@ -637,9 +651,6 @@ function run() {
             }
             const IS_WINDOWS = utils.isWindows();
             if (BOOT_VERSION) {
-                if (IS_WINDOWS) {
-                    throw new Error('Boot on windows is not supported yet.');
-                }
                 tools.push(boot.setup(BOOT_VERSION, githubAuth));
             }
             if (CLI_VERSION) {

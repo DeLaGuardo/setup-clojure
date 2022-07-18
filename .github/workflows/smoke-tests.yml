@@ -8,9 +8,9 @@ jobs:
   test-tools-deps:
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -95,9 +95,9 @@ jobs:
   test-leiningen:
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -122,9 +122,9 @@ jobs:
   test-boot:
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -134,7 +134,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '8'
+          java-version: '11'
 
       - name: Install boot
         # uses: DeLaGuardo/setup-clojure@master
@@ -149,9 +149,9 @@ jobs:
   test-bb:
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -176,9 +176,9 @@ jobs:
   test-clj-kondo:
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -203,9 +203,9 @@ jobs:
   test-cljstyle:
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -231,9 +231,9 @@ jobs:
 
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout

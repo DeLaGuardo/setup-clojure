@@ -63,18 +63,6 @@ describe('setup-clojure', () => {
     expect(boot.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
 
-  it('throws on Boot setup in Windows', async () => {
-    inputs['boot'] = '1.2.3'
-    inputs['github-token'] = 'abc'
-    utils.isWindows.mockReturnValue(true)
-
-    await run()
-
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'Boot on windows is not supported yet.'
-    )
-  })
-
   it('sets up Clojure CLI tools from deprecated `tools-deps` option', async () => {
     inputs['tools-deps'] = '1.2.3'
 

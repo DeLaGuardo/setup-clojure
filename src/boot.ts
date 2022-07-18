@@ -40,7 +40,9 @@ export async function setup(
     core.info(`Boot found in cache ${toolPath}`)
   } else {
     const bootBootstrapFile = await tc.downloadTool(
-      `https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh`,
+      `https://github.com/boot-clj/boot-bin/releases/download/latest/boot.${
+        utils.isWindows() ? 'exe' : 'sh'
+      }`,
       undefined,
       githubAuth
     )
@@ -78,8 +80,14 @@ async function installBoot(
 
     await io.mkdirP(binDir)
 
-    await io.mv(bin, path.join(binDir, `boot`))
-    await fs.chmod(path.join(binDir, `boot`), '0755')
+    await io.mv(
+      bin,
+      path.join(binDir, `boot${utils.isWindows() ? '.exe' : ''}`)
+    )
+
+    if (!utils.isWindows()) {
+      await fs.chmod(path.join(binDir, `boot`), '0755')
+    }
 
     let env: {[key: string]: string} = {}
     if (version === 'latest') {
@@ -100,10 +108,38 @@ async function installBoot(
       env['JAVA_CMD'] = process.env['JAVA_CMD']
     }
 
-    await exec.exec(`./boot ${version === 'latest' ? '-u' : '-V'}`, [], {
-      cwd: path.join(destinationFolder, 'boot', 'bin'),
-      env
-    })
+    if (utils.isWindows()) {
+      let java_version = ''
+
+      await exec.exec(`java -cp dist JavaVersion`, [], {
+        listeners: {
+          stdout: (data: Buffer) => {
+            java_version += data.toString()
+          }
+        }
+      })
+
+      await exec.exec(
+        `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
+      )
+
+      await exec.exec(
+        `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
+          process.env['JAVA_HOME']
+        }" /f`
+      )
+    }
+
+    await exec.exec(
+      `./boot${utils.isWindows() ? '.exe' : ''} ${
+        version === 'latest' ? '-u' : '-V'
+      }`,
+      [],
+      {
+        cwd: path.join(destinationFolder, 'boot', 'bin'),
+        env
+      }
+    )
 
     return path.join(destinationFolder, 'boot')
   } else {
