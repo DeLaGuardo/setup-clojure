@@ -41,6 +41,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.restore = exports.save = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
+const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(1017));
 const utils_1 = __nccwpck_require__(918);
 const version_1 = __nccwpck_require__(8217);
@@ -48,13 +49,23 @@ const cacheDir = process.env['RUNNER_TOOL_CACHE'] || '';
 const platform = (0, utils_1.isWindows)() ? 'windows' : (0, utils_1.isMacOS)() ? 'darwin' : 'linux';
 function save(tools) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield cache.saveCache(getCachePaths(tools), getCacheKey(tools));
+        try {
+            yield cache.saveCache(getCachePaths(tools), getCacheKey(tools));
+        }
+        catch (err) {
+            core.info('Can not save cache.');
+        }
     });
 }
 exports.save = save;
 function restore(tools) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield cache.restoreCache(getCachePaths(tools), getCacheKey(tools), []);
+        try {
+            yield cache.restoreCache(getCachePaths(tools), getCacheKey(tools), []);
+        }
+        catch (err) {
+            core.info('Can not restore cache');
+        }
     });
 }
 exports.restore = restore;

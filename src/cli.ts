@@ -34,7 +34,7 @@ export async function setup(
 
     const clojureToolsDir = await runLinuxInstall(
       clojureInstallScript,
-      '/opt/clojure'
+      '/usr/local/opt/clojure'
     )
     core.debug(`clojure tools deps installed to ${clojureToolsDir}`)
     await tc.cacheDir(
@@ -44,8 +44,11 @@ export async function setup(
     )
   }
 
-  core.exportVariable('CLOJURE_INSTALL_DIR', '/opt/clojure/lib/clojure')
-  core.addPath('/opt/clojure/bin')
+  core.exportVariable(
+    'CLOJURE_INSTALL_DIR',
+    '/usr/local/opt/clojure/lib/clojure'
+  )
+  core.addPath('/usr/local/opt/clojure/bin')
 }
 
 async function runLinuxInstall(

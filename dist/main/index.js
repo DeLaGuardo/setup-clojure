@@ -312,12 +312,12 @@ function setup(version, githubToken) {
             if (utils.isMacOS()) {
                 yield MacOSDeps(clojureInstallScript, githubToken);
             }
-            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, '/opt/clojure');
+            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, '/usr/local/opt/clojure');
             core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
             yield tc.cacheDir(clojureToolsDir, 'ClojureToolsDeps', utils.getCacheVersionString(version));
         }
-        core.exportVariable('CLOJURE_INSTALL_DIR', '/opt/clojure/lib/clojure');
-        core.addPath('/opt/clojure/bin');
+        core.exportVariable('CLOJURE_INSTALL_DIR', '/usr/local/opt/clojure/lib/clojure');
+        core.addPath('/usr/local/opt/clojure/bin');
     });
 }
 exports.setup = setup;

@@ -1,4 +1,5 @@
 import * as cache from '@actions/cache'
+import * as core from '@actions/core'
 import * as path from 'path'
 import {Tools, isWindows, isMacOS} from './utils'
 import {VERSION} from './version'
@@ -7,11 +8,19 @@ const cacheDir = process.env['RUNNER_TOOL_CACHE'] || ''
 const platform = isWindows() ? 'windows' : isMacOS() ? 'darwin' : 'linux'
 
 export async function save(tools: Tools): Promise<void> {
-  await cache.saveCache(getCachePaths(tools), getCacheKey(tools))
+  try {
+    await cache.saveCache(getCachePaths(tools), getCacheKey(tools))
+  } catch (err) {
+    core.info('Can not save cache.')
+  }
 }
 
 export async function restore(tools: Tools): Promise<void> {
-  await cache.restoreCache(getCachePaths(tools), getCacheKey(tools), [])
+  try {
+    await cache.restoreCache(getCachePaths(tools), getCacheKey(tools), [])
+  } catch (err) {
+    core.info('Can not restore cache')
+  }
 }
 
 function getCacheKey(tools: Tools): string {
