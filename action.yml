@@ -34,8 +34,13 @@ inputs:
       More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
     default: ${{ github.token }}
     required: false
+  invalidate-cache:
+    description: >+
+      Set to `true` to fix problems realted to wrongly populated tool cache
+    default: false
+    required: false
 runs:
-  using: 'node12'
-  main: 'dist/main/index.js'
-  pre: 'dist/pre/index.js'
-  post: 'dist/post/index.js'
+  using: 'node16'
+  main: 'dist/index.js'
+  pre: 'dist/index.js'
+  post: 'dist/index.js'

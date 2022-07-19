@@ -7,6 +7,8 @@ import * as os from 'os'
 import * as fs from './fs'
 import * as utils from './utils'
 
+export const identifier = 'Boot'
+
 function getTempDirectory(): string {
   let tempDirectory = process.env['RUNNER_TEMP'] || ''
 
@@ -31,10 +33,14 @@ export async function setup(
   githubAuth?: string
 ): Promise<void> {
   let toolPath = tc.find(
-    'Boot',
+    identifier,
     utils.getCacheVersionString(version),
     os.arch()
   )
+
+  if (utils.isWindows()) {
+    await setWindowsRegistry()
+  }
 
   if (toolPath && version !== 'latest') {
     core.info(`Boot found in cache ${toolPath}`)
@@ -54,7 +60,7 @@ export async function setup(
     core.debug(`Boot installed to ${bootDir}`)
     toolPath = await tc.cacheDir(
       bootDir,
-      'Boot',
+      identifier,
       utils.getCacheVersionString(version)
     )
   }
@@ -108,28 +114,6 @@ async function installBoot(
       env['JAVA_CMD'] = process.env['JAVA_CMD']
     }
 
-    if (utils.isWindows()) {
-      let java_version = ''
-
-      await exec.exec(`java -cp dist JavaVersion`, [], {
-        listeners: {
-          stdout: (data: Buffer) => {
-            java_version += data.toString()
-          }
-        }
-      })
-
-      await exec.exec(
-        `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
-      )
-
-      await exec.exec(
-        `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
-          process.env['JAVA_HOME']
-        }" /f`
-      )
-    }
-
     await exec.exec(
       `./boot${utils.isWindows() ? '.exe' : ''} ${
         version === 'latest' ? '-u' : '-V'
@@ -145,4 +129,26 @@ async function installBoot(
   } else {
     throw new Error('Not a file')
   }
+}
+
+async function setWindowsRegistry(): Promise<void> {
+  let java_version = ''
+
+  await exec.exec(`java -cp dist JavaVersion`, [], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        java_version += data.toString()
+      }
+    }
+  })
+
+  await exec.exec(
+    `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
+  )
+
+  await exec.exec(
+    `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
+      process.env['JAVA_HOME']
+    }" /f`
+  )
 }

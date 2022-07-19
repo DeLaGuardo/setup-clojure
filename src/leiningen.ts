@@ -7,6 +7,8 @@ import * as os from 'os'
 import * as fs from './fs'
 import * as utils from './utils'
 
+export const identifier = 'Leiningen'
+
 export async function setup(
   version: string,
   githubAuth?: string
@@ -14,7 +16,7 @@ export async function setup(
   const isWindows = utils.isWindows()
 
   let toolPath = tc.find(
-    'Leiningen',
+    identifier,
     utils.getCacheVersionString(version),
     os.arch()
   )
@@ -37,7 +39,7 @@ export async function setup(
     core.debug(`Leiningen installed to ${leiningenDir}`)
     toolPath = await tc.cacheDir(
       leiningenDir,
-      'Leiningen',
+      identifier,
       utils.getCacheVersionString(version)
     )
   }

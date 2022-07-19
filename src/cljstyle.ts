@@ -3,6 +3,8 @@ import * as http from '@actions/http-client'
 import * as os from 'os'
 import * as tc from '@actions/tool-cache'
 
+export const identifier = 'cljstyle'
+
 export async function getLatestCljstyle(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-clojure', undefined, {
     allowRetries: true,
@@ -44,7 +46,7 @@ export async function setup(
   const ver =
     version === 'latest' ? await getLatestCljstyle(githubAuth) : version
 
-  let toolDir = tc.find('cljstyle', ver)
+  let toolDir = tc.find(identifier, ver)
   if (!toolDir) {
     const archiveUrl = getArtifactUrl(ver)
     core.info(`Downloading: ${archiveUrl}`)
@@ -56,7 +58,7 @@ export async function setup(
     )
 
     const extractedDir = await tc.extractZip(artifactFile)
-    toolDir = await tc.cacheDir(extractedDir, 'cljstyle', ver)
+    toolDir = await tc.cacheDir(extractedDir, identifier, ver)
     core.info(`Caching directory: ${toolDir}`)
   } else {
     core.info(`Using cached directory: ${toolDir}`)

@@ -43,6 +43,7 @@ describe('setup-clojure', () => {
     jest.resetAllMocks()
     inputs = {}
     core.getInput.mockImplementation(key => inputs[key])
+    core.getState.mockImplementation(() => 'main')
   })
 
   it('sets up Leiningen', async () => {

@@ -5,6 +5,7 @@ import * as _fs from '../src/fs'
 import * as _tc from '@actions/tool-cache'
 import * as _os from 'os'
 import {join} from 'path'
+import {VERSION} from '../src/version'
 
 const toolPath = join(__dirname, 'runner', 'tools', 'leiningen')
 const tempPath = join(__dirname, 'runner', 'temp', 'leiningen')
@@ -81,7 +82,7 @@ describe('leiningen tests', () => {
     expect(tc.cacheDir).toHaveBeenCalledWith(
       join(tempPath, 'temp_2000000000', 'leiningen'),
       'Leiningen',
-      '2.9.1-3-6'
+      `2.9.1-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'LEIN_HOME',
@@ -118,7 +119,7 @@ describe('leiningen tests', () => {
     expect(tc.cacheDir).toHaveBeenCalledWith(
       join(tempPath, 'temp_2000000000', 'leiningen'),
       'Leiningen',
-      'latest.0.0-3-6'
+      `latest.0.0-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'LEIN_HOME',

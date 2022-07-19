@@ -5,6 +5,7 @@ import * as _tc from '@actions/tool-cache'
 import * as _os from 'os'
 import * as _fs from '../src/fs'
 import {join} from 'path'
+import {VERSION} from '../src/version'
 
 import * as tdeps from '../src/cli'
 
@@ -62,22 +63,22 @@ describe('tdeps tests', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.10.1.469.sh'
     )
-    expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',
-      join(tempPath, 'temp_2000000000')
+      '/tmp/usr/local/opt/clojure'
     ])
     expect(tc.cacheDir).toHaveBeenCalledWith(
-      join(tempPath, 'temp_2000000000'),
+      '/tmp/usr/local/opt/clojure',
       'ClojureToolsDeps',
-      '1.10.1-469-3-6'
+      `1.10.1-469-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      join(cachePath, 'lib', 'clojure')
+      '/tmp/usr/local/opt/clojure/lib/clojure'
     )
-    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
   })
 
   it('Install latest clojure tools deps', async () => {
@@ -89,22 +90,22 @@ describe('tdeps tests', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install.sh'
     )
-    expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',
-      join(tempPath, 'temp_2000000000')
+      '/tmp/usr/local/opt/clojure'
     ])
     expect(tc.cacheDir).toHaveBeenCalledWith(
-      join(tempPath, 'temp_2000000000'),
+      '/tmp/usr/local/opt/clojure',
       'ClojureToolsDeps',
-      'latest.0.0-3-6'
+      `latest.0.0-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      join(cachePath, 'lib', 'clojure')
+      '/tmp/usr/local/opt/clojure/lib/clojure'
     )
-    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
   })
 
   it('Supports macOS', async () => {
@@ -121,7 +122,7 @@ describe('tdeps tests', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install.sh'
     )
-    expect(io.mkdirP).toHaveBeenCalledWith(join(tempPath, 'temp_2000000000'))
+    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure')
     expect(fs.writeFile).toHaveBeenCalledWith(
       join(__dirname, 'runner/download'),
       '$(brew --prefix coreutils)/bin/ginstall -D',
@@ -130,18 +131,18 @@ describe('tdeps tests', () => {
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',
-      join(tempPath, 'temp_2000000000')
+      '/tmp/usr/local/opt/clojure'
     ])
     expect(tc.cacheDir).toHaveBeenCalledWith(
-      join(tempPath, 'temp_2000000000'),
+      '/tmp/usr/local/opt/clojure',
       'ClojureToolsDeps',
-      'latest.0.0-3-6'
+      `latest.0.0-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      join(cachePath, 'lib', 'clojure')
+      '/tmp/usr/local/opt/clojure/lib/clojure'
     )
-    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
   })
 
   it('Uses version of clojure tools-deps installed in cache', async () => {
@@ -151,8 +152,8 @@ describe('tdeps tests', () => {
 
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      join(cachePath, 'lib', 'clojure')
+      '/tmp/usr/local/opt/clojure/lib/clojure'
     )
-    expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
   })
 })

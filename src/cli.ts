@@ -8,23 +8,24 @@ import * as os from 'os'
 import * as fs from './fs'
 import * as utils from './utils'
 
+export const identifier = 'ClojureToolsDeps'
+
 export async function setup(
   version: string,
   githubToken?: string
 ): Promise<void> {
-  let toolPath = tc.find(
-    'ClojureToolsDeps',
+  const installDir = '/tmp/usr/local/opt'
+  const toolPath = tc.find(
+    identifier,
     utils.getCacheVersionString(version),
     os.arch()
   )
 
   if (toolPath && version !== 'latest') {
     core.info(`Clojure CLI found in cache ${toolPath}`)
+    await fs.mkdir(installDir, {recursive: true})
+    await fs.cp(toolPath, path.join(installDir, 'clojure'), {recursive: true})
   } else {
-    const tempDir: string = path.join(
-      utils.getTempDir(),
-      `temp_${Math.floor(Math.random() * 2000000000)}`
-    )
     const clojureInstallScript = await tc.downloadTool(
       `https://download.clojure.org/install/linux-install${
         version === 'latest' ? '' : `-${version}`
@@ -35,18 +36,23 @@ export async function setup(
       await MacOSDeps(clojureInstallScript, githubToken)
     }
 
-    const clojureToolsDir = await runLinuxInstall(clojureInstallScript, tempDir)
+    const clojureToolsDir = await runLinuxInstall(
+      clojureInstallScript,
+      path.join(installDir, 'clojure')
+    )
     core.debug(`clojure tools deps installed to ${clojureToolsDir}`)
-    toolPath = await tc.cacheDir(
+    await tc.cacheDir(
       clojureToolsDir,
-      'ClojureToolsDeps',
+      identifier,
       utils.getCacheVersionString(version)
     )
   }
 
-  const installDir = path.join(toolPath, 'lib', 'clojure')
-  core.exportVariable('CLOJURE_INSTALL_DIR', installDir)
-  core.addPath(path.join(toolPath, 'bin'))
+  core.exportVariable(
+    'CLOJURE_INSTALL_DIR',
+    path.join(installDir, 'clojure', 'lib', 'clojure')
+  )
+  core.addPath(path.join(installDir, 'clojure', 'bin'))
 }
 
 async function runLinuxInstall(
@@ -95,7 +101,7 @@ export async function getLatestDepsClj(githubAuth?: string): Promise<string> {
 
 export async function setupWindows(
   version: string,
-  cmdExeWorkaround: string,
+  cmdExeWorkaround: string | null | undefined,
   githubAuth?: string
 ): Promise<void> {
   if (cmdExeWorkaround) {

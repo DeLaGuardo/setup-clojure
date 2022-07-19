@@ -8,7 +8,7 @@ jobs:
   test-tools-deps:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -23,15 +23,15 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           tools-deps: 1.10.1.693
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
 
-  clojure-cli:
+  test-clojure-cli:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
@@ -49,8 +49,8 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           cli: 1.10.1.693
 
@@ -64,7 +64,7 @@ jobs:
         run: clojure -e "(+ 1 1)"
         shell: powershell
 
-  clojure-cmd-exe:
+  test-clojure-cmd-exe:
     runs-on: windows-latest
 
     steps:
@@ -78,8 +78,8 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           cli: 'latest'
           cmd-exe-workaround: 'latest'
@@ -110,8 +110,8 @@ jobs:
           java-version: '8'
 
       - name: Install leiningen
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           lein: 2.9.1
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -137,8 +137,8 @@ jobs:
           java-version: '11'
 
       - name: Install boot
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           boot: 2.8.3
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -164,8 +164,8 @@ jobs:
           java-version: '8'
 
       - name: Install babashka
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           bb: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -191,8 +191,8 @@ jobs:
           java-version: '8'
 
       - name: Install clj-kondo
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           clj-kondo: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -218,8 +218,8 @@ jobs:
           java-version: '8'
 
       - name: Install cljstyle
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -246,8 +246,8 @@ jobs:
           java-version: '8'
 
       - name: Install zprint
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
           zprint: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -269,16 +269,16 @@ jobs:
           java-version: '8'
 
       - name: Install all the tools
-        # uses: DeLaGuardo/setup-clojure@master
-        uses: ./
+        uses: DeLaGuardo/setup-clojure@boot-on-windows
+        # uses: ./
         with:
-          cli: latest
-          lein: latest
-          boot: latest
-          bb: latest
-          clj-kondo: latest
-          cljstyle: latest
-          zprint: latest
+          cli: 1.11.1.1149
+          lein: 2.9.1
+          boot: 2.8.3
+          bb: 0.8.157
+          clj-kondo: 2022.06.22
+          cljstyle: 0.15.0
+          zprint: 1.2.3
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Clojure CLI

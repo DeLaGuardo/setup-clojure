@@ -4,6 +4,8 @@ import * as os from 'os'
 import * as tc from '@actions/tool-cache'
 import * as fs from './fs'
 
+export const identifier = 'zprint'
+
 export async function getLatestZprint(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-zprint', undefined, {
     allowRetries: true,
@@ -46,7 +48,7 @@ export async function setup(
 ): Promise<void> {
   const ver = version === 'latest' ? await getLatestZprint(githubAuth) : version
 
-  let toolDir = tc.find('zprint', ver)
+  let toolDir = tc.find(identifier, ver)
   if (!toolDir) {
     const archiveUrl = getArtifactUrl(ver)
     core.info(`Artifact: ${archiveUrl}`)
@@ -59,7 +61,7 @@ export async function setup(
 
     await fs.chmod(artifactFile, '0755')
 
-    toolDir = await tc.cacheFile(artifactFile, 'zprint', 'zprint', ver)
+    toolDir = await tc.cacheFile(artifactFile, identifier, 'zprint', ver)
     core.info(`Saved: ${toolDir}`)
   } else {
     core.info(`Cached: ${toolDir}`)
