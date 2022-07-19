@@ -7,6 +7,7 @@ import * as cljKondo from './clj-kondo'
 import * as cljstyle from './cljstyle'
 import * as zprint from './zprint'
 import * as utils from './utils'
+import {save, restore} from './cache'
 
 export async function run(): Promise<void> {
   try {
@@ -82,4 +83,12 @@ export async function run(): Promise<void> {
     const error = err instanceof Error ? err.message : String(err)
     core.setFailed(error)
   }
+}
+
+export async function pre(): Promise<void> {
+  restore()
+}
+
+export async function post(): Promise<void> {
+  save()
 }
