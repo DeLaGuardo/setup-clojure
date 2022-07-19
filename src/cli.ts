@@ -20,7 +20,8 @@ export async function setup(
 
   if (toolPath && version !== 'latest') {
     core.info(`Clojure CLI found in cache ${toolPath}`)
-    await fs.cp(toolPath, '/opt/clojure', {recursive: true})
+    await fs.mkdir('/tmp/usr/local/opt', {recursive: true})
+    await fs.cp(toolPath, '/tmp/usr/local/opt/clojure', {recursive: true})
   } else {
     const clojureInstallScript = await tc.downloadTool(
       `https://download.clojure.org/install/linux-install${
@@ -34,7 +35,7 @@ export async function setup(
 
     const clojureToolsDir = await runLinuxInstall(
       clojureInstallScript,
-      '/usr/local/opt/clojure'
+      '/tmp/usr/local/opt/clojure'
     )
     core.debug(`clojure tools deps installed to ${clojureToolsDir}`)
     await tc.cacheDir(
@@ -46,9 +47,9 @@ export async function setup(
 
   core.exportVariable(
     'CLOJURE_INSTALL_DIR',
-    '/usr/local/opt/clojure/lib/clojure'
+    '/tmp/usr/local/opt/clojure/lib/clojure'
   )
-  core.addPath('/usr/local/opt/clojure/bin')
+  core.addPath('/tmp/usr/local/opt/clojure/bin')
 }
 
 async function runLinuxInstall(

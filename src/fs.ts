@@ -1,3 +1,3 @@
 import fs from 'fs'
 
-export const {stat, chmod, readFile, writeFile, cp} = fs.promises
+export const {stat, chmod, readFile, writeFile, cp, mkdir} = fs.promises

@@ -305,19 +305,20 @@ function setup(version, githubToken) {
         const toolPath = tc.find('ClojureToolsDeps', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Clojure CLI found in cache ${toolPath}`);
-            yield fs.cp(toolPath, '/opt/clojure', { recursive: true });
+            yield fs.mkdir('/tmp/usr/local/opt', { recursive: true });
+            yield fs.cp(toolPath, '/tmp/usr/local/opt/clojure', { recursive: true });
         }
         else {
             const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install${version === 'latest' ? '' : `-${version}`}.sh`);
             if (utils.isMacOS()) {
                 yield MacOSDeps(clojureInstallScript, githubToken);
             }
-            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, '/usr/local/opt/clojure');
+            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, '/tmp/usr/local/opt/clojure');
             core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
             yield tc.cacheDir(clojureToolsDir, 'ClojureToolsDeps', utils.getCacheVersionString(version));
         }
-        core.exportVariable('CLOJURE_INSTALL_DIR', '/usr/local/opt/clojure/lib/clojure');
-        core.addPath('/usr/local/opt/clojure/bin');
+        core.exportVariable('CLOJURE_INSTALL_DIR', '/tmp/usr/local/opt/clojure/lib/clojure');
+        core.addPath('/tmp/usr/local/opt/clojure/bin');
     });
 }
 exports.setup = setup;
@@ -704,9 +705,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.cp = exports.writeFile = exports.readFile = exports.chmod = exports.stat = void 0;
+exports.mkdir = exports.cp = exports.writeFile = exports.readFile = exports.chmod = exports.stat = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(147));
-_a = fs_1.default.promises, exports.stat = _a.stat, exports.chmod = _a.chmod, exports.readFile = _a.readFile, exports.writeFile = _a.writeFile, exports.cp = _a.cp;
+_a = fs_1.default.promises, exports.stat = _a.stat, exports.chmod = _a.chmod, exports.readFile = _a.readFile, exports.writeFile = _a.writeFile, exports.cp = _a.cp, exports.mkdir = _a.mkdir;
 
 
 /***/ }),
@@ -927,7 +928,7 @@ exports.getTools = getTools;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '8-2-alpha';
+exports.VERSION = '8-4-alpha';
 
 
 /***/ }),
