@@ -95,7 +95,7 @@ export async function getLatestDepsClj(githubAuth?: string): Promise<string> {
 
 export async function setupWindows(
   version: string,
-  cmdExeWorkaround: string,
+  cmdExeWorkaround: string | null | undefined,
   githubAuth?: string
 ): Promise<void> {
   if (cmdExeWorkaround) {

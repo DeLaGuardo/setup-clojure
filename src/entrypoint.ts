@@ -7,24 +7,25 @@ import * as cljKondo from './clj-kondo'
 import * as cljstyle from './cljstyle'
 import * as zprint from './zprint'
 import * as utils from './utils'
-import {save, restore} from './cache'
 
 export async function run(): Promise<void> {
   try {
-    const LEIN_VERSION = core.getInput('lein')
-    const BOOT_VERSION = core.getInput('boot')
-    const TDEPS_VERSION = core.getInput('tools-deps')
-    const CLI_VERSION = core.getInput('cli')
-    const CMD_EXE_WORKAROUND = core.getInput('cmd-exe-workaround')
-    const BB_VERSION = core.getInput('bb')
-    const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
-    const CLJSTYLE_VERSION = core.getInput('cljstyle')
-    const ZPRINT_VERSION = core.getInput('zprint')
+    const {
+      LEIN_VERSION,
+      BOOT_VERSION,
+      TDEPS_VERSION,
+      CLI_VERSION,
+      CMD_EXE_WORKAROUND,
+      BB_VERSION,
+      CLJ_KONDO_VERSION,
+      CLJSTYLE_VERSION,
+      ZPRINT_VERSION
+    } = utils.getTools()
+
+    const tools = []
 
     const githubToken = core.getInput('github-token')
     const githubAuth = githubToken ? `token ${githubToken}` : undefined
-
-    const tools = []
 
     if (LEIN_VERSION) {
       tools.push(lein.setup(LEIN_VERSION, githubAuth))
@@ -83,12 +84,4 @@ export async function run(): Promise<void> {
     const error = err instanceof Error ? err.message : String(err)
     core.setFailed(error)
   }
-}
-
-export async function pre(): Promise<void> {
-  restore()
-}
-
-export async function post(): Promise<void> {
-  save()
 }

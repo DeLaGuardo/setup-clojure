@@ -1,3 +1,4 @@
-import {post} from './entrypoint'
+import {restore} from './cache'
+import {getTools} from './utils'
 
-post()
+restore(getTools())

@@ -1,3 +1,4 @@
-import {pre} from './entrypoint'
+import {save} from './cache'
+import {getTools} from './utils'
 
-pre()
+save(getTools())
