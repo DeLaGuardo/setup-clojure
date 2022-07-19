@@ -1,1 +1,1 @@
-export const VERSION = '3-6'
+export const VERSION = '8-1-alpha'

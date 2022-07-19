@@ -1,6 +1,7 @@
 import * as cache from '@actions/cache'
 import * as path from 'path'
 import {Tools, isWindows, isMacOS} from './utils'
+import {VERSION} from './version'
 
 const cacheDir = process.env['RUNNER_TOOL_CACHE'] || ''
 const platform = isWindows() ? 'windows' : isMacOS() ? 'darwin' : 'linux'
@@ -14,7 +15,9 @@ export async function restore(tools: Tools): Promise<void> {
 }
 
 function getCacheKey(tools: Tools): string {
-  return `setup-clojure-${platform}-${getIdentifiers(tools).join('-')}`
+  return `setup-clojure-${VERSION}-${platform}-${getIdentifiers(tools).join(
+    '-'
+  )}`
 }
 
 function getCachePaths(tools: Tools): string[] {

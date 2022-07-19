@@ -43,6 +43,7 @@ exports.restore = exports.save = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const path = __importStar(__nccwpck_require__(1017));
 const utils_1 = __nccwpck_require__(918);
+const version_1 = __nccwpck_require__(8217);
 const cacheDir = process.env['RUNNER_TOOL_CACHE'] || '';
 const platform = (0, utils_1.isWindows)() ? 'windows' : (0, utils_1.isMacOS)() ? 'darwin' : 'linux';
 function save(tools) {
@@ -58,7 +59,7 @@ function restore(tools) {
 }
 exports.restore = restore;
 function getCacheKey(tools) {
-    return `setup-clojure-${platform}-${getIdentifiers(tools).join('-')}`;
+    return `setup-clojure-${version_1.VERSION}-${platform}-${getIdentifiers(tools).join('-')}`;
 }
 function getCachePaths(tools) {
     return getIdentifiers(tools).map(tool => path.join(cacheDir, tool));
@@ -202,7 +203,7 @@ exports.getTools = getTools;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '3-6';
+exports.VERSION = '8-1-alpha';
 
 
 /***/ }),
