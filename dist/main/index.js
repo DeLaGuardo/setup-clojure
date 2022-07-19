@@ -317,7 +317,7 @@ function setup(version, githubToken) {
             yield tc.cacheDir(clojureToolsDir, 'ClojureToolsDeps', utils.getCacheVersionString(version));
         }
         core.exportVariable('CLOJURE_INSTALL_DIR', '/opt/clojure/lib/clojure');
-        core.addPath(path.join(toolPath, 'bin'));
+        core.addPath('/opt/clojure/bin');
     });
 }
 exports.setup = setup;

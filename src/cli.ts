@@ -45,7 +45,7 @@ export async function setup(
   }
 
   core.exportVariable('CLOJURE_INSTALL_DIR', '/opt/clojure/lib/clojure')
-  core.addPath(path.join(toolPath, 'bin'))
+  core.addPath('/opt/clojure/bin')
 }
 
 async function runLinuxInstall(
