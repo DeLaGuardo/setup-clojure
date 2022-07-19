@@ -1,4 +1,4 @@
-import {save} from './cache'
+import {restore} from './cache'
 import {getTools} from './utils'
 
-save(getTools())
+restore(getTools())

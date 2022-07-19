@@ -63747,7 +63747,7 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const cache_1 = __nccwpck_require__(3782);
 const utils_1 = __nccwpck_require__(918);
-(0, cache_1.restore)((0, utils_1.getTools)());
+(0, cache_1.save)((0, utils_1.getTools)());
 
 })();
 
