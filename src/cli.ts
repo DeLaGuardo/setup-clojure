@@ -12,7 +12,7 @@ export async function setup(
   version: string,
   githubToken?: string
 ): Promise<void> {
-  let toolPath = tc.find(
+  const toolPath = tc.find(
     'ClojureToolsDeps',
     utils.getCacheVersionString(version),
     os.arch()
@@ -20,11 +20,8 @@ export async function setup(
 
   if (toolPath && version !== 'latest') {
     core.info(`Clojure CLI found in cache ${toolPath}`)
+    await fs.cp(toolPath, '/opt/clojure', {recursive: true})
   } else {
-    const tempDir: string = path.join(
-      utils.getTempDir(),
-      `temp_${Math.floor(Math.random() * 2000000000)}`
-    )
     const clojureInstallScript = await tc.downloadTool(
       `https://download.clojure.org/install/linux-install${
         version === 'latest' ? '' : `-${version}`
@@ -35,17 +32,19 @@ export async function setup(
       await MacOSDeps(clojureInstallScript, githubToken)
     }
 
-    const clojureToolsDir = await runLinuxInstall(clojureInstallScript, tempDir)
+    const clojureToolsDir = await runLinuxInstall(
+      clojureInstallScript,
+      '/opt/clojure'
+    )
     core.debug(`clojure tools deps installed to ${clojureToolsDir}`)
-    toolPath = await tc.cacheDir(
+    await tc.cacheDir(
       clojureToolsDir,
       'ClojureToolsDeps',
       utils.getCacheVersionString(version)
     )
   }
 
-  const installDir = path.join(toolPath, 'lib', 'clojure')
-  core.exportVariable('CLOJURE_INSTALL_DIR', installDir)
+  core.exportVariable('CLOJURE_INSTALL_DIR', '/opt/clojure/lib/clojure')
   core.addPath(path.join(toolPath, 'bin'))
 }
 

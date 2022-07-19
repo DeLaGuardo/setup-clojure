@@ -182,6 +182,9 @@ function setup(version, githubAuth) {
             core.debug(`Boot installed to ${bootDir}`);
             toolPath = yield tc.cacheDir(bootDir, 'Boot', utils.getCacheVersionString(version));
         }
+        if (utils.isWindows()) {
+            yield setWindowsRegistry();
+        }
         core.exportVariable('BOOT_HOME', toolPath);
         if (version !== 'latest') {
             core.exportVariable('BOOT_VERSION', version);
@@ -220,18 +223,6 @@ function installBoot(binScript, destinationFolder, version) {
             if (process.env['JAVA_CMD']) {
                 env['JAVA_CMD'] = process.env['JAVA_CMD'];
             }
-            if (utils.isWindows()) {
-                let java_version = '';
-                yield exec.exec(`java -cp dist JavaVersion`, [], {
-                    listeners: {
-                        stdout: (data) => {
-                            java_version += data.toString();
-                        }
-                    }
-                });
-                yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`);
-                yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${process.env['JAVA_HOME']}" /f`);
-            }
             yield exec.exec(`./boot${utils.isWindows() ? '.exe' : ''} ${version === 'latest' ? '-u' : '-V'}`, [], {
                 cwd: path.join(destinationFolder, 'boot', 'bin'),
                 env
@@ -241,6 +232,20 @@ function installBoot(binScript, destinationFolder, version) {
         else {
             throw new Error('Not a file');
         }
+    });
+}
+function setWindowsRegistry() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let java_version = '';
+        yield exec.exec(`java -cp dist JavaVersion`, [], {
+            listeners: {
+                stdout: (data) => {
+                    java_version += data.toString();
+                }
+            }
+        });
+        yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`);
+        yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${process.env['JAVA_HOME']}" /f`);
     });
 }
 
@@ -297,22 +302,21 @@ const fs = __importStar(__nccwpck_require__(78));
 const utils = __importStar(__nccwpck_require__(918));
 function setup(version, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
-        let toolPath = tc.find('ClojureToolsDeps', utils.getCacheVersionString(version), os.arch());
+        const toolPath = tc.find('ClojureToolsDeps', utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Clojure CLI found in cache ${toolPath}`);
+            yield fs.cp(toolPath, '/opt/clojure', { recursive: true });
         }
         else {
-            const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
             const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install${version === 'latest' ? '' : `-${version}`}.sh`);
             if (utils.isMacOS()) {
                 yield MacOSDeps(clojureInstallScript, githubToken);
             }
-            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, tempDir);
+            const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, '/opt/clojure');
             core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
-            toolPath = yield tc.cacheDir(clojureToolsDir, 'ClojureToolsDeps', utils.getCacheVersionString(version));
+            yield tc.cacheDir(clojureToolsDir, 'ClojureToolsDeps', utils.getCacheVersionString(version));
         }
-        const installDir = path.join(toolPath, 'lib', 'clojure');
-        core.exportVariable('CLOJURE_INSTALL_DIR', installDir);
+        core.exportVariable('CLOJURE_INSTALL_DIR', '/opt/clojure/lib/clojure');
         core.addPath(path.join(toolPath, 'bin'));
     });
 }
@@ -700,9 +704,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeFile = exports.readFile = exports.chmod = exports.stat = void 0;
+exports.cp = exports.writeFile = exports.readFile = exports.chmod = exports.stat = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(147));
-_a = fs_1.default.promises, exports.stat = _a.stat, exports.chmod = _a.chmod, exports.readFile = _a.readFile, exports.writeFile = _a.writeFile;
+_a = fs_1.default.promises, exports.stat = _a.stat, exports.chmod = _a.chmod, exports.readFile = _a.readFile, exports.writeFile = _a.writeFile, exports.cp = _a.cp;
 
 
 /***/ }),

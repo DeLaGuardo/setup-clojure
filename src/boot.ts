@@ -59,6 +59,10 @@ export async function setup(
     )
   }
 
+  if (utils.isWindows()) {
+    await setWindowsRegistry()
+  }
+
   core.exportVariable('BOOT_HOME', toolPath)
   if (version !== 'latest') {
     core.exportVariable('BOOT_VERSION', version)
@@ -108,28 +112,6 @@ async function installBoot(
       env['JAVA_CMD'] = process.env['JAVA_CMD']
     }
 
-    if (utils.isWindows()) {
-      let java_version = ''
-
-      await exec.exec(`java -cp dist JavaVersion`, [], {
-        listeners: {
-          stdout: (data: Buffer) => {
-            java_version += data.toString()
-          }
-        }
-      })
-
-      await exec.exec(
-        `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
-      )
-
-      await exec.exec(
-        `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
-          process.env['JAVA_HOME']
-        }" /f`
-      )
-    }
-
     await exec.exec(
       `./boot${utils.isWindows() ? '.exe' : ''} ${
         version === 'latest' ? '-u' : '-V'
@@ -145,4 +127,26 @@ async function installBoot(
   } else {
     throw new Error('Not a file')
   }
+}
+
+async function setWindowsRegistry(): Promise<void> {
+  let java_version = ''
+
+  await exec.exec(`java -cp dist JavaVersion`, [], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        java_version += data.toString()
+      }
+    }
+  })
+
+  await exec.exec(
+    `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
+  )
+
+  await exec.exec(
+    `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
+      process.env['JAVA_HOME']
+    }" /f`
+  )
 }
