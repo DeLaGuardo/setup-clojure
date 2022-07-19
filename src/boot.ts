@@ -36,6 +36,10 @@ export async function setup(
     os.arch()
   )
 
+  if (utils.isWindows()) {
+    await setWindowsRegistry()
+  }
+
   if (toolPath && version !== 'latest') {
     core.info(`Boot found in cache ${toolPath}`)
   } else {
@@ -57,10 +61,6 @@ export async function setup(
       'Boot',
       utils.getCacheVersionString(version)
     )
-  }
-
-  if (utils.isWindows()) {
-    await setWindowsRegistry()
   }
 
   core.exportVariable('BOOT_HOME', toolPath)

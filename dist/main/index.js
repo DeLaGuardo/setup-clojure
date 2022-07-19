@@ -172,6 +172,9 @@ function getTempDirectory() {
 function setup(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Boot', utils.getCacheVersionString(version), os.arch());
+        if (utils.isWindows()) {
+            yield setWindowsRegistry();
+        }
         if (toolPath && version !== 'latest') {
             core.info(`Boot found in cache ${toolPath}`);
         }
@@ -181,9 +184,6 @@ function setup(version, githubAuth) {
             const bootDir = yield installBoot(bootBootstrapFile, tempDir, version);
             core.debug(`Boot installed to ${bootDir}`);
             toolPath = yield tc.cacheDir(bootDir, 'Boot', utils.getCacheVersionString(version));
-        }
-        if (utils.isWindows()) {
-            yield setWindowsRegistry();
         }
         core.exportVariable('BOOT_HOME', toolPath);
         if (version !== 'latest') {
@@ -927,7 +927,7 @@ exports.getTools = getTools;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '8-1-alpha';
+exports.VERSION = '8-2-alpha';
 
 
 /***/ }),

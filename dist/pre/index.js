@@ -214,7 +214,7 @@ exports.getTools = getTools;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '8-1-alpha';
+exports.VERSION = '8-2-alpha';
 
 
 /***/ }),
