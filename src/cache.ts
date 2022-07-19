@@ -1,8 +1,9 @@
 import * as cache from '@actions/cache'
 import * as path from 'path'
-import {Tools} from './utils'
+import {Tools, isWindows, isMacOS} from './utils'
 
 const cacheDir = process.env['RUNNER_TOOL_CACHE'] || ''
+const platform = isWindows() ? 'windows' : isMacOS() ? 'darwin' : 'linux'
 
 export async function save(tools: Tools): Promise<void> {
   await cache.saveCache(getCachePaths(tools), getCacheKey(tools))
@@ -13,7 +14,7 @@ export async function restore(tools: Tools): Promise<void> {
 }
 
 function getCacheKey(tools: Tools): string {
-  return `setup-clojure-${getIdentifiers(tools).join('-')}`
+  return `setup-clojure-${platform}-${getIdentifiers(tools).join('-')}`
 }
 
 function getCachePaths(tools: Tools): string[] {
