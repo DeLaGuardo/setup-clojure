@@ -4,6 +4,8 @@ import * as http from '@actions/http-client'
 
 import * as os from 'os'
 
+export const identifier = 'Babashka'
+
 export async function getLatestBabashka(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-clojure', undefined, {
     allowRetries: true,
@@ -53,12 +55,12 @@ export async function setup(
   const ver =
     version === 'latest' ? await getLatestBabashka(githubAuth) : version
 
-  let toolDir = tc.find('Babashka', ver)
+  let toolDir = tc.find(identifier, ver)
   if (!toolDir) {
     const archiveUrl = getArtifactUrl(ver)
     const archiveDir = await tc.downloadTool(archiveUrl, undefined, githubAuth)
     toolDir = await extract(archiveDir)
-    await tc.cacheDir(toolDir, 'Babashka', ver)
+    await tc.cacheDir(toolDir, identifier, ver)
   }
 
   core.addPath(toolDir)

@@ -5,6 +5,7 @@ import * as _fs from '../src/fs'
 import * as _tc from '@actions/tool-cache'
 import * as _os from 'os'
 import {join} from 'path'
+import {VERSION} from '../src/version'
 
 import * as boot from '../src/boot'
 
@@ -82,7 +83,7 @@ describe('boot tests', () => {
     expect(tc.cacheDir).toHaveBeenCalledWith(
       join(tempPath, 'temp_2000000000', 'boot'),
       'Boot',
-      '2.8.3-3-6'
+      `2.8.3-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'BOOT_HOME',
@@ -119,7 +120,7 @@ describe('boot tests', () => {
     expect(tc.cacheDir).toHaveBeenCalledWith(
       join(tempPath, 'temp_2000000000', 'boot'),
       'Boot',
-      'latest.0.0-3-6'
+      `latest.0.0-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'BOOT_HOME',

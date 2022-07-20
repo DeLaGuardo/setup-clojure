@@ -9,10 +9,11 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map",
+    "package": "ncc build ./lib/setup-clojure.js --source-map",
     "test": "jest",
     "update-deps": "ncu -u",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "release": "npm run build && npm run format && npm run lint && npm run package",
+    "all": "npm run release && npm test"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
   "author": "DeLaGuardo",
   "license": "MIT",
   "dependencies": {
+    "@actions/cache": "^3.0.0",
     "@actions/core": "^1.9.0",
     "@actions/exec": "^1.1.1",
     "@actions/http-client": "^2.0.1",
@@ -33,20 +35,20 @@
     "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
-    "@types/jest": "^28.1.4",
-    "@types/node": "^18.0.0",
+    "@types/jest": "^28.1.6",
+    "@types/node": "^18.0.6",
     "@types/semver": "^7.3.10",
-    "@typescript-eslint/parser": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.7",
     "@vercel/ncc": "^0.34.0",
-    "eslint": "^8.18.0",
+    "eslint": "^8.20.0",
     "eslint-plugin-github": "^4.3.6",
-    "eslint-plugin-jest": "^26.5.3",
-    "jest": "^28.1.2",
-    "jest-circus": "^28.1.2",
+    "eslint-plugin-jest": "^26.6.0",
+    "jest": "^28.1.3",
+    "jest-circus": "^28.1.3",
     "js-yaml": "^4.1.0",
-    "npm-check-updates": "^15.0.1",
+    "npm-check-updates": "^15.3.4",
     "prettier": "2.7.1",
-    "ts-jest": "^28.0.5",
+    "ts-jest": "^28.0.7",
     "typescript": "^4.7.4"
   }
 }

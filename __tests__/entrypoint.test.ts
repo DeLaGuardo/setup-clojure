@@ -43,6 +43,7 @@ describe('setup-clojure', () => {
     jest.resetAllMocks()
     inputs = {}
     core.getInput.mockImplementation(key => inputs[key])
+    core.getState.mockImplementation(() => 'main')
   })
 
   it('sets up Leiningen', async () => {
@@ -61,18 +62,6 @@ describe('setup-clojure', () => {
     await run()
 
     expect(boot.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
-  })
-
-  it('throws on Boot setup in Windows', async () => {
-    inputs['boot'] = '1.2.3'
-    inputs['github-token'] = 'abc'
-    utils.isWindows.mockReturnValue(true)
-
-    await run()
-
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'Boot on windows is not supported yet.'
-    )
   })
 
   it('sets up Clojure CLI tools from deprecated `tools-deps` option', async () => {
