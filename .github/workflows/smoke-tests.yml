@@ -36,9 +36,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -65,9 +62,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -97,9 +91,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -124,9 +115,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -151,9 +139,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -178,9 +163,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -205,9 +187,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -233,9 +212,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -256,9 +232,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
