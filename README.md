@@ -11,7 +11,7 @@ This action sets up Clojure tools environment for using in GitHub Actions.
 * [deps.clj](https://github.com/borkdude/deps.clj)
 * [zprint](https://github.com/kkinnear/zprint)
 
-All three major tools (Clojure CLI, leiningen and boot-clj) available for MacOS, Ubuntu and Windows based runners. Please look at [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/master/.github/workflows/smoke-tests.yml) for compatibility matrix.
+All three major tools (Clojure CLI, leiningen and boot-clj) available for MacOS, Ubuntu and Windows based runners. Please look at [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/main/.github/workflows/smoke-tests.yml) for compatibility matrix.
 
 # Usage
 
@@ -90,7 +90,7 @@ jobs:
         run: zprint --version
 ```
 
-For more application cases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/master/.github/workflows/smoke-tests.yml)
+For more application cases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/main/.github/workflows/smoke-tests.yml)
 
 # License
 
