@@ -239,7 +239,7 @@ function installBoot(binScript, destinationFolder, version) {
 function setWindowsRegistry() {
     return __awaiter(this, void 0, void 0, function* () {
         let java_version = '';
-        yield exec.exec(`java -cp dist JavaVersion`, [], {
+        yield exec.exec(`java -cp ${path.resolve('./dist')} JavaVersion`, [], {
             listeners: {
                 stdout: (data) => {
                     java_version += data.toString();

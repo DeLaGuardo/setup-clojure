@@ -13,9 +13,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -23,7 +20,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           tools-deps: 1.10.1.693
@@ -49,7 +46,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           cli: 1.10.1.693
@@ -78,7 +75,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           cli: 'latest'
@@ -110,7 +107,7 @@ jobs:
           java-version: '8'
 
       - name: Install leiningen
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           lein: 2.9.1
@@ -137,7 +134,7 @@ jobs:
           java-version: '11'
 
       - name: Install boot
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           boot: 2.8.3
@@ -164,7 +161,7 @@ jobs:
           java-version: '8'
 
       - name: Install babashka
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           bb: latest
@@ -191,7 +188,7 @@ jobs:
           java-version: '8'
 
       - name: Install clj-kondo
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           clj-kondo: latest
@@ -218,7 +215,7 @@ jobs:
           java-version: '8'
 
       - name: Install cljstyle
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           cljstyle: latest
@@ -246,7 +243,7 @@ jobs:
           java-version: '8'
 
       - name: Install zprint
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           zprint: latest
@@ -269,7 +266,7 @@ jobs:
           java-version: '8'
 
       - name: Install all the tools
-        uses: DeLaGuardo/setup-clojure@main
+        uses: DeLaGuardo/setup-clojure@issue-59
         # uses: ./
         with:
           cli: 1.11.1.1149

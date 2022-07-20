@@ -134,7 +134,7 @@ async function installBoot(
 async function setWindowsRegistry(): Promise<void> {
   let java_version = ''
 
-  await exec.exec(`java -cp dist JavaVersion`, [], {
+  await exec.exec(`java -cp ${path.resolve('./dist')} JavaVersion`, [], {
     listeners: {
       stdout: (data: Buffer) => {
         java_version += data.toString()
