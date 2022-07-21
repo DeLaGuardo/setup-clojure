@@ -238,16 +238,20 @@ function installBoot(binScript, destinationFolder, version) {
 }
 function setWindowsRegistry() {
     return __awaiter(this, void 0, void 0, function* () {
-        let java_version = '';
-        yield exec.exec(`java -cp ${path.resolve('./dist')} JavaVersion`, [], {
+        let outString = '';
+        yield exec.exec(`java -XshowSettings:properties -version`, [], {
             listeners: {
-                stdout: (data) => {
-                    java_version += data.toString();
+                stderr: (data) => {
+                    outString += data.toString();
                 }
             }
         });
-        yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`);
-        yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${process.env['JAVA_HOME']}" /f`);
+        const m = outString.match(/java\.version = (.*)\n/);
+        if (m) {
+            const java_version = m[1];
+            yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`);
+            yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${process.env['JAVA_HOME']}" /f`);
+        }
     });
 }
 
@@ -1137,7 +1141,7 @@ exports.isMacOS = isMacOS;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '9-0';
+exports.VERSION = '9-1';
 
 
 /***/ }),
