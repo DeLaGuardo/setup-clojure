@@ -20,7 +20,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: ikappaki/setup-clojure@issue/pwsh
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           tools-deps: 1.10.1.693
@@ -43,7 +43,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@main
+        uses: ikappaki/setup-clojure@issue/pwsh
         # uses: ./
         with:
           cli: 1.10.1.693
