@@ -72,30 +72,12 @@ describe('setup-clojure', () => {
     expect(cli.setup).toHaveBeenCalledWith('1.2.3')
   })
 
-  it('sets up Clojure CLI tools for Windows from deprecated `tools-deps` option', async () => {
-    inputs['tools-deps'] = '1.2.3'
-    utils.isWindows.mockReturnValue(true)
-
-    await run()
-
-    expect(cli.setupWindows).toHaveBeenCalledWith('1.2.3', undefined, undefined)
-  })
-
   it('sets up Clojure CLI tools', async () => {
     inputs['cli'] = '1.2.3'
 
     await run()
 
     expect(cli.setup).toHaveBeenCalledWith('1.2.3')
-  })
-
-  it('sets up Clojure CLI tools for Windows', async () => {
-    inputs['cli'] = '1.2.3'
-    utils.isWindows.mockReturnValue(true)
-
-    await run()
-
-    expect(cli.setupWindows).toHaveBeenCalledWith('1.2.3', undefined, undefined)
   })
 
   it('sets up Babashka', async () => {
