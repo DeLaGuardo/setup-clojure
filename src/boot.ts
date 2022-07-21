@@ -132,23 +132,29 @@ async function installBoot(
 }
 
 async function setWindowsRegistry(): Promise<void> {
-  let java_version = ''
+  let outString = ''
 
-  await exec.exec(`java -cp dist JavaVersion`, [], {
+  await exec.exec(`java -XshowSettings:properties -version`, [], {
     listeners: {
-      stdout: (data: Buffer) => {
-        java_version += data.toString()
+      stderr: (data: Buffer) => {
+        outString += data.toString()
       }
     }
   })
 
-  await exec.exec(
-    `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
-  )
+  const m = outString.match(/^\s*java\.version = (.*)$/m)
 
-  await exec.exec(
-    `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
-      process.env['JAVA_HOME']
-    }" /f`
-  )
+  if (m) {
+    const java_version = m[1]
+
+    await exec.exec(
+      `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`
+    )
+
+    await exec.exec(
+      `reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\${java_version.trim()}" /v JavaHome /d "${
+        process.env['JAVA_HOME']
+      }" /f`
+    )
+  }
 }
