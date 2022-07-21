@@ -48,15 +48,8 @@ jobs:
         with:
           cli: 1.10.1.693
 
-      - name: Execute clojure code on Linux and MacOS
-        if: ${{ matrix.os != 'windows-latest' }}
+      - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
-        shell: bash
-
-      - name: Execute clojure code on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: clojure -e "(+ 1 1)"
-        shell: powershell
 
   test-clojure-cmd-exe:
     runs-on: windows-latest
