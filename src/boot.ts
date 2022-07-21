@@ -142,7 +142,7 @@ async function setWindowsRegistry(): Promise<void> {
     }
   })
 
-  const m = outString.match(/java\.version = (.*)\n/)
+  const m = outString.match(/^\s*java\.version = (.*)$/m)
 
   if (m) {
     const java_version = m[1]

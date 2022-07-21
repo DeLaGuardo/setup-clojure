@@ -246,7 +246,7 @@ function setWindowsRegistry() {
                 }
             }
         });
-        const m = outString.match(/java\.version = (.*)\n/);
+        const m = outString.match(/^\s*java\.version = (.*)$/m);
         if (m) {
             const java_version = m[1];
             yield exec.exec(`reg add "HKLM\\SOFTWARE\\JavaSoft\\Java Runtime Environment" /v CurrentVersion /d ${java_version.trim()} /f`);
