@@ -59,15 +59,8 @@ jobs:
           cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           zprint: 1.2.3                # zprint
 
-      - name: Execute clojure code on Linux and MacOS
-        if: ${{ matrix.os != 'windows-latest' }}
+      - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
-        shell: bash
-
-      - name: Execute clojure code on Windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: clojure -e "(+ 1 1)"
-        shell: powershell
         
       - name: Get leiningen version
         run: lein -v
