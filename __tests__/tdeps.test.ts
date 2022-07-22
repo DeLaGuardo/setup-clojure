@@ -63,22 +63,24 @@ describe('tdeps tests', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.10.1.469.sh'
     )
-    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure')
+    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',
-      '/tmp/usr/local/opt/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     ])
     expect(tc.cacheDir).toHaveBeenCalledWith(
-      '/tmp/usr/local/opt/clojure',
+      '/tmp/usr/local/opt/ClojureTools',
       'ClojureToolsDeps',
       `1.10.1-469-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      '/tmp/usr/local/opt/clojure/lib/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     )
-    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
+    expect(core.addPath).toHaveBeenCalledWith(
+      '/tmp/usr/local/opt/ClojureTools/bin'
+    )
   })
 
   it('Install latest clojure tools deps', async () => {
@@ -90,22 +92,24 @@ describe('tdeps tests', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install.sh'
     )
-    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure')
+    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',
-      '/tmp/usr/local/opt/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     ])
     expect(tc.cacheDir).toHaveBeenCalledWith(
-      '/tmp/usr/local/opt/clojure',
+      '/tmp/usr/local/opt/ClojureTools',
       'ClojureToolsDeps',
       `latest.0.0-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      '/tmp/usr/local/opt/clojure/lib/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     )
-    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
+    expect(core.addPath).toHaveBeenCalledWith(
+      '/tmp/usr/local/opt/ClojureTools/bin'
+    )
   })
 
   it('Supports macOS', async () => {
@@ -122,7 +126,7 @@ describe('tdeps tests', () => {
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install.sh'
     )
-    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure')
+    expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(fs.writeFile).toHaveBeenCalledWith(
       join(__dirname, 'runner/download'),
       '$(brew --prefix coreutils)/bin/ginstall -D',
@@ -131,18 +135,20 @@ describe('tdeps tests', () => {
     expect(exec.exec).toHaveBeenCalledWith('bash', [
       downloadPath,
       '--prefix',
-      '/tmp/usr/local/opt/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     ])
     expect(tc.cacheDir).toHaveBeenCalledWith(
-      '/tmp/usr/local/opt/clojure',
+      '/tmp/usr/local/opt/ClojureTools',
       'ClojureToolsDeps',
       `latest.0.0-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      '/tmp/usr/local/opt/clojure/lib/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     )
-    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
+    expect(core.addPath).toHaveBeenCalledWith(
+      '/tmp/usr/local/opt/ClojureTools/bin'
+    )
   })
 
   it('Uses version of clojure tools-deps installed in cache', async () => {
@@ -152,8 +158,10 @@ describe('tdeps tests', () => {
 
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
-      '/tmp/usr/local/opt/clojure/lib/clojure'
+      '/tmp/usr/local/opt/ClojureTools'
     )
-    expect(core.addPath).toHaveBeenCalledWith('/tmp/usr/local/opt/clojure/bin')
+    expect(core.addPath).toHaveBeenCalledWith(
+      '/tmp/usr/local/opt/ClojureTools/bin'
+    )
   })
 })

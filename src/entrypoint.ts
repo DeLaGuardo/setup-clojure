@@ -16,7 +16,6 @@ async function main(): Promise<void> {
       BOOT_VERSION,
       TDEPS_VERSION,
       CLI_VERSION,
-      CMD_EXE_WORKAROUND,
       BB_VERSION,
       CLJ_KONDO_VERSION,
       CLJSTYLE_VERSION,
@@ -38,21 +37,10 @@ async function main(): Promise<void> {
     }
 
     if (CLI_VERSION) {
-      if (IS_WINDOWS) {
-        tools.push(
-          cli.setupWindows(CLI_VERSION, CMD_EXE_WORKAROUND, githubAuth)
-        )
-      } else {
-        tools.push(cli.setup(CLI_VERSION))
-      }
+      tools.push(cli.setup(CLI_VERSION))
     }
 
     if (TDEPS_VERSION && !CLI_VERSION) {
-      if (IS_WINDOWS) {
-        tools.push(
-          cli.setupWindows(TDEPS_VERSION, CMD_EXE_WORKAROUND, githubAuth)
-        )
-      }
       tools.push(cli.setup(TDEPS_VERSION))
     }
 
@@ -112,15 +100,11 @@ async function pre(): Promise<void> {
       }
 
       if (CLI_VERSION) {
-        if (!IS_WINDOWS) {
-          tools.push(cache.restore(cli.identifier, CLI_VERSION))
-        }
+        tools.push(cache.restore(cli.identifier, CLI_VERSION))
       }
 
       if (TDEPS_VERSION && !CLI_VERSION) {
-        if (!IS_WINDOWS) {
-          tools.push(cache.restore(cli.identifier, TDEPS_VERSION))
-        }
+        tools.push(cache.restore(cli.identifier, TDEPS_VERSION))
       }
 
       if (BB_VERSION) {
@@ -174,15 +158,11 @@ async function post(): Promise<void> {
     }
 
     if (CLI_VERSION) {
-      if (!IS_WINDOWS) {
-        tools.push(cache.save(cli.identifier, CLI_VERSION))
-      }
+      tools.push(cache.save(cli.identifier, CLI_VERSION))
     }
 
     if (TDEPS_VERSION && !CLI_VERSION) {
-      if (!IS_WINDOWS) {
-        tools.push(cache.save(cli.identifier, TDEPS_VERSION))
-      }
+      tools.push(cache.save(cli.identifier, TDEPS_VERSION))
     }
 
     if (BB_VERSION) {
@@ -215,7 +195,6 @@ export type Tools = {
   BOOT_VERSION: string | null | undefined
   TDEPS_VERSION: string | null | undefined
   CLI_VERSION: string | null | undefined
-  CMD_EXE_WORKAROUND: string | null | undefined
   BB_VERSION: string | null | undefined
   CLJ_KONDO_VERSION: string | null | undefined
   CLJSTYLE_VERSION: string | null | undefined
@@ -227,7 +206,6 @@ function getTools(): Tools {
   const BOOT_VERSION = core.getInput('boot')
   const TDEPS_VERSION = core.getInput('tools-deps')
   const CLI_VERSION = core.getInput('cli')
-  const CMD_EXE_WORKAROUND = core.getInput('cmd-exe-workaround')
   const BB_VERSION = core.getInput('bb')
   const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
   const CLJSTYLE_VERSION = core.getInput('cljstyle')
@@ -238,7 +216,6 @@ function getTools(): Tools {
     BOOT_VERSION,
     TDEPS_VERSION,
     CLI_VERSION,
-    CMD_EXE_WORKAROUND,
     BB_VERSION,
     CLJ_KONDO_VERSION,
     CLJSTYLE_VERSION,

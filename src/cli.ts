@@ -14,7 +14,9 @@ export async function setup(
   version: string,
   githubToken?: string
 ): Promise<void> {
-  const installDir = '/tmp/usr/local/opt'
+  const installDir = utils.isWindows()
+    ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
+    : '/tmp/usr/local/opt'
   const toolPath = tc.find(
     identifier,
     utils.getCacheVersionString(version),
@@ -24,35 +26,63 @@ export async function setup(
   if (toolPath && version !== 'latest') {
     core.info(`Clojure CLI found in cache ${toolPath}`)
     await fs.mkdir(installDir, {recursive: true})
-    await fs.cp(toolPath, path.join(installDir, 'clojure'), {recursive: true})
+    await fs.cp(toolPath, path.join(installDir, 'ClojureTools'), {
+      recursive: true
+    })
   } else {
-    const clojureInstallScript = await tc.downloadTool(
-      `https://download.clojure.org/install/linux-install${
+    if (utils.isWindows()) {
+      const url = `download.clojure.org/install/win-install${
         version === 'latest' ? '' : `-${version}`
-      }.sh`
-    )
+      }.ps1`
 
-    if (utils.isMacOS()) {
-      await MacOSDeps(clojureInstallScript, githubToken)
+      await exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
+        // Install to a modules location common to powershell/pwsh
+        env: {PSModulePath: installDir},
+        input: Buffer.from('1')
+      })
+
+      core.debug(
+        `clojure tools deps installed to ${path.join(
+          installDir,
+          'ClojureTools'
+        )}`
+      )
+      await tc.cacheDir(
+        path.join(installDir, 'ClojureTools'),
+        identifier,
+        utils.getCacheVersionString(version)
+      )
+    } else {
+      const clojureInstallScript = await tc.downloadTool(
+        `https://download.clojure.org/install/linux-install${
+          version === 'latest' ? '' : `-${version}`
+        }.sh`
+      )
+
+      if (utils.isMacOS()) {
+        await MacOSDeps(clojureInstallScript, githubToken)
+      }
+
+      const clojureToolsDir = await runLinuxInstall(
+        clojureInstallScript,
+        path.join(installDir, 'ClojureTools')
+      )
+      core.debug(`clojure tools deps installed to ${clojureToolsDir}`)
+      await tc.cacheDir(
+        clojureToolsDir,
+        identifier,
+        utils.getCacheVersionString(version)
+      )
     }
-
-    const clojureToolsDir = await runLinuxInstall(
-      clojureInstallScript,
-      path.join(installDir, 'clojure')
-    )
-    core.debug(`clojure tools deps installed to ${clojureToolsDir}`)
-    await tc.cacheDir(
-      clojureToolsDir,
-      identifier,
-      utils.getCacheVersionString(version)
-    )
   }
 
   core.exportVariable(
     'CLOJURE_INSTALL_DIR',
-    path.join(installDir, 'clojure', 'lib', 'clojure')
+    path.join(installDir, 'ClojureTools')
   )
-  core.addPath(path.join(installDir, 'clojure', 'bin'))
+  if (!utils.isWindows()) {
+    core.addPath(path.join(installDir, 'ClojureTools', 'bin'))
+  }
 }
 
 async function runLinuxInstall(
@@ -97,56 +127,4 @@ export async function getLatestDepsClj(githubAuth?: string): Promise<string> {
   }
 
   throw new Error(`Can't obtain latest deps.clj version`)
-}
-
-export async function setupWindows(
-  version: string,
-  cmdExeWorkaround: string | null | undefined,
-  githubAuth?: string
-): Promise<void> {
-  if (cmdExeWorkaround) {
-    let depsCljVersion = cmdExeWorkaround
-    if (depsCljVersion === 'latest') {
-      depsCljVersion = await getLatestDepsClj(githubAuth)
-    }
-    let clojureExePath = tc.find('deps.clj', depsCljVersion)
-    if (!clojureExePath) {
-      const archiveUrl = `https://github.com/borkdude/deps.clj/releases/download/v${depsCljVersion}/deps.clj-${depsCljVersion}-windows-amd64.zip`
-      core.info(`archiveUrl = ${archiveUrl}`)
-
-      const archivePath = await tc.downloadTool(
-        archiveUrl,
-        undefined,
-        githubAuth
-      )
-      core.info(`archivePath = ${archivePath}`)
-
-      const depsExePath = await tc.extractZip(archivePath)
-      const depsExe = path.join(depsExePath, 'deps.exe')
-      core.info(`depsExe = ${depsExe}`)
-
-      clojureExePath = await tc.cacheFile(
-        depsExe,
-        'clojure.exe',
-        'deps.clj',
-        depsCljVersion
-      )
-      core.info(`clojureExePath = ${clojureExePath}`)
-
-      const clojureExe = path.join(clojureExePath, 'clojure.exe')
-      await fs.chmod(clojureExe, '0755')
-    }
-
-    core.addPath(clojureExePath)
-    return
-  }
-
-  const url = `download.clojure.org/install/win-install${
-    version === 'latest' ? '' : `-${version}`
-  }.ps1`
-  await exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
-    // Install to a modules location common to powershell/pwsh
-    env: {PSModulePath: 'C:\\Program Files\\WindowsPowerShell\\Modules'},
-    input: Buffer.from('1')
-  })
 }
