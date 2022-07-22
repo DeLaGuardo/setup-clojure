@@ -20,7 +20,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           tools-deps: 1.10.1.693
@@ -42,8 +42,8 @@ jobs:
           distribution: 'zulu'
           java-version: '8'
 
-      - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+      - name: Install Clojure CLI
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           cli: 1.10.1.693
@@ -66,7 +66,7 @@ jobs:
           java-version: '8'
 
       - name: Install leiningen
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           lein: 2.9.1
@@ -90,7 +90,7 @@ jobs:
           java-version: '11'
 
       - name: Install boot
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           boot: 2.8.3
@@ -114,7 +114,7 @@ jobs:
           java-version: '8'
 
       - name: Install babashka
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           bb: latest
@@ -138,7 +138,7 @@ jobs:
           java-version: '8'
 
       - name: Install clj-kondo
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           clj-kondo: latest
@@ -162,7 +162,7 @@ jobs:
           java-version: '8'
 
       - name: Install cljstyle
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           cljstyle: latest
@@ -187,7 +187,7 @@ jobs:
           java-version: '8'
 
       - name: Install zprint
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           zprint: latest
@@ -207,7 +207,7 @@ jobs:
           java-version: '8'
 
       - name: Install all the tools
-        uses: DeLaGuardo/setup-clojure@clojure-cli-windows-cache
+        uses: DeLaGuardo/setup-clojure@main
         # uses: ./
         with:
           cli: 1.11.1.1149
