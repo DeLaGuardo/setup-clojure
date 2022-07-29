@@ -58,6 +58,21 @@ jobs:
           cljstyle: 0.15.0             # cljstyle
           cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           zprint: 1.2.3                # zprint
+          
+      # Optional step:
+      - name: Cache clojure dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.deps.clj
+          # List all files containing dependencies:
+          key: cljdeps-${{ hashFiles('deps.edn') }}
+          # key: cljdeps-${{ hashFiles('deps.edn', 'bb.edn') }}
+          # key: cljdeps-${{ hashFiles('project.clj') }}
+          # key: cljdeps-${{ hashFiles('build.boot') }}
+          restore-keys: cljdeps-
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
