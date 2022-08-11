@@ -9,7 +9,7 @@ import * as zprint from './zprint'
 import * as utils from './utils'
 import * as cache from './cache'
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   try {
     const {
       LEIN_VERSION,
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
   }
 }
 
-async function pre(): Promise<void> {
+export async function pre(): Promise<void> {
   if (!core.getBooleanInput('invalidate-cache')) {
     try {
       const {
@@ -133,7 +133,7 @@ async function pre(): Promise<void> {
   }
 }
 
-async function post(): Promise<void> {
+export async function post(): Promise<void> {
   try {
     const {
       LEIN_VERSION,
@@ -199,6 +199,7 @@ export type Tools = {
   CLJ_KONDO_VERSION: string | null | undefined
   CLJSTYLE_VERSION: string | null | undefined
   ZPRINT_VERSION: string | null | undefined
+  DEPS_EXE_VERSION: string | null | undefined
 }
 
 function getTools(): Tools {
@@ -210,6 +211,7 @@ function getTools(): Tools {
   const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
   const CLJSTYLE_VERSION = core.getInput('cljstyle')
   const ZPRINT_VERSION = core.getInput('zprint')
+  const DEPS_EXE_VERSION = core.getInput('deps.exe')
 
   return {
     LEIN_VERSION,
@@ -219,43 +221,7 @@ function getTools(): Tools {
     BB_VERSION,
     CLJ_KONDO_VERSION,
     CLJSTYLE_VERSION,
-    ZPRINT_VERSION
-  }
-}
-
-type SetupClojureActionState = 'pre' | 'main' | 'post' | 'in-progress'
-
-function ensureCurrentState(): SetupClojureActionState {
-  const st = core.getState('SETUP_CLOJURE')
-  const result =
-    st === 'pre' || st === 'main' || st === 'post' || st === 'in-progress'
-      ? st
-      : 'pre'
-  core.saveState('SETUP_CLOJURE', 'in-progress')
-
-  return result
-}
-
-function ensureNextState(prevState: 'pre' | 'main'): void {
-  const nextState: SetupClojureActionState =
-    prevState === 'pre' ? 'main' : 'post'
-  core.saveState('SETUP_CLOJURE', nextState)
-}
-
-const entrypoints = {pre, main, post}
-
-export async function run(): Promise<void> {
-  const actionState = ensureCurrentState()
-
-  if (actionState === 'in-progress') {
-    core.setFailed('Previous phase was not completed correctly')
-    return
-  }
-
-  const entrypoint = entrypoints[actionState]
-  await entrypoint()
-
-  if (actionState !== 'post') {
-    ensureNextState(actionState)
+    ZPRINT_VERSION,
+    DEPS_EXE_VERSION
   }
 }

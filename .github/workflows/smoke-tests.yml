@@ -13,6 +13,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -20,8 +23,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           tools-deps: 1.10.1.693
 
@@ -36,6 +38,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -43,8 +48,7 @@ jobs:
           java-version: '8'
 
       - name: Install Clojure CLI
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           cli: 1.10.1.693
 
@@ -59,6 +63,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -66,8 +73,7 @@ jobs:
           java-version: '8'
 
       - name: Install leiningen
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           lein: 2.9.1
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -83,6 +89,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -90,8 +99,7 @@ jobs:
           java-version: '11'
 
       - name: Install boot
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           boot: 2.8.3
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -107,6 +115,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -114,8 +125,7 @@ jobs:
           java-version: '8'
 
       - name: Install babashka
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           bb: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -131,6 +141,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -138,8 +151,7 @@ jobs:
           java-version: '8'
 
       - name: Install clj-kondo
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           clj-kondo: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -155,6 +167,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -162,8 +177,7 @@ jobs:
           java-version: '8'
 
       - name: Install cljstyle
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           cljstyle: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -180,6 +194,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -187,8 +204,7 @@ jobs:
           java-version: '8'
 
       - name: Install zprint
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           zprint: latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -200,6 +216,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -207,8 +226,7 @@ jobs:
           java-version: '8'
 
       - name: Install all the tools
-        uses: DeLaGuardo/setup-clojure@main
-        # uses: ./
+        uses: ./
         with:
           cli: 1.11.1.1149
           lein: 2.9.1
