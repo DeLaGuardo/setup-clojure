@@ -709,7 +709,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
+exports.post = exports.pre = exports.main = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const lein = __importStar(__nccwpck_require__(5479));
 const boot = __importStar(__nccwpck_require__(7478));
@@ -766,6 +766,7 @@ function main() {
         }
     });
 }
+exports.main = main;
 function pre() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!core.getBooleanInput('invalidate-cache')) {
@@ -808,6 +809,7 @@ function pre() {
         }
     });
 }
+exports.pre = pre;
 function post() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -848,6 +850,7 @@ function post() {
         }
     });
 }
+exports.post = post;
 function getTools() {
     const LEIN_VERSION = core.getInput('lein');
     const BOOT_VERSION = core.getInput('boot');
@@ -857,6 +860,7 @@ function getTools() {
     const CLJ_KONDO_VERSION = core.getInput('clj-kondo');
     const CLJSTYLE_VERSION = core.getInput('cljstyle');
     const ZPRINT_VERSION = core.getInput('zprint');
+    const DEPS_EXE_VERSION = core.getInput('deps.exe');
     return {
         LEIN_VERSION,
         BOOT_VERSION,
@@ -865,37 +869,10 @@ function getTools() {
         BB_VERSION,
         CLJ_KONDO_VERSION,
         CLJSTYLE_VERSION,
-        ZPRINT_VERSION
+        ZPRINT_VERSION,
+        DEPS_EXE_VERSION
     };
 }
-function ensureCurrentState() {
-    const st = core.getState('SETUP_CLOJURE');
-    const result = st === 'pre' || st === 'main' || st === 'post' || st === 'in-progress'
-        ? st
-        : 'pre';
-    core.saveState('SETUP_CLOJURE', 'in-progress');
-    return result;
-}
-function ensureNextState(prevState) {
-    const nextState = prevState === 'pre' ? 'main' : 'post';
-    core.saveState('SETUP_CLOJURE', nextState);
-}
-const entrypoints = { pre, main, post };
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const actionState = ensureCurrentState();
-        if (actionState === 'in-progress') {
-            core.setFailed('Previous phase was not completed correctly');
-            return;
-        }
-        const entrypoint = entrypoints[actionState];
-        yield entrypoint();
-        if (actionState !== 'post') {
-            ensureNextState(actionState);
-        }
-    });
-}
-exports.run = run;
 
 
 /***/ }),
@@ -1024,6 +1001,34 @@ function installLeiningen(binScript, destinationFolder) {
 
 /***/ }),
 
+/***/ 229:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const entrypoint_1 = __nccwpck_require__(4792);
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield (0, entrypoint_1.pre)();
+        yield (0, entrypoint_1.main)();
+        yield (0, entrypoint_1.post)();
+    });
+}
+run();
+
+
+/***/ }),
+
 /***/ 918:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1110,7 +1115,7 @@ exports.isMacOS = isMacOS;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '9-3';
+exports.VERSION = '9-4';
 
 
 /***/ }),
@@ -65646,19 +65651,13 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-var exports = __webpack_exports__;
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const entrypoint_1 = __nccwpck_require__(4792);
-(0, entrypoint_1.run)();
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(229);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

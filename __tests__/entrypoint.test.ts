@@ -7,7 +7,7 @@ import * as _cljKondo from '../src/clj-kondo'
 import * as _cljstyle from '../src/cljstyle'
 import * as _zprint from '../src/zprint'
 import * as _utils from '../src/utils'
-import {run} from '../src/entrypoint'
+import {main} from '../src/entrypoint'
 
 jest.mock('@actions/core')
 const core: jest.Mocked<typeof _core> = _core as never
@@ -50,7 +50,7 @@ describe('setup-clojure', () => {
     inputs['lein'] = '1.2.3'
     inputs['github-token'] = 'abc'
 
-    await run()
+    await main()
 
     expect(lein.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
@@ -59,7 +59,7 @@ describe('setup-clojure', () => {
     inputs['boot'] = '1.2.3'
     inputs['github-token'] = 'abc'
 
-    await run()
+    await main()
 
     expect(boot.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
@@ -67,7 +67,7 @@ describe('setup-clojure', () => {
   it('sets up Clojure CLI tools from deprecated `tools-deps` option', async () => {
     inputs['tools-deps'] = '1.2.3'
 
-    await run()
+    await main()
 
     expect(cli.setup).toHaveBeenCalledWith('1.2.3')
   })
@@ -75,7 +75,7 @@ describe('setup-clojure', () => {
   it('sets up Clojure CLI tools', async () => {
     inputs['cli'] = '1.2.3'
 
-    await run()
+    await main()
 
     expect(cli.setup).toHaveBeenCalledWith('1.2.3')
   })
@@ -84,7 +84,7 @@ describe('setup-clojure', () => {
     inputs['bb'] = '1.2.3'
     inputs['github-token'] = 'abc'
 
-    await run()
+    await main()
 
     expect(bb.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
@@ -93,7 +93,7 @@ describe('setup-clojure', () => {
     inputs['clj-kondo'] = '1.2.3'
     inputs['github-token'] = 'abc'
 
-    await run()
+    await main()
 
     expect(cljKondo.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
@@ -102,7 +102,7 @@ describe('setup-clojure', () => {
     inputs['cljstyle'] = '1.2.3'
     inputs['github-token'] = 'abc'
 
-    await run()
+    await main()
 
     expect(cljstyle.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
@@ -112,7 +112,7 @@ describe('setup-clojure', () => {
     inputs['github-token'] = 'abc'
     utils.isWindows.mockReturnValue(true)
 
-    await run()
+    await main()
 
     expect(core.setFailed).toHaveBeenCalledWith(
       'cljstyle on windows is not supported yet.'
@@ -120,7 +120,7 @@ describe('setup-clojure', () => {
   })
 
   it('throws if none of Clojure tools is specified', async () => {
-    await run()
+    await main()
     expect(core.setFailed).toHaveBeenCalledWith(
       'You must specify at least one clojure tool.'
     )
@@ -130,7 +130,7 @@ describe('setup-clojure', () => {
     inputs['bb'] = '1.2.3'
     bb.setup.mockRejectedValueOnce('Unknown failure')
 
-    await run()
+    await main()
     expect(core.setFailed).toHaveBeenCalledWith('Unknown failure')
   })
 
@@ -138,7 +138,7 @@ describe('setup-clojure', () => {
     inputs['zprint'] = '1.2.3'
     inputs['github-token'] = 'abc'
 
-    await run()
+    await main()
 
     expect(zprint.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
