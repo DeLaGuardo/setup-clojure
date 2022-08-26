@@ -27,13 +27,21 @@ export async function getLatestBabashka(githubAuth?: string): Promise<string> {
 
 export function getArtifactName(version: string): string {
   const platform = os.platform()
+  let arch
+  switch (os.arch()) {
+    case 'x64':
+      arch = 'amd64'
+    case 'arm64':
+      arch = 'aarch64'
+  }
+
   switch (platform) {
     case 'win32':
-      return `babashka-${version}-windows-amd64.zip`
+      return `babashka-${version}-windows-${arch}.zip`
     case 'darwin':
-      return `babashka-${version}-macos-amd64.tar.gz`
+      return `babashka-${version}-macos-${arch}.tar.gz`
     default:
-      return `babashka-${version}-linux-amd64-static.tar.gz`
+      return `babashka-${version}-linux-${arch}-static.tar.gz`
   }
 }
 
