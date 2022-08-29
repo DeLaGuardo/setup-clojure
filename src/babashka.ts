@@ -27,13 +27,7 @@ export async function getLatestBabashka(githubAuth?: string): Promise<string> {
 
 export function getArtifactName(version: string): string {
   const platform = os.platform()
-  let arch
-  switch (os.arch()) {
-    case 'x64':
-      arch = 'amd64'
-    case 'arm64':
-      arch = 'aarch64'
-  }
+  const arch = os.arch() === 'arm64' ? 'aarch64' : 'amd64'
 
   switch (platform) {
     case 'win32':

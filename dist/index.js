@@ -63,13 +63,14 @@ function getLatestBabashka(githubAuth) {
 exports.getLatestBabashka = getLatestBabashka;
 function getArtifactName(version) {
     const platform = os.platform();
+    const arch = os.arch() === 'arm64' ? 'aarch64' : 'amd64';
     switch (platform) {
         case 'win32':
-            return `babashka-${version}-windows-amd64.zip`;
+            return `babashka-${version}-windows-${arch}.zip`;
         case 'darwin':
-            return `babashka-${version}-macos-amd64.tar.gz`;
+            return `babashka-${version}-macos-${arch}.tar.gz`;
         default:
-            return `babashka-${version}-linux-amd64-static.tar.gz`;
+            return `babashka-${version}-linux-${arch}-static.tar.gz`;
     }
 }
 exports.getArtifactName = getArtifactName;
@@ -1115,7 +1116,7 @@ exports.isMacOS = isMacOS;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '9-4';
+exports.VERSION = '9-5';
 
 
 /***/ }),
