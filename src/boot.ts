@@ -32,7 +32,7 @@ export async function setup(
   version: string,
   githubAuth?: string
 ): Promise<void> {
-  let toolPath = tc.find(
+  let toolPath = core.getBooleanInput('invalidate-cache') ? null : tc.find(
     identifier,
     utils.getCacheVersionString(version),
     os.arch()

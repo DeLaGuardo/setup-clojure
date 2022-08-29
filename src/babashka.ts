@@ -57,7 +57,7 @@ export async function setup(
   const ver =
     version === 'latest' ? await getLatestBabashka(githubAuth) : version
 
-  let toolDir = tc.find(identifier, ver)
+  let toolDir = core.getBooleanInput('invalidate-cache') ? null : tc.find(identifier, ver)
   if (!toolDir) {
     const archiveUrl = getArtifactUrl(ver)
     const archiveDir = await tc.downloadTool(archiveUrl, undefined, githubAuth)

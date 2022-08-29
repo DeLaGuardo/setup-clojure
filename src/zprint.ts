@@ -48,7 +48,7 @@ export async function setup(
 ): Promise<void> {
   const ver = version === 'latest' ? await getLatestZprint(githubAuth) : version
 
-  let toolDir = tc.find(identifier, ver)
+  let toolDir = core.getBooleanInput('invalidate-cache') ? null : tc.find(identifier, ver)
   if (!toolDir) {
     const archiveUrl = getArtifactUrl(ver)
     core.info(`Artifact: ${archiveUrl}`)

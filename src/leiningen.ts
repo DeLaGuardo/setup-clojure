@@ -15,7 +15,7 @@ export async function setup(
 ): Promise<void> {
   const isWindows = utils.isWindows()
 
-  let toolPath = tc.find(
+  let toolPath = core.getBooleanInput('invalidate-cache') ? null : tc.find(
     identifier,
     utils.getCacheVersionString(version),
     os.arch()

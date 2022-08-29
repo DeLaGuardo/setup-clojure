@@ -17,7 +17,7 @@ export async function setup(
   const installDir = utils.isWindows()
     ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
     : '/tmp/usr/local/opt'
-  const toolPath = tc.find(
+  const toolPath = core.getBooleanInput('invalidate-cache') ? null : tc.find(
     identifier,
     utils.getCacheVersionString(version),
     os.arch()
