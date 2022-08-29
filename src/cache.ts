@@ -39,7 +39,7 @@ export async function restore(
 }
 
 function getCacheKey(identifier: string, version: string): string {
-  return `setupclojure-${os.platform()}-${VERSION}-${identifier}-${version}`
+  return `setupclojure-${os.platform()}-${os.arch()}-${VERSION}-${identifier}-${version}`
 }
 
 function getCachePaths(identifier: string): string[] {
