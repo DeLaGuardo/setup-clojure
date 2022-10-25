@@ -394,13 +394,30 @@ const os = __importStar(__nccwpck_require__(2037));
 const fs = __importStar(__nccwpck_require__(6078));
 const utils = __importStar(__nccwpck_require__(918));
 exports.identifier = 'ClojureToolsDeps';
-function setup(version, githubToken) {
+const client = new http.HttpClient('actions/setup-clojure', undefined, {
+    allowRetries: true,
+    maxRetries: 3
+});
+function toolVersion(version) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (version === 'latest') {
+            const res = yield client.get('https://download.clojure.org/install/stable.properties');
+            const versionString = yield res.readBody();
+            return versionString.split(' ')[0];
+        }
+        else {
+            return version;
+        }
+    });
+}
+function setup(requestedVersion, githubToken) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const version = yield toolVersion(requestedVersion);
         const installDir = utils.isWindows()
             ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
             : '/tmp/usr/local/opt';
         const toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
-        if (toolPath && version !== 'latest') {
+        if (toolPath) {
             core.info(`Clojure CLI found in cache ${toolPath}`);
             yield fs.mkdir(installDir, { recursive: true });
             yield fs.cp(toolPath, path.join(installDir, 'ClojureTools'), {
@@ -409,7 +426,7 @@ function setup(version, githubToken) {
         }
         else {
             if (utils.isWindows()) {
-                const url = `download.clojure.org/install/win-install${version === 'latest' ? '' : `-${version}`}.ps1`;
+                const url = `download.clojure.org/install/win-install-${version}.ps1`;
                 yield exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
                     // Install to a modules location common to powershell/pwsh
                     env: { PSModulePath: installDir },
@@ -419,7 +436,7 @@ function setup(version, githubToken) {
                 yield tc.cacheDir(path.join(installDir, 'ClojureTools'), exports.identifier, utils.getCacheVersionString(version));
             }
             else {
-                const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install${version === 'latest' ? '' : `-${version}`}.sh`);
+                const clojureInstallScript = yield tc.downloadTool(`https://download.clojure.org/install/linux-install-${version}.sh`);
                 if (utils.isMacOS()) {
                     yield MacOSDeps(clojureInstallScript, githubToken);
                 }
@@ -457,10 +474,6 @@ function MacOSDeps(file, githubToken) {
 function getLatestDepsClj(githubAuth) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
-        const client = new http.HttpClient('actions/setup-clojure', undefined, {
-            allowRetries: true,
-            maxRetries: 3
-        });
         const res = yield client.getJson(`https://api.github.com/repos/borkdude/deps.clj/releases/latest`, githubAuth ? { Authorization: githubAuth } : undefined);
         const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
         if (result) {

@@ -10,10 +10,28 @@ import * as utils from './utils'
 
 export const identifier = 'ClojureToolsDeps'
 
+const client = new http.HttpClient('actions/setup-clojure', undefined, {
+  allowRetries: true,
+  maxRetries: 3
+})
+
+async function toolVersion(version: string): Promise<string> {
+  if (version === 'latest') {
+    const res = await client.get(
+      'https://download.clojure.org/install/stable.properties'
+    )
+    const versionString = await res.readBody()
+    return versionString.split(' ')[0]
+  } else {
+    return version
+  }
+}
+
 export async function setup(
-  version: string,
+  requestedVersion: string,
   githubToken?: string
 ): Promise<void> {
+  const version = await toolVersion(requestedVersion)
   const installDir = utils.isWindows()
     ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
     : '/tmp/usr/local/opt'
@@ -23,7 +41,7 @@ export async function setup(
     os.arch()
   )
 
-  if (toolPath && version !== 'latest') {
+  if (toolPath) {
     core.info(`Clojure CLI found in cache ${toolPath}`)
     await fs.mkdir(installDir, {recursive: true})
     await fs.cp(toolPath, path.join(installDir, 'ClojureTools'), {
@@ -31,9 +49,7 @@ export async function setup(
     })
   } else {
     if (utils.isWindows()) {
-      const url = `download.clojure.org/install/win-install${
-        version === 'latest' ? '' : `-${version}`
-      }.ps1`
+      const url = `download.clojure.org/install/win-install-${version}.ps1`
 
       await exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
         // Install to a modules location common to powershell/pwsh
@@ -54,9 +70,7 @@ export async function setup(
       )
     } else {
       const clojureInstallScript = await tc.downloadTool(
-        `https://download.clojure.org/install/linux-install${
-          version === 'latest' ? '' : `-${version}`
-        }.sh`
+        `https://download.clojure.org/install/linux-install-${version}.sh`
       )
 
       if (utils.isMacOS()) {
@@ -111,11 +125,6 @@ async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
 }
 
 export async function getLatestDepsClj(githubAuth?: string): Promise<string> {
-  const client = new http.HttpClient('actions/setup-clojure', undefined, {
-    allowRetries: true,
-    maxRetries: 3
-  })
-
   const res = await client.getJson<{tag_name: string}>(
     `https://api.github.com/repos/borkdude/deps.clj/releases/latest`,
     githubAuth ? {Authorization: githubAuth} : undefined

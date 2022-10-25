@@ -2,6 +2,7 @@ import * as _core from '@actions/core'
 import * as _exec from '@actions/exec'
 import * as _io from '@actions/io'
 import * as _tc from '@actions/tool-cache'
+import * as _http from '@actions/http-client'
 import * as _os from 'os'
 import * as _fs from '../src/fs'
 import {join} from 'path'
@@ -31,6 +32,20 @@ const fs: jest.Mocked<typeof _fs> = _fs as never
 
 jest.mock('os')
 const os: jest.Mocked<typeof _os> = _os as never
+
+jest.mock('@actions/http-client', () => {
+  return {
+    HttpClient: jest.fn().mockImplementation(() => {
+      return {
+        get: jest.fn().mockImplementation(() => {
+          return {
+            readBody: jest.fn().mockResolvedValue('1.2.3 123qwe')
+          }
+        })
+      }
+    })
+  }
+})
 
 describe('tdeps tests', () => {
   beforeAll(async () => {
@@ -90,7 +105,7 @@ describe('tdeps tests', () => {
     await tdeps.setup('latest')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
-      'https://download.clojure.org/install/linux-install.sh'
+      'https://download.clojure.org/install/linux-install-1.2.3.sh'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
@@ -101,7 +116,7 @@ describe('tdeps tests', () => {
     expect(tc.cacheDir).toHaveBeenCalledWith(
       '/tmp/usr/local/opt/ClojureTools',
       'ClojureToolsDeps',
-      `latest.0.0-${VERSION}`
+      `1.2.3-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
@@ -124,7 +139,7 @@ describe('tdeps tests', () => {
     await tdeps.setup('latest')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
-      'https://download.clojure.org/install/linux-install.sh'
+      'https://download.clojure.org/install/linux-install-1.2.3.sh'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(fs.writeFile).toHaveBeenCalledWith(
@@ -140,7 +155,7 @@ describe('tdeps tests', () => {
     expect(tc.cacheDir).toHaveBeenCalledWith(
       '/tmp/usr/local/opt/ClojureTools',
       'ClojureToolsDeps',
-      `latest.0.0-${VERSION}`
+      `1.2.3-${VERSION}`
     )
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',
