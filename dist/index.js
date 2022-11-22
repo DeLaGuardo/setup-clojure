@@ -964,9 +964,17 @@ function setup(version, githubAuth) {
             core.info(`Leiningen found in cache ${toolPath}`);
         }
         else {
-            const leiningenFile = yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein${isWindows ? '.ps1' : ''}`, undefined, githubAuth);
+            const binScripts = [];
+            if (isWindows) {
+                for (const ext of ['ps1', 'bat']) {
+                    binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein.${ext}`, undefined, githubAuth));
+                }
+            }
+            else {
+                binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, undefined, githubAuth));
+            }
             const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
-            const leiningenDir = yield installLeiningen(leiningenFile, tempDir);
+            const leiningenDir = yield installLeiningen(binScripts, tempDir);
             core.debug(`Leiningen installed to ${leiningenDir}`);
             toolPath = yield tc.cacheDir(leiningenDir, exports.identifier, utils.getCacheVersionString(version));
         }
@@ -975,40 +983,42 @@ function setup(version, githubAuth) {
     });
 }
 exports.setup = setup;
-function installLeiningen(binScript, destinationFolder) {
+function installLeiningen(binScripts, destinationFolder) {
     return __awaiter(this, void 0, void 0, function* () {
         const isWindows = utils.isWindows();
         yield io.mkdirP(destinationFolder);
-        const bin = path.normalize(binScript);
-        const binStats = yield fs.stat(bin);
-        if (binStats.isFile()) {
-            const binDir = path.join(destinationFolder, 'leiningen', 'bin');
-            yield io.mkdirP(binDir);
-            yield io.mv(bin, path.join(binDir, `lein${isWindows ? '.ps1' : ''}`));
-            if (!isWindows) {
-                yield fs.chmod(path.join(binDir, `lein`), '0755');
+        for (const binScript of binScripts) {
+            const bin = path.normalize(binScript);
+            const binStats = yield fs.stat(bin);
+            if (binStats.isFile()) {
+                const binDir = path.join(destinationFolder, 'leiningen', 'bin');
+                yield io.mkdirP(binDir);
+                yield io.mv(bin, path.join(binDir, `lein${isWindows ? '.ps1' : ''}`));
+                if (!isWindows) {
+                    yield fs.chmod(path.join(binDir, `lein`), '0755');
+                }
             }
-            const version_cmd = isWindows
-                ? 'powershell .\\lein.ps1 self-install'
-                : './lein version';
-            const env = {
-                LEIN_HOME: path.join(destinationFolder, 'leiningen')
-            };
-            if (process.env['PATH']) {
-                env['PATH'] = process.env['PATH'];
+            else {
+                throw new Error('Not a file');
             }
-            if (process.env['JAVA_CMD']) {
-                env['JAVA_CMD'] = process.env['JAVA_CMD'];
-            }
-            yield exec.exec(version_cmd, [], {
-                cwd: path.join(destinationFolder, 'leiningen', 'bin'),
-                env
-            });
-            return path.join(destinationFolder, 'leiningen');
         }
-        else {
-            throw new Error('Not a file');
+        const version_cmd = isWindows
+            ? 'powershell .\\lein.ps1 self-install'
+            : './lein version';
+        const env = {
+            LEIN_HOME: path.join(destinationFolder, 'leiningen')
+        };
+        if (process.env['PATH']) {
+            env['PATH'] = process.env['PATH'];
         }
+        if (process.env['JAVA_CMD']) {
+            env['JAVA_CMD'] = process.env['JAVA_CMD'];
+        }
+        yield exec.exec(version_cmd, [], {
+            cwd: path.join(destinationFolder, 'leiningen', 'bin'),
+            env
+        });
+        return path.join(destinationFolder, 'leiningen');
     });
 }
 
