@@ -96,7 +96,7 @@ jobs:
       - name: Install leiningen
         uses: ./
         with:
-          lein: 2.9.1
+          lein: latest
 
       - name: lein powershell
         shell: powershell
