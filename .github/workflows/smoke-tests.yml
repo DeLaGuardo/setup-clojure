@@ -58,7 +58,7 @@ jobs:
   test-leiningen:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -80,6 +80,38 @@ jobs:
 
       - name: Check leiningen version
         run: lein version
+
+  test-leiningen-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install leiningen
+        uses: ./
+        with:
+          lein: 2.9.1
+
+      - name: lein powershell
+        shell: powershell
+        run: |
+          lein version
+
+      - name: lein pwsh
+        shell: pwsh
+        run: |
+          lein version
+
+      - name: lein cmd
+        shell: cmd
+        run: |
+          lein version
 
   test-boot:
     strategy:
