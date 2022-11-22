@@ -967,11 +967,11 @@ function setup(version, githubAuth) {
             const binScripts = [];
             if (isWindows) {
                 for (const ext of ['ps1', 'bat']) {
-                    binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein.${ext}`, undefined, githubAuth));
+                    binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein.${ext}`, path.join(utils.getTempDir(), `lein.${ext}`), githubAuth));
                 }
             }
             else {
-                binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, undefined, githubAuth));
+                binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, path.join(utils.getTempDir(), 'lein'), githubAuth));
             }
             const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
             const leiningenDir = yield installLeiningen(binScripts, tempDir);
@@ -993,9 +993,9 @@ function installLeiningen(binScripts, destinationFolder) {
             if (binStats.isFile()) {
                 const binDir = path.join(destinationFolder, 'leiningen', 'bin');
                 yield io.mkdirP(binDir);
-                yield io.mv(bin, path.join(binDir, `lein${isWindows ? '.ps1' : ''}`));
+                yield io.mv(bin, path.join(binDir, `${path.basename(bin)}`));
                 if (!isWindows) {
-                    yield fs.chmod(path.join(binDir, `lein`), '0755');
+                    yield fs.chmod(path.join(binDir, 'lein'), '0755');
                 }
             }
             else {

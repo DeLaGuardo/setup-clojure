@@ -32,7 +32,7 @@ export async function setup(
             `https://raw.githubusercontent.com/technomancy/leiningen/${
               version === 'latest' ? 'stable' : version
             }/bin/lein.${ext}`,
-            undefined,
+            path.join(utils.getTempDir(), `lein.${ext}`),
             githubAuth
           )
         )
@@ -43,7 +43,7 @@ export async function setup(
           `https://raw.githubusercontent.com/technomancy/leiningen/${
             version === 'latest' ? 'stable' : version
           }/bin/lein`,
-          undefined,
+          path.join(utils.getTempDir(), 'lein'),
           githubAuth
         )
       )
@@ -82,10 +82,10 @@ async function installLeiningen(
 
       await io.mkdirP(binDir)
 
-      await io.mv(bin, path.join(binDir, `lein${isWindows ? '.ps1' : ''}`))
+      await io.mv(bin, path.join(binDir, `${path.basename(bin)}`))
 
       if (!isWindows) {
-        await fs.chmod(path.join(binDir, `lein`), '0755')
+        await fs.chmod(path.join(binDir, 'lein'), '0755')
       }
     } else {
       throw new Error('Not a file')
