@@ -38,7 +38,7 @@ inputs:
     required: false
   invalidate-cache:
     description: >+
-      Set to `true` to fix problems realted to wrongly populated tool cache
+      Set to `true` to fix problems related to wrongly populated tool cache
     default: false
     required: false
 runs:

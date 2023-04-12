@@ -9,7 +9,7 @@ jobs:
         operating-system: [ubuntu-latest, macOS-latest]
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@main
 
     - name: Set Node.js 16.x
       uses: actions/setup-node@master
