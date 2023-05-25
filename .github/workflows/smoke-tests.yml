@@ -191,6 +191,32 @@ jobs:
       - name: Check clj-kondo version
         run: clj-kondo --version
 
+  test-cljfmt:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install cljfmt
+        uses: ./
+        with:
+          cljfmt: latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check cljfmt version
+        run: cljfmt --version
+
   test-cljstyle:
     strategy:
       matrix:

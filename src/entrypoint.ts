@@ -4,6 +4,7 @@ import * as boot from './boot'
 import * as cli from './cli'
 import * as bb from './babashka'
 import * as cljKondo from './clj-kondo'
+import * as cljfmt from './cljfmt'
 import * as cljstyle from './cljstyle'
 import * as zprint from './zprint'
 import * as utils from './utils'
@@ -18,6 +19,7 @@ export async function main(): Promise<void> {
       CLI_VERSION,
       BB_VERSION,
       CLJ_KONDO_VERSION,
+      CLJFMT_VERSION,
       CLJSTYLE_VERSION,
       ZPRINT_VERSION
     } = getTools()
@@ -52,6 +54,10 @@ export async function main(): Promise<void> {
       tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth))
     }
 
+    if (CLJFMT_VERSION) {
+      tools.push(cljfmt.setup(CLJFMT_VERSION, githubAuth))
+    }
+
     if (CLJSTYLE_VERSION) {
       if (IS_WINDOWS) {
         throw new Error('cljstyle on windows is not supported yet.')
@@ -84,6 +90,7 @@ export async function pre(): Promise<void> {
         CLI_VERSION,
         BB_VERSION,
         CLJ_KONDO_VERSION,
+        CLJFMT_VERSION,
         CLJSTYLE_VERSION,
         ZPRINT_VERSION
       } = getTools()
@@ -115,6 +122,10 @@ export async function pre(): Promise<void> {
         tools.push(cache.restore(cljKondo.identifier, CLJ_KONDO_VERSION))
       }
 
+      if (CLJFMT_VERSION) {
+        tools.push(cache.restore(cljfmt.identifier, CLJFMT_VERSION))
+      }
+
       if (CLJSTYLE_VERSION) {
         if (!IS_WINDOWS) {
           tools.push(cache.restore(cljstyle.identifier, CLJSTYLE_VERSION))
@@ -142,6 +153,7 @@ export async function post(): Promise<void> {
       CLI_VERSION,
       BB_VERSION,
       CLJ_KONDO_VERSION,
+      CLJFMT_VERSION,
       CLJSTYLE_VERSION,
       ZPRINT_VERSION
     } = getTools()
@@ -173,6 +185,10 @@ export async function post(): Promise<void> {
       tools.push(cache.save(cljKondo.identifier, CLJ_KONDO_VERSION))
     }
 
+    if (CLJFMT_VERSION) {
+      tools.push(cache.save(cljfmt.identifier, CLJFMT_VERSION))
+    }
+
     if (CLJSTYLE_VERSION) {
       if (!IS_WINDOWS) {
         tools.push(cache.save(cljstyle.identifier, CLJSTYLE_VERSION))
@@ -197,6 +213,7 @@ export type Tools = {
   CLI_VERSION: string | null | undefined
   BB_VERSION: string | null | undefined
   CLJ_KONDO_VERSION: string | null | undefined
+  CLJFMT_VERSION: string | null | undefined
   CLJSTYLE_VERSION: string | null | undefined
   ZPRINT_VERSION: string | null | undefined
   DEPS_EXE_VERSION: string | null | undefined
@@ -209,6 +226,7 @@ function getTools(): Tools {
   const CLI_VERSION = core.getInput('cli')
   const BB_VERSION = core.getInput('bb')
   const CLJ_KONDO_VERSION = core.getInput('clj-kondo')
+  const CLJFMT_VERSION = core.getInput('cljfmt')
   const CLJSTYLE_VERSION = core.getInput('cljstyle')
   const ZPRINT_VERSION = core.getInput('zprint')
   const DEPS_EXE_VERSION = core.getInput('deps.exe')
@@ -220,6 +238,7 @@ function getTools(): Tools {
     CLI_VERSION,
     BB_VERSION,
     CLJ_KONDO_VERSION,
+    CLJFMT_VERSION,
     CLJSTYLE_VERSION,
     ZPRINT_VERSION,
     DEPS_EXE_VERSION

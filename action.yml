@@ -26,6 +26,8 @@ inputs:
     description: 'Babashka version to install, `latest` can be used.'
   clj-kondo:
     description: 'Clj-kondo version to install, `latest` can be used.'
+  cljfmt:
+    description: 'cljfmt version to install, `latest` can be used.'
   cljstyle:
     description: 'cljstyle version to install, `latest` can be used.'
   zprint:
