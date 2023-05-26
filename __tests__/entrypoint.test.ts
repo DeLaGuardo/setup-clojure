@@ -4,6 +4,7 @@ import * as _boot from '../src/boot'
 import * as _cli from '../src/cli'
 import * as _bb from '../src/babashka'
 import * as _cljKondo from '../src/clj-kondo'
+import * as _cljfmt from '../src/cljfmt'
 import * as _cljstyle from '../src/cljstyle'
 import * as _zprint from '../src/zprint'
 import * as _utils from '../src/utils'
@@ -26,6 +27,9 @@ const bb: jest.Mocked<typeof _bb> = _bb as never
 
 jest.mock('../src/clj-kondo')
 const cljKondo: jest.Mocked<typeof _cljKondo> = _cljKondo as never
+
+jest.mock('../src/cljfmt')
+const cljfmt: jest.Mocked<typeof _cljfmt> = _cljfmt as never
 
 jest.mock('../src/cljstyle')
 const cljstyle: jest.Mocked<typeof _cljstyle> = _cljstyle as never
@@ -96,6 +100,15 @@ describe('setup-clojure', () => {
     await main()
 
     expect(cljKondo.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+  })
+
+  it('sets up cljfmt', async () => {
+    inputs['cljfmt'] = '1.2.3'
+    inputs['github-token'] = 'abc'
+
+    await main()
+
+    expect(cljfmt.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
   })
 
   it('sets up cljstyle', async () => {

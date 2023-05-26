@@ -7,6 +7,7 @@ This action sets up Clojure tools environment for using in GitHub Actions.
 * [boot-clj](https://boot-clj.github.io/)
 * [babashka](https://babashka.org/)
 * [clj-kondo](https://github.com/clj-kondo/clj-kondo)
+* [cljfmt](https://github.com/weavejester/cljfmt)
 * [cljstyle](https://github.com/greglook/cljstyle)
 * [deps.clj](https://github.com/borkdude/deps.clj)
 * [zprint](https://github.com/kkinnear/zprint)
@@ -55,6 +56,7 @@ jobs:
           boot: 2.8.3                  # Boot.clj
           bb: 0.7.8                    # Babashka
           clj-kondo: 2022.05.31        # Clj-kondo
+          cljfmt: 0.10.2               # cljfmt
           cljstyle: 0.15.0             # cljstyle
           cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           zprint: 1.2.3                # zprint
@@ -88,6 +90,9 @@ jobs:
 
       - name: Get clj-kondo version
         run: clj-kondo --version
+
+      - name: Get cljfmt version
+        run: cljfmt --version
 
       - name: Get cljstyle version
         # cljstyle is not yet available for windows
