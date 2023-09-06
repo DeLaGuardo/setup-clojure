@@ -8,7 +8,7 @@ export const identifier = 'cljstyle'
 export async function getLatestCljstyle(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-clojure', undefined, {
     allowRetries: true,
-    maxRetries: 3
+    maxRetries: 1
   })
 
   const res = await client.getJson<{tag_name: string}>(

@@ -12,18 +12,52 @@ export const identifier = 'ClojureToolsDeps'
 
 const client = new http.HttpClient('actions/setup-clojure', undefined, {
   allowRetries: true,
-  maxRetries: 3
+  maxRetries: 1
 })
 
-async function toolVersion(version: string): Promise<string> {
+async function toolVersion(
+  version: string,
+  githubAuth?: string
+): Promise<string> {
   if (version === 'latest') {
-    const res = await client.get(
-      'https://download.clojure.org/install/stable.properties'
+    const res = await client.getJson<{tag_name: string}>(
+      'https://api.github.com/repos/clojure/brew-install/releases/latest',
+      githubAuth ? {Authorization: githubAuth} : undefined
     )
-    const versionString = await res.readBody()
-    return versionString.split(' ')[0]
+    const versionString = res.result?.tag_name
+    if (versionString) {
+      return versionString
+    }
+
+    throw new Error(`Can't obtain latest Clojure CLI version`)
   } else {
     return version
+  }
+}
+
+async function getUrls(
+  tag: string,
+  githubAuth?: string
+): Promise<{posix?: string; linux: string; windows: string}> {
+  const res = await client.getJson<{
+    assets: {browser_download_url: string}[]
+  }>(
+    `https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`,
+    githubAuth ? {Authorization: githubAuth} : undefined
+  )
+
+  const assets = res.result?.assets
+  if (assets) {
+    return {
+      posix: `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`,
+      linux: `https://github.com/clojure/brew-install/releases/download/${tag}/linux-install.sh`,
+      windows: `github.com/clojure/brew-install/releases/download/${tag}/win-install.ps1`
+    }
+  } else {
+    return {
+      linux: `https://download.clojure.org/install/linux-install-${tag}.sh`,
+      windows: `download.clojure.org/install/win-install-${tag}.ps1`
+    }
   }
 }
 
@@ -31,7 +65,7 @@ export async function setup(
   requestedVersion: string,
   githubToken?: string
 ): Promise<void> {
-  const version = await toolVersion(requestedVersion)
+  const version = await toolVersion(requestedVersion, githubToken)
   const installDir = utils.isWindows()
     ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
     : '/tmp/usr/local/opt'
@@ -48,10 +82,10 @@ export async function setup(
       recursive: true
     })
   } else {
-    if (utils.isWindows()) {
-      const url = `download.clojure.org/install/win-install-${version}.ps1`
+    const {linux, posix, windows} = await getUrls(version, githubToken)
 
-      await exec.exec(`powershell -c "iwr -useb ${url} | iex"`, [], {
+    if (utils.isWindows()) {
+      await exec.exec(`powershell -c "iwr -useb ${windows} | iex"`, [], {
         // Install to a modules location common to powershell/pwsh
         env: {PSModulePath: installDir},
         input: Buffer.from('1')
@@ -69,12 +103,29 @@ export async function setup(
         utils.getCacheVersionString(version)
       )
     } else {
-      const clojureInstallScript = await tc.downloadTool(
-        `https://download.clojure.org/install/linux-install-${version}.sh`
-      )
+      let clojureInstallScript
 
       if (utils.isMacOS()) {
-        await MacOSDeps(clojureInstallScript, githubToken)
+        if (posix) {
+          clojureInstallScript = await tc.downloadTool(
+            posix,
+            undefined,
+            githubToken
+          )
+        } else {
+          clojureInstallScript = await tc.downloadTool(
+            linux,
+            undefined,
+            githubToken
+          )
+          await MacOSDeps(clojureInstallScript, githubToken)
+        }
+      } else {
+        clojureInstallScript = await tc.downloadTool(
+          linux,
+          undefined,
+          githubToken
+        )
       }
 
       const clojureToolsDir = await runLinuxInstall(
