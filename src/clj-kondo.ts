@@ -8,7 +8,7 @@ export const identifier = 'clj-kondo'
 export async function getLatestCljKondo(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-clj-kondo', undefined, {
     allowRetries: true,
-    maxRetries: 3
+    maxRetries: 1
   })
 
   const res = await client.getJson<{tag_name: string}>(

@@ -8,7 +8,7 @@ export const identifier = 'cljfmt'
 export async function getLatestCljFmt(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-cljfmt', undefined, {
     allowRetries: true,
-    maxRetries: 3
+    maxRetries: 1
   })
 
   const res = await client.getJson<{tag_name: string}>(

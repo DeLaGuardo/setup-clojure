@@ -9,7 +9,7 @@ export const identifier = 'zprint'
 export async function getLatestZprint(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-zprint', undefined, {
     allowRetries: true,
-    maxRetries: 3
+    maxRetries: 1
   })
 
   const res = await client.getJson<{tag_name: string}>(

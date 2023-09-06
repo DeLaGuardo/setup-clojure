@@ -50,7 +50,32 @@ jobs:
       - name: Install Clojure CLI
         uses: ./
         with:
-          cli: 1.10.1.693
+          cli: 1.11.1.1409
+
+      - name: Execute clojure code
+        run: clojure -e "(+ 1 1)"
+
+  test-clojure-cli-latest:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install Clojure CLI
+        uses: ./
+        with:
+          cli: latest
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"

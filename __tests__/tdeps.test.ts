@@ -37,9 +37,11 @@ jest.mock('@actions/http-client', () => {
   return {
     HttpClient: jest.fn().mockImplementation(() => {
       return {
-        get: jest.fn().mockImplementation(() => {
+        getJson: jest.fn().mockImplementation(() => {
           return {
-            readBody: jest.fn().mockResolvedValue('1.2.3 123qwe')
+            result: {
+              tag_name: '1.2.3'
+            }
           }
         })
       }
@@ -76,7 +78,9 @@ describe('tdeps tests', () => {
     await tdeps.setup('1.10.1.469')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
-      'https://download.clojure.org/install/linux-install-1.10.1.469.sh'
+      'https://download.clojure.org/install/linux-install-1.10.1.469.sh',
+      undefined,
+      undefined
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
@@ -105,7 +109,9 @@ describe('tdeps tests', () => {
     await tdeps.setup('latest')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
-      'https://download.clojure.org/install/linux-install-1.2.3.sh'
+      'https://download.clojure.org/install/linux-install-1.2.3.sh',
+      undefined,
+      undefined
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
@@ -136,10 +142,12 @@ describe('tdeps tests', () => {
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
-    await tdeps.setup('latest')
+    await tdeps.setup('latest', 'foo')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
-      'https://download.clojure.org/install/linux-install-1.2.3.sh'
+      'https://download.clojure.org/install/linux-install-1.2.3.sh',
+      undefined,
+      'foo'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(fs.writeFile).toHaveBeenCalledWith(
