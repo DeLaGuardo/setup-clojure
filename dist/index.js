@@ -414,14 +414,23 @@ function toolVersion(version, githubAuth) {
         }
     });
 }
+function isResourceProvided(target, assets) {
+    for (const asset of assets) {
+        if (asset.browser_download_url === target) {
+            return true;
+        }
+    }
+    return false;
+}
 function getUrls(tag, githubAuth) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const posix_install_url = `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`;
         const assets = (_a = res.result) === null || _a === void 0 ? void 0 : _a.assets;
-        if (assets) {
+        if (assets && isResourceProvided(posix_install_url, assets)) {
             return {
-                posix: `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`,
+                posix: posix_install_url,
                 linux: `https://github.com/clojure/brew-install/releases/download/${tag}/linux-install.sh`,
                 windows: `github.com/clojure/brew-install/releases/download/${tag}/win-install.ps1`
             };
@@ -1292,7 +1301,7 @@ exports.isMacOS = isMacOS;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '12-0';
+exports.VERSION = '12-1';
 
 
 /***/ }),

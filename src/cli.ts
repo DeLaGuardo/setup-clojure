@@ -35,6 +35,18 @@ async function toolVersion(
   }
 }
 
+function isResourceProvided(
+  target: string,
+  assets: {browser_download_url: string}[]
+): boolean {
+  for (const asset of assets) {
+    if (asset.browser_download_url === target) {
+      return true
+    }
+  }
+  return false
+}
+
 async function getUrls(
   tag: string,
   githubAuth?: string
@@ -45,11 +57,12 @@ async function getUrls(
     `https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`,
     githubAuth ? {Authorization: githubAuth} : undefined
   )
+  const posix_install_url = `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`
 
   const assets = res.result?.assets
-  if (assets) {
+  if (assets && isResourceProvided(posix_install_url, assets)) {
     return {
-      posix: `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`,
+      posix: posix_install_url,
       linux: `https://github.com/clojure/brew-install/releases/download/${tag}/linux-install.sh`,
       windows: `github.com/clojure/brew-install/releases/download/${tag}/win-install.ps1`
     }
