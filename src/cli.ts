@@ -19,6 +19,7 @@ async function toolVersion(
   version: string,
   githubAuth?: string
 ): Promise<string> {
+  core.debug('=== Check tool version')
   if (version === 'latest') {
     const res = await client.getJson<{tag_name: string}>(
       'https://api.github.com/repos/clojure/brew-install/releases/latest',
@@ -51,6 +52,7 @@ async function getUrls(
   tag: string,
   githubAuth?: string
 ): Promise<{posix?: string; linux: string; windows: string}> {
+  core.debug('=== Get download URLs')
   const res = await client.getJson<{
     assets: {browser_download_url: string}[]
   }>(
@@ -78,6 +80,7 @@ export async function setup(
   requestedVersion: string,
   githubToken?: string
 ): Promise<void> {
+  core.debug('=== Run setup')
   const version = await toolVersion(requestedVersion, githubToken)
   const installDir = utils.isWindows()
     ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
@@ -167,6 +170,7 @@ async function runLinuxInstall(
   installScript: string,
   destinationFolder: string
 ): Promise<string> {
+  core.debug('=== Install on Linux')
   await io.mkdirP(destinationFolder)
 
   const file = path.normalize(installScript)
@@ -176,6 +180,7 @@ async function runLinuxInstall(
 }
 
 async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
+  core.debug('=== Install extra deps for MacOS')
   const data = await fs.readFile(file, 'utf-8')
   const newValue = data.replace(
     /install -D/gim,
@@ -183,12 +188,13 @@ async function MacOSDeps(file: string, githubToken?: string): Promise<void> {
   )
   await fs.writeFile(file, newValue, 'utf-8')
   const env = githubToken
-    ? {env: {HOMEBREW_GITHUB_API_TOKEN: githubToken}}
+    ? {env: {HOMEBREW_GITHUB_API_TOKEN: githubToken.substring(7)}}
     : undefined
   await exec.exec('brew', ['install', 'coreutils'], env)
 }
 
 export async function getLatestDepsClj(githubAuth?: string): Promise<string> {
+  core.debug('=== Fetch latest version of deps clj')
   const res = await client.getJson<{tag_name: string}>(
     `https://api.github.com/repos/borkdude/deps.clj/releases/latest`,
     githubAuth ? {Authorization: githubAuth} : undefined
