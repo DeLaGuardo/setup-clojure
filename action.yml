@@ -41,8 +41,8 @@ inputs:
   invalidate-cache:
     description: >+
       Set to `true` to fix problems related to wrongly populated tool cache
-    default: false
+    default: 'false'
     required: false
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

@@ -27,7 +27,7 @@ export async function main(): Promise<void> {
     const tools = []
 
     const githubToken = core.getInput('github-token')
-    const githubAuth = githubToken ? `token ${githubToken}` : undefined
+    const githubAuth = githubToken ? `Bearer ${githubToken}` : undefined
     const IS_WINDOWS = utils.isWindows()
 
     if (LEIN_VERSION) {

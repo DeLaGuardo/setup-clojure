@@ -56,7 +56,7 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(lein.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(lein.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 
   it('sets up Boot', async () => {
@@ -65,7 +65,7 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(boot.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(boot.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 
   it('sets up Clojure CLI tools from deprecated `tools-deps` option', async () => {
@@ -90,7 +90,7 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(bb.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(bb.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 
   it('sets up clj-kondo', async () => {
@@ -99,7 +99,7 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(cljKondo.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(cljKondo.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 
   it('sets up cljfmt', async () => {
@@ -108,7 +108,7 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(cljfmt.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(cljfmt.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 
   it('sets up cljstyle', async () => {
@@ -117,7 +117,7 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(cljstyle.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(cljstyle.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 
   it('throws on cljstyle setup in Windows', async () => {
@@ -153,6 +153,6 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(zprint.setup).toHaveBeenCalledWith('1.2.3', 'token abc')
+    expect(zprint.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
   })
 })
