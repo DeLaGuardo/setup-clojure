@@ -76,14 +76,17 @@ describe('cljstyle tests', () => {
 
   describe('getArtifactUrl', () => {
     test.each`
-      platform    | artifact
-      ${'darwin'} | ${`cljstyle_1.2.3_macos_amd64.zip`}
-      ${'linux'}  | ${`cljstyle_1.2.3_linux_amd64.zip`}
-      ${'foobar'} | ${`cljstyle_1.2.3_linux_amd64.zip`}
-    `('$platform -> $artifact', ({platform, artifact}) => {
+      platform    | version     | artifact
+      ${'darwin'} | ${'1.2.3'}  | ${`cljstyle_1.2.3_macos_amd64.zip`}
+      ${'linux'}  | ${'1.2.3'}  | ${`cljstyle_1.2.3_linux_amd64.zip`}
+      ${'foobar'} | ${'1.2.3'}  | ${`cljstyle_1.2.3_linux_amd64.zip`}
+      ${'darwin'} | ${'0.15.0'} | ${`cljstyle_0.15.0_macos.zip`}
+      ${'linux'}  | ${'0.15.0'} | ${`cljstyle_0.15.0_linux.zip`}
+      ${'foobar'} | ${'0.15.0'} | ${`cljstyle_0.15.0_linux.zip`}
+    `('$platform -> $artifact', ({platform, version, artifact}) => {
       os.platform.mockReturnValueOnce(platform as never)
-      expect(cljstyle.getArtifactUrl('1.2.3')).toBe(
-        `https://github.com/greglook/cljstyle/releases/download/1.2.3/${artifact}`
+      expect(cljstyle.getArtifactUrl(version)).toBe(
+        `https://github.com/greglook/cljstyle/releases/download/${version}/${artifact}`
       )
     })
   })
