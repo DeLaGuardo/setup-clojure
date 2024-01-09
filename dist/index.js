@@ -804,12 +804,14 @@ function getLatestCljstyle(githubAuth) {
 }
 exports.getLatestCljstyle = getLatestCljstyle;
 function getArtifactName(version) {
+    const [major, minor] = version.split('.').map(n => parseInt(n));
+    const archiSuffix = major > 0 || minor > 15 ? '_amd64' : '';
     const platform = os.platform();
     switch (platform) {
         case 'darwin':
-            return `cljstyle_${version}_macos.zip`;
+            return `cljstyle_${version}_macos${archiSuffix}.zip`;
         default:
-            return `cljstyle_${version}_linux.zip`;
+            return `cljstyle_${version}_linux${archiSuffix}.zip`;
     }
 }
 exports.getArtifactName = getArtifactName;
