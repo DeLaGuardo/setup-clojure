@@ -65,9 +65,9 @@ describe('cljstyle tests', () => {
   describe('getArtifactName', () => {
     test.each`
       platform    | artifact
-      ${'darwin'} | ${`cljstyle_1.2.3_macos.zip`}
-      ${'linux'}  | ${`cljstyle_1.2.3_linux.zip`}
-      ${'foobar'} | ${`cljstyle_1.2.3_linux.zip`}
+      ${'darwin'} | ${`cljstyle_1.2.3_macos_amd64.zip`}
+      ${'linux'}  | ${`cljstyle_1.2.3_linux_amd64.zip`}
+      ${'foobar'} | ${`cljstyle_1.2.3_linux_amd64.zip`}
     `('$platform -> $artifact', ({platform, artifact}) => {
       os.platform.mockReturnValueOnce(platform as never)
       expect(cljstyle.getArtifactName('1.2.3')).toBe(artifact)
@@ -77,9 +77,9 @@ describe('cljstyle tests', () => {
   describe('getArtifactUrl', () => {
     test.each`
       platform    | artifact
-      ${'darwin'} | ${`cljstyle_1.2.3_macos.zip`}
-      ${'linux'}  | ${`cljstyle_1.2.3_linux.zip`}
-      ${'foobar'} | ${`cljstyle_1.2.3_linux.zip`}
+      ${'darwin'} | ${`cljstyle_1.2.3_macos_amd64.zip`}
+      ${'linux'}  | ${`cljstyle_1.2.3_linux_amd64.zip`}
+      ${'foobar'} | ${`cljstyle_1.2.3_linux_amd64.zip`}
     `('$platform -> $artifact', ({platform, artifact}) => {
       os.platform.mockReturnValueOnce(platform as never)
       expect(cljstyle.getArtifactUrl('1.2.3')).toBe(
@@ -116,7 +116,7 @@ describe('cljstyle tests', () => {
 
       expect(tc.find).toHaveBeenCalledWith('cljstyle', '1.2.3')
       expect(tc.downloadTool).toHaveBeenCalledWith(
-        'https://github.com/greglook/cljstyle/releases/download/1.2.3/cljstyle_1.2.3_linux.zip',
+        'https://github.com/greglook/cljstyle/releases/download/1.2.3/cljstyle_1.2.3_linux_amd64.zip',
         undefined,
         'token 123'
       )
@@ -140,7 +140,7 @@ describe('cljstyle tests', () => {
       )
       expect(tc.find).toHaveBeenCalledWith('cljstyle', '9.9.9')
       expect(tc.downloadTool).toHaveBeenCalledWith(
-        'https://github.com/greglook/cljstyle/releases/download/9.9.9/cljstyle_9.9.9_linux.zip',
+        'https://github.com/greglook/cljstyle/releases/download/9.9.9/cljstyle_9.9.9_linux_amd64.zip',
         undefined,
         'token 123'
       )
