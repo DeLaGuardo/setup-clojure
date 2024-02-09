@@ -1180,13 +1180,9 @@ function installLeiningen(binScripts, destinationFolder) {
             ? 'powershell .\\lein.ps1 self-install'
             : './lein version';
         const toolDir = path.join(destinationFolder, 'leiningen');
-        const leiningenJarPath = yield leiningenJar(toolDir);
         const env = {
             LEIN_HOME: toolDir
         };
-        if (leiningenJarPath !== null) {
-            env['LEIN_JAR'] = leiningenJarPath;
-        }
         if (process.env['PATH']) {
             env['PATH'] = process.env['PATH'];
         }
@@ -1331,7 +1327,7 @@ exports.isMacOS = isMacOS;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '12-3';
+exports.VERSION = '12-4';
 
 
 /***/ }),

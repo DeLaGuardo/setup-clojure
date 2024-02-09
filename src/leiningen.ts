@@ -103,14 +103,9 @@ async function installLeiningen(
     : './lein version'
 
   const toolDir = path.join(destinationFolder, 'leiningen')
-  const leiningenJarPath = await leiningenJar(toolDir)
 
   const env: {[key: string]: string} = {
     LEIN_HOME: toolDir
-  }
-
-  if (leiningenJarPath !== null) {
-    env['LEIN_JAR'] = leiningenJarPath
   }
 
   if (process.env['PATH']) {
