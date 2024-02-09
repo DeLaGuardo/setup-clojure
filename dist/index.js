@@ -1071,9 +1071,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.mkdir = exports.cp = exports.writeFile = exports.readFile = exports.chmod = exports.stat = void 0;
+exports.readdir = exports.mkdir = exports.cp = exports.writeFile = exports.readFile = exports.chmod = exports.stat = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(7147));
-_a = fs_1.default.promises, exports.stat = _a.stat, exports.chmod = _a.chmod, exports.readFile = _a.readFile, exports.writeFile = _a.writeFile, exports.cp = _a.cp, exports.mkdir = _a.mkdir;
+_a = fs_1.default.promises, exports.stat = _a.stat, exports.chmod = _a.chmod, exports.readFile = _a.readFile, exports.writeFile = _a.writeFile, exports.cp = _a.cp, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir;
 
 
 /***/ }),
@@ -1148,6 +1148,10 @@ function setup(version, githubAuth) {
             core.debug(`Leiningen installed to ${leiningenDir}`);
             toolPath = yield tc.cacheDir(leiningenDir, exports.identifier, utils.getCacheVersionString(version));
         }
+        const leiningenJarPath = yield leiningenJar(toolPath);
+        if (leiningenJarPath !== null) {
+            core.exportVariable('LEIN_JAR', leiningenJarPath);
+        }
         core.exportVariable('LEIN_HOME', toolPath);
         core.addPath(path.join(toolPath, 'bin'));
     });
@@ -1175,9 +1179,14 @@ function installLeiningen(binScripts, destinationFolder) {
         const version_cmd = isWindows
             ? 'powershell .\\lein.ps1 self-install'
             : './lein version';
+        const toolDir = path.join(destinationFolder, 'leiningen');
+        const leiningenJarPath = yield leiningenJar(toolDir);
         const env = {
-            LEIN_HOME: path.join(destinationFolder, 'leiningen')
+            LEIN_HOME: toolDir
         };
+        if (leiningenJarPath !== null) {
+            env['LEIN_JAR'] = leiningenJarPath;
+        }
         if (process.env['PATH']) {
             env['PATH'] = process.env['PATH'];
         }
@@ -1185,10 +1194,23 @@ function installLeiningen(binScripts, destinationFolder) {
             env['JAVA_CMD'] = process.env['JAVA_CMD'];
         }
         yield exec.exec(version_cmd, [], {
-            cwd: path.join(destinationFolder, 'leiningen', 'bin'),
+            cwd: path.join(toolDir, 'bin'),
             env
         });
-        return path.join(destinationFolder, 'leiningen');
+        return toolDir;
+    });
+}
+function leiningenJar(toolPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const files = yield fs.readdir(path.join(toolPath, 'self-installs'));
+        if (files) {
+            for (const file of files) {
+                if (file.endsWith('.jar')) {
+                    return path.join(toolPath, 'self-installs', file);
+                }
+            }
+        }
+        return null;
     });
 }
 

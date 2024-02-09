@@ -62,6 +62,12 @@ export async function setup(
     )
   }
 
+  const leiningenJarPath = await leiningenJar(toolPath)
+
+  if (leiningenJarPath !== null) {
+    core.exportVariable('LEIN_JAR', leiningenJarPath)
+  }
+
   core.exportVariable('LEIN_HOME', toolPath)
   core.addPath(path.join(toolPath, 'bin'))
 }
@@ -96,8 +102,15 @@ async function installLeiningen(
     ? 'powershell .\\lein.ps1 self-install'
     : './lein version'
 
+  const toolDir = path.join(destinationFolder, 'leiningen')
+  const leiningenJarPath = await leiningenJar(toolDir)
+
   const env: {[key: string]: string} = {
-    LEIN_HOME: path.join(destinationFolder, 'leiningen')
+    LEIN_HOME: toolDir
+  }
+
+  if (leiningenJarPath !== null) {
+    env['LEIN_JAR'] = leiningenJarPath
   }
 
   if (process.env['PATH']) {
@@ -108,9 +121,22 @@ async function installLeiningen(
   }
 
   await exec.exec(version_cmd, [], {
-    cwd: path.join(destinationFolder, 'leiningen', 'bin'),
+    cwd: path.join(toolDir, 'bin'),
     env
   })
 
-  return path.join(destinationFolder, 'leiningen')
+  return toolDir
+}
+
+async function leiningenJar(toolPath: string): Promise<string | null> {
+  const files = await fs.readdir(path.join(toolPath, 'self-installs'))
+  if (files) {
+    for (const file of files) {
+      if (file.endsWith('.jar')) {
+        return path.join(toolPath, 'self-installs', file)
+      }
+    }
+  }
+
+  return null
 }

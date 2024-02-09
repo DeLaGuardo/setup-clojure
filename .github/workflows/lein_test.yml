@@ -19,5 +19,3 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - run: env
       - run: DEBUG=true lein -v
-      - run: unset LEIN_JAR
-      - run: DEBUG=true lein -v
