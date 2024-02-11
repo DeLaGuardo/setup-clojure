@@ -68,19 +68,19 @@ describe('tdeps tests', () => {
   it('Throws if invalid version', async () => {
     const msg = 'Unexpected HTTP response: 403'
     tc.downloadTool.mockRejectedValueOnce(new Error(msg))
-    await expect(tdeps.setup('1000')).rejects.toThrow(msg)
+    await expect(tdeps.setup('1000', 'auth token')).rejects.toThrow(msg)
   })
 
   it('Install clojure tools deps with normal version', async () => {
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
-    await tdeps.setup('1.10.1.469')
+    await tdeps.setup('1.10.1.469', 'auth token')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.10.1.469.sh',
       undefined,
-      undefined
+      'auth token'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
@@ -106,12 +106,12 @@ describe('tdeps tests', () => {
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
-    await tdeps.setup('latest')
+    await tdeps.setup('latest', 'auth token')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.2.3.sh',
       undefined,
-      undefined
+      'auth token'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
     expect(exec.exec).toHaveBeenCalledWith('bash', [
@@ -177,7 +177,7 @@ describe('tdeps tests', () => {
   it('Uses version of clojure tools-deps installed in cache', async () => {
     tc.find.mockReturnValue(cachePath)
 
-    await tdeps.setup('1.10.1.469')
+    await tdeps.setup('1.10.1.469', 'auth token')
 
     expect(core.exportVariable).toHaveBeenCalledWith(
       'CLOJURE_INSTALL_DIR',

@@ -70,18 +70,20 @@ describe('setup-clojure', () => {
 
   it('sets up Clojure CLI tools from deprecated `tools-deps` option', async () => {
     inputs['tools-deps'] = '1.2.3'
+    inputs['github-token'] = 'auth token'
 
     await main()
 
-    expect(cli.setup).toHaveBeenCalledWith('1.2.3')
+    expect(cli.setup).toHaveBeenCalledWith('1.2.3', 'Bearer auth token')
   })
 
   it('sets up Clojure CLI tools', async () => {
     inputs['cli'] = '1.2.3'
+    inputs['github-token'] = 'auth token'
 
     await main()
 
-    expect(cli.setup).toHaveBeenCalledWith('1.2.3')
+    expect(cli.setup).toHaveBeenCalledWith('1.2.3', 'Bearer auth token')
   })
 
   it('sets up Babashka', async () => {

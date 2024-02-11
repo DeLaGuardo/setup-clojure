@@ -403,7 +403,7 @@ function toolVersion(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Check tool version');
         if (version === 'latest') {
-            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', githubAuth ? { Authorization: githubAuth } : undefined);
+            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', { Authorization: githubAuth });
             const versionString = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name;
             if (versionString) {
                 return versionString;
@@ -427,7 +427,9 @@ function getUrls(tag, githubAuth) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Get download URLs');
-        const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, {
+            Authorization: githubAuth
+        });
         const posix_install_url = `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`;
         const assets = (_a = res.result) === null || _a === void 0 ? void 0 : _a.assets;
         if (assets && isResourceProvided(posix_install_url, assets)) {
@@ -445,10 +447,10 @@ function getUrls(tag, githubAuth) {
         }
     });
 }
-function setup(requestedVersion, githubToken) {
+function setup(requestedVersion, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Run setup');
-        const version = yield toolVersion(requestedVersion, githubToken);
+        const version = yield toolVersion(requestedVersion, githubAuth);
         const installDir = utils.isWindows()
             ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
             : '/tmp/usr/local/opt';
@@ -461,7 +463,7 @@ function setup(requestedVersion, githubToken) {
             });
         }
         else {
-            const { linux, posix, windows } = yield getUrls(version, githubToken);
+            const { linux, posix, windows } = yield getUrls(version, githubAuth);
             if (utils.isWindows()) {
                 yield exec.exec(`powershell -c "iwr -useb ${windows} | iex"`, [], {
                     // Install to a modules location common to powershell/pwsh
@@ -475,15 +477,15 @@ function setup(requestedVersion, githubToken) {
                 let clojureInstallScript;
                 if (utils.isMacOS()) {
                     if (posix) {
-                        clojureInstallScript = yield tc.downloadTool(posix, undefined, githubToken);
+                        clojureInstallScript = yield tc.downloadTool(posix, undefined, githubAuth);
                     }
                     else {
-                        clojureInstallScript = yield tc.downloadTool(linux, undefined, githubToken);
-                        yield MacOSDeps(clojureInstallScript, githubToken);
+                        clojureInstallScript = yield tc.downloadTool(linux, undefined, githubAuth);
+                        yield MacOSDeps(clojureInstallScript, githubAuth);
                     }
                 }
                 else {
-                    clojureInstallScript = yield tc.downloadTool(linux, undefined, githubToken);
+                    clojureInstallScript = yield tc.downloadTool(linux, undefined, githubAuth);
                 }
                 const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, path.join(installDir, 'ClojureTools'));
                 core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
@@ -506,23 +508,26 @@ function runLinuxInstall(installScript, destinationFolder) {
         return destinationFolder;
     });
 }
-function MacOSDeps(file, githubToken) {
+function MacOSDeps(file, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Install extra deps for MacOS');
         const data = yield fs.readFile(file, 'utf-8');
         const newValue = data.replace(/install -D/gim, '$(brew --prefix coreutils)/bin/ginstall -D');
         yield fs.writeFile(file, newValue, 'utf-8');
-        const env = githubToken
-            ? { env: { HOMEBREW_GITHUB_API_TOKEN: githubToken.substring(7) } }
-            : undefined;
-        yield exec.exec('brew', ['install', 'coreutils'], env);
+        yield exec.exec('brew', ['install', 'coreutils'], {
+            env: {
+                HOMEBREW_GITHUB_API_TOKEN: githubAuth.substring(7),
+                HOMEBREW_NO_INSTALL_CLEANUP: 'true',
+                HOME: process.env['HOME'] || ''
+            }
+        });
     });
 }
 function getLatestDepsClj(githubAuth) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Fetch latest version of deps clj');
-        const res = yield client.getJson(`https://api.github.com/repos/borkdude/deps.clj/releases/latest`, githubAuth ? { Authorization: githubAuth } : undefined);
+        const res = yield client.getJson(`https://api.github.com/repos/borkdude/deps.clj/releases/latest`, { Authorization: githubAuth });
         const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
         if (result) {
             return result;
@@ -898,8 +903,8 @@ function main() {
         try {
             const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
             const tools = [];
-            const githubToken = core.getInput('github-token');
-            const githubAuth = githubToken ? `Bearer ${githubToken}` : undefined;
+            const githubToken = core.getInput('github-token', { required: true });
+            const githubAuth = `Bearer ${githubToken}`;
             const IS_WINDOWS = utils.isWindows();
             if (LEIN_VERSION) {
                 tools.push(lein.setup(LEIN_VERSION, githubAuth));
@@ -908,10 +913,10 @@ function main() {
                 tools.push(boot.setup(BOOT_VERSION, githubAuth));
             }
             if (CLI_VERSION) {
-                tools.push(cli.setup(CLI_VERSION));
+                tools.push(cli.setup(CLI_VERSION, githubAuth));
             }
             if (TDEPS_VERSION && !CLI_VERSION) {
-                tools.push(cli.setup(TDEPS_VERSION));
+                tools.push(cli.setup(TDEPS_VERSION, githubAuth));
             }
             if (BB_VERSION) {
                 tools.push(bb.setup(BB_VERSION, githubAuth));
@@ -1327,7 +1332,7 @@ exports.isMacOS = isMacOS;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '12-4';
+exports.VERSION = '12-5';
 
 
 /***/ }),
