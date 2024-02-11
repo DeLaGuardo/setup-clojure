@@ -26,8 +26,8 @@ export async function main(): Promise<void> {
 
     const tools = []
 
-    const githubToken = core.getInput('github-token')
-    const githubAuth = githubToken ? `Bearer ${githubToken}` : undefined
+    const githubToken = core.getInput('github-token', {required: true})
+    const githubAuth = `Bearer ${githubToken}`
     const IS_WINDOWS = utils.isWindows()
 
     if (LEIN_VERSION) {
@@ -39,11 +39,11 @@ export async function main(): Promise<void> {
     }
 
     if (CLI_VERSION) {
-      tools.push(cli.setup(CLI_VERSION))
+      tools.push(cli.setup(CLI_VERSION, githubAuth))
     }
 
     if (TDEPS_VERSION && !CLI_VERSION) {
-      tools.push(cli.setup(TDEPS_VERSION))
+      tools.push(cli.setup(TDEPS_VERSION, githubAuth))
     }
 
     if (BB_VERSION) {
