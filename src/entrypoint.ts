@@ -201,11 +201,11 @@ export async function post(): Promise<void> {
     }
 
     await Promise.all(tools)
-    process.exit(0);
+    process.exit(0)
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err)
     core.debug(error)
-    process.exit(1);
+    process.exit(1)
   }
 }
 
