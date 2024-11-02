@@ -885,6 +885,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.post = exports.pre = exports.main = void 0;
 const core = __importStar(__nccwpck_require__(2186));
@@ -898,6 +901,7 @@ const cljstyle = __importStar(__nccwpck_require__(2661));
 const zprint = __importStar(__nccwpck_require__(982));
 const utils = __importStar(__nccwpck_require__(918));
 const cache = __importStar(__nccwpck_require__(3782));
+const node_process_1 = __importDefault(__nccwpck_require__(7742));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1030,10 +1034,12 @@ function post() {
                 tools.push(cache.save(zprint.identifier, ZPRINT_VERSION));
             }
             yield Promise.all(tools);
+            node_process_1.default.exit(0);
         }
         catch (err) {
             const error = err instanceof Error ? err.message : String(err);
             core.debug(error);
+            node_process_1.default.exit(1);
         }
     });
 }
@@ -86842,6 +86848,14 @@ module.exports = require("net");
 
 "use strict";
 module.exports = require("node:events");
+
+/***/ }),
+
+/***/ 7742:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:process");
 
 /***/ }),
 
