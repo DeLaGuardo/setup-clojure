@@ -7,6 +7,7 @@ import * as cljKondo from './clj-kondo'
 import * as cljfmt from './cljfmt'
 import * as cljstyle from './cljstyle'
 import * as zprint from './zprint'
+import * as polylith from './polylith'
 import * as utils from './utils'
 import * as cache from './cache'
 import process from 'node:process'
@@ -22,12 +23,13 @@ export async function main(): Promise<void> {
       CLJ_KONDO_VERSION,
       CLJFMT_VERSION,
       CLJSTYLE_VERSION,
-      ZPRINT_VERSION
+      ZPRINT_VERSION,
+      POLYLITH_VERSION
     } = getTools()
 
     const tools = []
 
-    const githubToken = core.getInput('github-token', {required: true})
+    const githubToken = core.getInput('github-token', { required: true })
     const githubAuth = `Bearer ${githubToken}`
     const IS_WINDOWS = utils.isWindows()
 
@@ -70,6 +72,10 @@ export async function main(): Promise<void> {
       tools.push(zprint.setup(ZPRINT_VERSION, githubAuth))
     }
 
+    if (POLYLITH_VERSION) {
+      tools.push(polylith.setup(POLYLITH_VERSION, githubAuth))
+    }
+
     if (tools.length === 0) {
       throw new Error('You must specify at least one clojure tool.')
     }
@@ -93,7 +99,8 @@ export async function pre(): Promise<void> {
         CLJ_KONDO_VERSION,
         CLJFMT_VERSION,
         CLJSTYLE_VERSION,
-        ZPRINT_VERSION
+        ZPRINT_VERSION,
+        POLYLITH_VERSION
       } = getTools()
 
       const IS_WINDOWS = utils.isWindows()
@@ -137,6 +144,11 @@ export async function pre(): Promise<void> {
         tools.push(cache.restore(zprint.identifier, ZPRINT_VERSION))
       }
 
+      if (POLYLITH_VERSION) {
+        tools.push(cache.restore(polylith.identifier, POLYLITH_VERSION))
+      }
+
+
       await Promise.all(tools)
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err)
@@ -156,7 +168,8 @@ export async function post(): Promise<void> {
       CLJ_KONDO_VERSION,
       CLJFMT_VERSION,
       CLJSTYLE_VERSION,
-      ZPRINT_VERSION
+      ZPRINT_VERSION,
+      POLYLITH_VERSION
     } = getTools()
 
     const IS_WINDOWS = utils.isWindows()
@@ -200,6 +213,10 @@ export async function post(): Promise<void> {
       tools.push(cache.save(zprint.identifier, ZPRINT_VERSION))
     }
 
+    if (POLYLITH_VERSION) {
+      tools.push(cache.save(polylith.identifier, POLYLITH_VERSION))
+    }
+
     await Promise.all(tools)
     process.exit(0)
   } catch (err) {
@@ -220,6 +237,7 @@ export type Tools = {
   CLJSTYLE_VERSION: string | null | undefined
   ZPRINT_VERSION: string | null | undefined
   DEPS_EXE_VERSION: string | null | undefined
+  POLYLITH_VERSION: string | null | undefined
 }
 
 function getTools(): Tools {
@@ -233,6 +251,7 @@ function getTools(): Tools {
   const CLJSTYLE_VERSION = core.getInput('cljstyle')
   const ZPRINT_VERSION = core.getInput('zprint')
   const DEPS_EXE_VERSION = core.getInput('deps.exe')
+  const POLYLITH_VERSION = core.getInput('polylith')
 
   return {
     LEIN_VERSION,
@@ -244,6 +263,7 @@ function getTools(): Tools {
     CLJFMT_VERSION,
     CLJSTYLE_VERSION,
     ZPRINT_VERSION,
-    DEPS_EXE_VERSION
+    DEPS_EXE_VERSION,
+    POLYLITH_VERSION
   }
 }
