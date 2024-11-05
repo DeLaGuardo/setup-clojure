@@ -9,6 +9,7 @@ import * as cljstyle from './cljstyle'
 import * as zprint from './zprint'
 import * as utils from './utils'
 import * as cache from './cache'
+import process from 'node:process'
 
 export async function main(): Promise<void> {
   try {
@@ -200,9 +201,11 @@ export async function post(): Promise<void> {
     }
 
     await Promise.all(tools)
+    process.exit(0)
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err)
     core.debug(error)
+    process.exit(1)
   }
 }
 
