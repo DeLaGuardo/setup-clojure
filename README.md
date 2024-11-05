@@ -57,7 +57,7 @@ jobs:
           bb: 0.7.8                    # Babashka
           clj-kondo: 2022.05.31        # Clj-kondo
           cljfmt: 0.10.2               # cljfmt
-          cljstyle: 0.15.0             # cljstyle
+          cljstyle: 0.16.626           # cljstyle
           cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           zprint: 1.2.3                # zprint
           

@@ -311,7 +311,7 @@ jobs:
           boot: 2.8.3
           bb: 0.8.157
           clj-kondo: 2022.06.22
-          cljstyle: 0.15.0
+          cljstyle: 0.16.626
           zprint: 1.2.3
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
