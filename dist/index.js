@@ -404,7 +404,7 @@ function toolVersion(version, githubAuth) {
         var _a;
         core.debug('=== Check tool version');
         if (version === 'latest') {
-            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', { Authorization: githubAuth });
+            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', githubAuth ? { Authorization: githubAuth } : {});
             const versionString = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name;
             if (versionString) {
                 return versionString;
@@ -428,9 +428,7 @@ function getUrls(tag, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         core.debug('=== Get download URLs');
-        const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, {
-            Authorization: githubAuth
-        });
+        const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, githubAuth ? { Authorization: githubAuth } : {});
         const posix_install_url = `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`;
         const assets = (_a = res.result) === null || _a === void 0 ? void 0 : _a.assets;
         if (assets && isResourceProvided(posix_install_url, assets)) {
@@ -516,7 +514,7 @@ function MacOSDeps(file, githubAuth) {
         yield fs.writeFile(file, newValue, 'utf-8');
         yield exec.exec('brew', ['install', 'coreutils'], {
             env: {
-                HOMEBREW_GITHUB_API_TOKEN: githubAuth.substring(7),
+                HOMEBREW_GITHUB_API_TOKEN: githubAuth ? githubAuth.substring(7) : '',
                 HOMEBREW_NO_INSTALL_CLEANUP: 'true',
                 HOME: process.env['HOME'] || ''
             }
@@ -527,7 +525,7 @@ function getLatestDepsClj(githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
         core.debug('=== Fetch latest version of deps clj');
-        const res = yield client.getJson(`https://api.github.com/repos/borkdude/deps.clj/releases/latest`, { Authorization: githubAuth });
+        const res = yield client.getJson(`https://api.github.com/repos/borkdude/deps.clj/releases/latest`, githubAuth ? { Authorization: githubAuth } : {});
         const result = (_b = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name) === null || _b === void 0 ? void 0 : _b.replace(/^v/, '');
         if (result) {
             return result;
@@ -908,8 +906,8 @@ function main() {
         try {
             const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
             const tools = [];
-            const githubToken = core.getInput('github-token', { required: true });
-            const githubAuth = `Bearer ${githubToken}`;
+            const noAuth = core.getBooleanInput('no-auth');
+            const githubAuth = noAuth ? undefined : `Bearer ${core.getInput('github-token', { required: true })}`;
             const IS_WINDOWS = utils.isWindows();
             if (LEIN_VERSION) {
                 tools.push(lein.setup(LEIN_VERSION, githubAuth));
