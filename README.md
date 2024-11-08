@@ -60,6 +60,10 @@ jobs:
           cljstyle: 0.16.626           # cljstyle
           cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           zprint: 1.2.3                # zprint
+          # In case you don't want to use built in authentication using github token
+          # Useful in case this action is used outside of github.com context
+          # `false` by default
+          no-auth: 'true'
           
       # Optional step:
       - name: Cache clojure dependencies

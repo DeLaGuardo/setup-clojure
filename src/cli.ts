@@ -17,13 +17,13 @@ const client = new http.HttpClient('actions/setup-clojure', undefined, {
 
 async function toolVersion(
   version: string,
-  githubAuth: string
+  githubAuth?: string
 ): Promise<string> {
   core.debug('=== Check tool version')
   if (version === 'latest') {
     const res = await client.getJson<{tag_name: string}>(
       'https://api.github.com/repos/clojure/brew-install/releases/latest',
-      {Authorization: githubAuth}
+      githubAuth ? {Authorization: githubAuth} : {}
     )
     const versionString = res.result?.tag_name
     if (versionString) {
@@ -50,14 +50,15 @@ function isResourceProvided(
 
 async function getUrls(
   tag: string,
-  githubAuth: string
+  githubAuth?: string
 ): Promise<{posix?: string; linux: string; windows: string}> {
   core.debug('=== Get download URLs')
   const res = await client.getJson<{
     assets: {browser_download_url: string}[]
-  }>(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, {
-    Authorization: githubAuth
-  })
+  }>(
+    `https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`,
+    githubAuth ? {Authorization: githubAuth} : {}
+  )
   const posix_install_url = `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`
 
   const assets = res.result?.assets
@@ -77,7 +78,7 @@ async function getUrls(
 
 export async function setup(
   requestedVersion: string,
-  githubAuth: string
+  githubAuth?: string
 ): Promise<void> {
   core.debug('=== Run setup')
   const version = await toolVersion(requestedVersion, githubAuth)
@@ -178,7 +179,7 @@ async function runLinuxInstall(
   return destinationFolder
 }
 
-async function MacOSDeps(file: string, githubAuth: string): Promise<void> {
+async function MacOSDeps(file: string, githubAuth?: string): Promise<void> {
   core.debug('=== Install extra deps for MacOS')
   const data = await fs.readFile(file, 'utf-8')
   const newValue = data.replace(
@@ -188,18 +189,18 @@ async function MacOSDeps(file: string, githubAuth: string): Promise<void> {
   await fs.writeFile(file, newValue, 'utf-8')
   await exec.exec('brew', ['install', 'coreutils'], {
     env: {
-      HOMEBREW_GITHUB_API_TOKEN: githubAuth.substring(7),
+      HOMEBREW_GITHUB_API_TOKEN: githubAuth ? githubAuth.substring(7) : '',
       HOMEBREW_NO_INSTALL_CLEANUP: 'true',
       HOME: process.env['HOME'] || ''
     }
   })
 }
 
-export async function getLatestDepsClj(githubAuth: string): Promise<string> {
+export async function getLatestDepsClj(githubAuth?: string): Promise<string> {
   core.debug('=== Fetch latest version of deps clj')
   const res = await client.getJson<{tag_name: string}>(
     `https://api.github.com/repos/borkdude/deps.clj/releases/latest`,
-    {Authorization: githubAuth}
+    githubAuth ? {Authorization: githubAuth} : {}
   )
 
   const result = res.result?.tag_name?.replace(/^v/, '')

@@ -1,19 +1,19 @@
-name: 'Setup Clojure'
-description: 'Setup your runner with Clojure build tools'
-author: 'DeLaGuardo'
+name: "Setup Clojure"
+description: "Setup your runner with Clojure build tools"
+author: "DeLaGuardo"
 branding:
-  icon: 'gift'
-  color: 'blue'
+  icon: "gift"
+  color: "blue"
 inputs:
   lein:
-    description: 'The Leiningen version to make available on the path.'
+    description: "The Leiningen version to make available on the path."
   boot:
-    description: 'The boot-clj version to make available on the path.'
+    description: "The boot-clj version to make available on the path."
   tools-deps:
-    description: '[DEPRECATED] The tools deps version to make available on the path.'
-    deprecationMessage: 'Use the `cli` input instead'
+    description: "[DEPRECATED] The tools deps version to make available on the path."
+    deprecationMessage: "Use the `cli` input instead"
   cli:
-    description: 'Clojure CLI version to make available on the path.'
+    description: "Clojure CLI version to make available on the path."
   cmd-exe-workaround:
     description: >+
       [DEPRECATED]
@@ -21,17 +21,17 @@ inputs:
       with the `deps.clj` of its specific version, `latest` can be used.
 
       Useful for running `clojure` command from `cmd.exe`.
-    deprecationMessage: 'No longer needed. Please remove and use unified `cli` input instead'
+    deprecationMessage: "No longer needed. Please remove and use unified `cli` input instead"
   bb:
-    description: 'Babashka version to install, `latest` can be used.'
+    description: "Babashka version to install, `latest` can be used."
   clj-kondo:
-    description: 'Clj-kondo version to install, `latest` can be used.'
+    description: "Clj-kondo version to install, `latest` can be used."
   cljfmt:
-    description: 'cljfmt version to install, `latest` can be used.'
+    description: "cljfmt version to install, `latest` can be used."
   cljstyle:
-    description: 'cljstyle version to install, `latest` can be used.'
+    description: "cljstyle version to install, `latest` can be used."
   zprint:
-    description: 'zprint version to install, `latest` can be used.'
+    description: "zprint version to install, `latest` can be used."
   github-token:
     description: >+
       To fix rate limit errors, provide `secrets.GITHUB_TOKEN` value to this field.
@@ -41,8 +41,13 @@ inputs:
   invalidate-cache:
     description: >+
       Set to `true` to fix problems related to wrongly populated tool cache
-    default: 'false'
+    default: "false"
+    required: false
+  no-auth:
+    description: >+
+      Set to `true` to avoid using github-token as an Authentication header
+    default: "false"
     required: false
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: "node20"
+  main: "dist/index.js"
