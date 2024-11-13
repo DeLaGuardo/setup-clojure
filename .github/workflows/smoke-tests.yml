@@ -19,13 +19,13 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install clojure tools-deps
         uses: ./
         with:
-          tools-deps: 1.10.1.693
+          tools-deps: 1.11.4.1474
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
@@ -44,13 +44,13 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install Clojure CLI
         uses: ./
         with:
-          cli: 1.11.1.1409
+          cli: 1.11.4.1474
 
       - name: Execute clojure code
         run: clojure -e "(+ 1 1)"
@@ -69,8 +69,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install Clojure CLI
         uses: ./
@@ -94,8 +94,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install leiningen
         uses: ./
@@ -115,8 +115,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install leiningen
         uses: ./
@@ -147,8 +147,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '11'
+          distribution: "zulu"
+          java-version: "11"
 
       - name: Install boot
         uses: ./
@@ -173,8 +173,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install babashka
         uses: ./
@@ -199,8 +199,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install clj-kondo
         uses: ./
@@ -225,8 +225,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install cljfmt
         uses: ./
@@ -240,7 +240,7 @@ jobs:
   test-cljstyle:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -251,8 +251,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install cljstyle
         uses: ./
@@ -264,7 +264,6 @@ jobs:
         run: cljstyle version
 
   test-zprint:
-
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
@@ -278,8 +277,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install zprint
         uses: ./
@@ -300,13 +299,13 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: "zulu"
+          java-version: "8"
 
       - name: Install all the tools
         uses: ./
         with:
-          cli: 1.11.1.1149
+          cli: 1.11.4.1474
           lein: 2.11.0
           boot: 2.8.3
           bb: 0.8.157

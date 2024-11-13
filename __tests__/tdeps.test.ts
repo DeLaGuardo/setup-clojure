@@ -4,7 +4,9 @@ import * as _io from '@actions/io'
 import * as _tc from '@actions/tool-cache'
 import * as _http from '@actions/http-client'
 import * as _os from 'os'
+import * as _crypto from 'crypto'
 import * as _fs from '../src/fs'
+import * as _utils from '../src/utils'
 import {join} from 'path'
 import {VERSION} from '../src/version'
 
@@ -33,6 +35,13 @@ const fs: jest.Mocked<typeof _fs> = _fs as never
 jest.mock('os')
 const os: jest.Mocked<typeof _os> = _os as never
 
+jest.mock('../src/utils', () => ({
+  ...jest.requireActual('../src/utils'),
+  getTempDir: jest.fn(),
+  isMacOS: jest.fn()
+}))
+const utils: jest.Mocked<typeof _utils> = _utils as never
+
 jest.mock('@actions/http-client', () => {
   return {
     HttpClient: jest.fn().mockImplementation(() => {
@@ -49,12 +58,17 @@ jest.mock('@actions/http-client', () => {
   }
 })
 
+jest.mock('crypto')
+const crypto: jest.Mocked<typeof _crypto> = _crypto as never
+
 describe('tdeps tests', () => {
   beforeAll(async () => {
     process.env['RUNNER_TOOL_CACHE'] = toolPath
     process.env['RUNNER_TEMP'] = tempPath
     os.arch.mockReturnValue('x64')
     os.platform.mockReturnValue('linux')
+    utils.getTempDir.mockReturnValue(tempPath)
+    crypto.randomUUID.mockReturnValue('123-123-123-123-123')
     jest.spyOn(global.Math, 'random').mockReturnValue(1)
   })
 
@@ -75,11 +89,11 @@ describe('tdeps tests', () => {
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
-    await tdeps.setup('1.10.1.469', 'auth token')
+    await tdeps.setup('1.10.1.469', 'auth token', 'Bearer auth token')
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.10.1.469.sh',
-      undefined,
+      join(tempPath, '123-123-123-123-123', 'linux-install-1.10.1.469.sh'),
       'auth token'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
@@ -110,7 +124,7 @@ describe('tdeps tests', () => {
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.2.3.sh',
-      undefined,
+      join(tempPath, '123-123-123-123-123', 'linux-install-1.2.3.sh'),
       'auth token'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')
@@ -134,7 +148,7 @@ describe('tdeps tests', () => {
   })
 
   it('Supports macOS', async () => {
-    os.platform.mockReturnValue('darwin')
+    utils.isMacOS.mockReturnValue(true)
 
     fs.readFile.mockResolvedValueOnce('install -D')
     fs.writeFile.mockResolvedValueOnce()
@@ -146,7 +160,7 @@ describe('tdeps tests', () => {
 
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://download.clojure.org/install/linux-install-1.2.3.sh',
-      undefined,
+      join(tempPath, '123-123-123-123-123', 'linux-install-1.2.3.sh'),
       'foo'
     )
     expect(io.mkdirP).toHaveBeenCalledWith('/tmp/usr/local/opt/ClojureTools')

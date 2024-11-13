@@ -1,6 +1,6 @@
 {
   "name": "setup-clojure",
-  "version": "12.2",
+  "version": "13.0",
   "private": true,
   "description": "setup clojure action",
   "main": "lib/setup-clojure.js",

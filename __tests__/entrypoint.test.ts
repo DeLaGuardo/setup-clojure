@@ -74,7 +74,11 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(cli.setup).toHaveBeenCalledWith('1.2.3', 'Bearer auth token')
+    expect(cli.setup).toHaveBeenCalledWith(
+      '1.2.3',
+      'auth token',
+      'Bearer auth token'
+    )
   })
 
   it('sets up Clojure CLI tools', async () => {
@@ -83,7 +87,11 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(cli.setup).toHaveBeenCalledWith('1.2.3', 'Bearer auth token')
+    expect(cli.setup).toHaveBeenCalledWith(
+      '1.2.3',
+      'auth token',
+      'Bearer auth token'
+    )
   })
 
   it('sets up Babashka', async () => {

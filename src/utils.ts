@@ -1,6 +1,6 @@
-import os from 'os'
 import * as path from 'path'
 import {VERSION} from './version'
+import {platform} from '@actions/core'
 
 export function getCacheVersionString(version: string): string {
   const versionArray = version.split('.')
@@ -14,17 +14,15 @@ export function getTempDir(): string {
   let tempDirectory = process.env.RUNNER_TEMP
   if (tempDirectory === undefined) {
     let baseLocation
-    if (isWindows()) {
+    if (platform.isWindows) {
       // On windows use the USERPROFILE env variable
       baseLocation = process.env['USERPROFILE']
         ? process.env['USERPROFILE']
         : 'C:\\'
+    } else if (platform.isMacOS) {
+      baseLocation = '/Users'
     } else {
-      if (process.platform === 'darwin') {
-        baseLocation = '/Users'
-      } else {
-        baseLocation = '/home'
-      }
+      baseLocation = '/home'
     }
     tempDirectory = path.join(baseLocation, 'actions', 'temp')
   }
@@ -32,9 +30,9 @@ export function getTempDir(): string {
 }
 
 export function isWindows(): boolean {
-  return os.platform() === 'win32'
+  return platform.isWindows
 }
 
 export function isMacOS(): boolean {
-  return os.platform() === 'darwin'
+  return platform.isMacOS
 }
