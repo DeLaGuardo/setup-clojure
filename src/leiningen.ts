@@ -13,8 +13,6 @@ export async function setup(
   version: string,
   githubAuth?: string
 ): Promise<void> {
-  const isWindows = utils.isWindows()
-
   let toolPath = tc.find(
     identifier,
     utils.getCacheVersionString(version),
@@ -25,7 +23,7 @@ export async function setup(
     core.info(`Leiningen found in cache ${toolPath}`)
   } else {
     const binScripts = []
-    if (isWindows) {
+    if (utils.isWindows()) {
       for (const ext of ['ps1', 'bat']) {
         binScripts.push(
           await tc.downloadTool(
@@ -76,8 +74,6 @@ async function installLeiningen(
   binScripts: string[],
   destinationFolder: string
 ): Promise<string> {
-  const isWindows = utils.isWindows()
-
   await io.mkdirP(destinationFolder)
 
   for (const binScript of binScripts) {
@@ -90,7 +86,7 @@ async function installLeiningen(
 
       await io.mv(bin, path.join(binDir, `${path.basename(bin)}`))
 
-      if (!isWindows) {
+      if (!utils.isWindows()) {
         await fs.chmod(path.join(binDir, 'lein'), '0755')
       }
     } else {
@@ -98,7 +94,7 @@ async function installLeiningen(
     }
   }
 
-  const version_cmd = isWindows
+  const version_cmd = utils.isWindows()
     ? 'powershell .\\lein.ps1 self-install'
     : './lein version'
 

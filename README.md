@@ -46,7 +46,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@12.5
+        uses: DeLaGuardo/setup-clojure@13.0
         with:
           # Install just one or all simultaneously
           # The value must indicate a particular version of the tool, or use 'latest'
@@ -58,7 +58,6 @@ jobs:
           clj-kondo: 2022.05.31        # Clj-kondo
           cljfmt: 0.10.2               # cljfmt
           cljstyle: 0.16.626           # cljstyle
-          cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           zprint: 1.2.3                # zprint
           
       # Optional step:
@@ -95,8 +94,8 @@ jobs:
         run: cljfmt --version
 
       - name: Get cljstyle version
-        # cljstyle is not yet available for windows
-        if: ${{ matrix.os != 'windows-latest' }}
+        # cljstyle is not yet available for windows and mac os
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: cljstyle version
 
       - name: Get zprint version

@@ -394,6 +394,7 @@ const path = __importStar(__nccwpck_require__(6928));
 const os = __importStar(__nccwpck_require__(857));
 const fs = __importStar(__nccwpck_require__(2621));
 const utils = __importStar(__nccwpck_require__(9277));
+const crypto = __importStar(__nccwpck_require__(6982));
 exports.identifier = 'ClojureToolsDeps';
 const client = new http.HttpClient('actions/setup-clojure', undefined, {
     allowRetries: true,
@@ -404,7 +405,7 @@ function toolVersion(version, githubAuth) {
         var _a;
         core.debug('=== Check tool version');
         if (version === 'latest') {
-            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', { Authorization: githubAuth });
+            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', githubAuth ? { Authorization: githubAuth } : {});
             const versionString = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name;
             if (versionString) {
                 return versionString;
@@ -428,33 +429,33 @@ function getUrls(tag, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         core.debug('=== Get download URLs');
-        const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, {
-            Authorization: githubAuth
-        });
+        const res = yield client.getJson(`https://api.github.com/repos/clojure/brew-install/releases/tags/${tag}`, githubAuth
+            ? {
+                Authorization: githubAuth
+            }
+            : {});
         const posix_install_url = `https://github.com/clojure/brew-install/releases/download/${tag}/posix-install.sh`;
         const assets = (_a = res.result) === null || _a === void 0 ? void 0 : _a.assets;
         if (assets && isResourceProvided(posix_install_url, assets)) {
             return {
                 posix: posix_install_url,
                 linux: `https://github.com/clojure/brew-install/releases/download/${tag}/linux-install.sh`,
-                windows: `github.com/clojure/brew-install/releases/download/${tag}/win-install.ps1`
+                windows: `https://github.com/casselc/clj-msi/releases/tag/v${tag}/clojure-${tag}.msi`
             };
         }
         else {
             return {
                 linux: `https://download.clojure.org/install/linux-install-${tag}.sh`,
-                windows: `download.clojure.org/install/win-install-${tag}.ps1`
+                windows: `https://github.com/casselc/clj-msi/releases/tag/v${tag}/clojure-${tag}.msi`
             };
         }
     });
 }
-function setup(requestedVersion, githubAuth) {
+function setup(requestedVersion, githubToken, githubAuthToken) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Run setup');
-        const version = yield toolVersion(requestedVersion, githubAuth);
-        const installDir = utils.isWindows()
-            ? 'C:\\Program Files\\WindowsPowerShell\\Modules'
-            : '/tmp/usr/local/opt';
+        const version = yield toolVersion(requestedVersion, githubAuthToken);
+        const installDir = utils.isWindows() ? 'C:\\tools' : '/tmp/usr/local/opt';
         const toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
         if (toolPath) {
             core.info(`Clojure CLI found in cache ${toolPath}`);
@@ -464,37 +465,48 @@ function setup(requestedVersion, githubAuth) {
             });
         }
         else {
-            const { linux, posix, windows } = yield getUrls(version, githubAuth);
+            const { linux, posix, windows } = yield getUrls(version, githubAuthToken);
+            const url = utils.isMacOS()
+                ? posix || linux
+                : utils.isWindows()
+                    ? windows
+                    : linux;
+            const installerFileName = url.split(/\//).pop() || '';
+            const outputDir = path.join(utils.getTempDir(), crypto.randomUUID());
+            const outputFile = path.join(outputDir, installerFileName);
+            let clojureInstallScript;
             if (utils.isWindows()) {
-                yield exec.exec(`powershell -c "iwr -useb ${windows} | iex"`, [], {
-                    // Install to a modules location common to powershell/pwsh
-                    env: { PSModulePath: installDir },
-                    input: Buffer.from('1')
+                yield exec.exec('gh', [
+                    'release',
+                    '-R',
+                    'casselc/clj-msi',
+                    'download',
+                    `v${version}`,
+                    '-D',
+                    `${outputDir}`
+                ], {
+                    env: { GH_TOKEN: githubToken }
                 });
-                core.debug(`clojure tools deps installed to ${path.join(installDir, 'ClojureTools')}`);
-                yield tc.cacheDir(path.join(installDir, 'ClojureTools'), exports.identifier, utils.getCacheVersionString(version));
+                clojureInstallScript = path.join(outputDir, `clojure-${version}.msi`);
             }
             else {
-                let clojureInstallScript;
-                if (utils.isMacOS()) {
-                    if (posix) {
-                        clojureInstallScript = yield tc.downloadTool(posix, undefined, githubAuth);
-                    }
-                    else {
-                        clojureInstallScript = yield tc.downloadTool(linux, undefined, githubAuth);
-                        yield MacOSDeps(clojureInstallScript, githubAuth);
-                    }
-                }
-                else {
-                    clojureInstallScript = yield tc.downloadTool(linux, undefined, githubAuth);
-                }
-                const clojureToolsDir = yield runLinuxInstall(clojureInstallScript, path.join(installDir, 'ClojureTools'));
-                core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
-                yield tc.cacheDir(clojureToolsDir, exports.identifier, utils.getCacheVersionString(version));
+                clojureInstallScript = yield tc.downloadTool(url, outputFile, githubToken);
             }
+            core.debug(`Finish downloading of installation script to ${clojureInstallScript}`);
+            if (utils.isMacOS() && !posix) {
+                yield MacOSDeps(clojureInstallScript, githubToken);
+            }
+            const clojureToolsDir = utils.isWindows()
+                ? yield runWindowsInstall(clojureInstallScript, path.join(installDir, 'ClojureTools'), githubToken)
+                : yield runLinuxInstall(clojureInstallScript, path.join(installDir, 'ClojureTools'));
+            core.debug(`clojure tools deps installed to ${clojureToolsDir}`);
+            yield tc.cacheDir(clojureToolsDir, exports.identifier, utils.getCacheVersionString(version));
         }
         core.exportVariable('CLOJURE_INSTALL_DIR', path.join(installDir, 'ClojureTools'));
-        if (!utils.isWindows()) {
+        if (utils.isWindows()) {
+            core.addPath(path.join(installDir, 'ClojureTools'));
+        }
+        else {
             core.addPath(path.join(installDir, 'ClojureTools', 'bin'));
         }
     });
@@ -508,6 +520,23 @@ function runLinuxInstall(installScript, destinationFolder) {
         return destinationFolder;
     });
 }
+function runWindowsInstall(installScript, destinationFolder, githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug('=== Install on Windows');
+        yield io.mkdirP(destinationFolder);
+        core.debug(`installing from ${installScript} to ${destinationFolder}`);
+        yield exec.getExecOutput('msiexec', [
+            '/i',
+            `"${installScript}"`,
+            '/qn',
+            `APPLICATIONFOLDER="${destinationFolder}"`
+        ], {
+            env: { GH_TOKEN: githubAuth },
+            windowsVerbatimArguments: true
+        });
+        return destinationFolder;
+    });
+}
 function MacOSDeps(file, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug('=== Install extra deps for MacOS');
@@ -516,7 +545,7 @@ function MacOSDeps(file, githubAuth) {
         yield fs.writeFile(file, newValue, 'utf-8');
         yield exec.exec('brew', ['install', 'coreutils'], {
             env: {
-                HOMEBREW_GITHUB_API_TOKEN: githubAuth.substring(7),
+                HOMEBREW_GITHUB_API_TOKEN: githubAuth,
                 HOMEBREW_NO_INSTALL_CLEANUP: 'true',
                 HOME: process.env['HOME'] || ''
             }
@@ -900,8 +929,8 @@ const cljKondo = __importStar(__nccwpck_require__(4519));
 const cljfmt = __importStar(__nccwpck_require__(4964));
 const cljstyle = __importStar(__nccwpck_require__(1578));
 const zprint = __importStar(__nccwpck_require__(9283));
-const utils = __importStar(__nccwpck_require__(9277));
 const cache = __importStar(__nccwpck_require__(5914));
+const utils = __importStar(__nccwpck_require__(9277));
 const node_process_1 = __importDefault(__nccwpck_require__(1708));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -909,37 +938,36 @@ function main() {
             const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
             const tools = [];
             const githubToken = core.getInput('github-token', { required: true });
-            const githubAuth = `Bearer ${githubToken}`;
-            const IS_WINDOWS = utils.isWindows();
+            const githubAuthToken = (githubToken === null || githubToken === void 0 ? void 0 : githubToken.length) > 0 ? `Bearer ${githubToken}` : undefined;
             if (LEIN_VERSION) {
-                tools.push(lein.setup(LEIN_VERSION, githubAuth));
+                tools.push(lein.setup(LEIN_VERSION, githubAuthToken));
             }
             if (BOOT_VERSION) {
-                tools.push(boot.setup(BOOT_VERSION, githubAuth));
+                tools.push(boot.setup(BOOT_VERSION, githubAuthToken));
             }
             if (CLI_VERSION) {
-                tools.push(cli.setup(CLI_VERSION, githubAuth));
+                tools.push(cli.setup(CLI_VERSION, githubToken, githubAuthToken));
             }
             if (TDEPS_VERSION && !CLI_VERSION) {
-                tools.push(cli.setup(TDEPS_VERSION, githubAuth));
+                tools.push(cli.setup(TDEPS_VERSION, githubToken, githubAuthToken));
             }
             if (BB_VERSION) {
-                tools.push(bb.setup(BB_VERSION, githubAuth));
+                tools.push(bb.setup(BB_VERSION, githubAuthToken));
             }
             if (CLJ_KONDO_VERSION) {
-                tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth));
+                tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuthToken));
             }
             if (CLJFMT_VERSION) {
-                tools.push(cljfmt.setup(CLJFMT_VERSION, githubAuth));
+                tools.push(cljfmt.setup(CLJFMT_VERSION, githubAuthToken));
             }
             if (CLJSTYLE_VERSION) {
-                if (IS_WINDOWS) {
+                if (utils.isWindows()) {
                     throw new Error('cljstyle on windows is not supported yet.');
                 }
-                tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuth));
+                tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuthToken));
             }
             if (ZPRINT_VERSION) {
-                tools.push(zprint.setup(ZPRINT_VERSION, githubAuth));
+                tools.push(zprint.setup(ZPRINT_VERSION, githubAuthToken));
             }
             if (tools.length === 0) {
                 throw new Error('You must specify at least one clojure tool.');
@@ -957,7 +985,6 @@ function pre() {
         if (!core.getBooleanInput('invalidate-cache')) {
             try {
                 const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
-                const IS_WINDOWS = utils.isWindows();
                 const tools = [];
                 if (LEIN_VERSION) {
                     tools.push(cache.restore(lein.identifier, LEIN_VERSION));
@@ -981,7 +1008,7 @@ function pre() {
                     tools.push(cache.restore(cljfmt.identifier, CLJFMT_VERSION));
                 }
                 if (CLJSTYLE_VERSION) {
-                    if (!IS_WINDOWS) {
+                    if (!utils.isWindows()) {
                         tools.push(cache.restore(cljstyle.identifier, CLJSTYLE_VERSION));
                     }
                 }
@@ -1001,7 +1028,6 @@ function post() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
-            const IS_WINDOWS = utils.isWindows();
             const tools = [];
             if (LEIN_VERSION) {
                 tools.push(cache.save(lein.identifier, LEIN_VERSION));
@@ -1025,7 +1051,7 @@ function post() {
                 tools.push(cache.save(cljfmt.identifier, CLJFMT_VERSION));
             }
             if (CLJSTYLE_VERSION) {
-                if (!IS_WINDOWS) {
+                if (!utils.isWindows()) {
                     tools.push(cache.save(cljstyle.identifier, CLJSTYLE_VERSION));
                 }
             }
@@ -1138,14 +1164,13 @@ const utils = __importStar(__nccwpck_require__(9277));
 exports.identifier = 'Leiningen';
 function setup(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
-        const isWindows = utils.isWindows();
         let toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
             core.info(`Leiningen found in cache ${toolPath}`);
         }
         else {
             const binScripts = [];
-            if (isWindows) {
+            if (utils.isWindows()) {
                 for (const ext of ['ps1', 'bat']) {
                     binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein.${ext}`, path.join(utils.getTempDir(), `lein.${ext}`), githubAuth));
                 }
@@ -1168,7 +1193,6 @@ function setup(version, githubAuth) {
 }
 function installLeiningen(binScripts, destinationFolder) {
     return __awaiter(this, void 0, void 0, function* () {
-        const isWindows = utils.isWindows();
         yield io.mkdirP(destinationFolder);
         for (const binScript of binScripts) {
             const bin = path.normalize(binScript);
@@ -1177,7 +1201,7 @@ function installLeiningen(binScripts, destinationFolder) {
                 const binDir = path.join(destinationFolder, 'leiningen', 'bin');
                 yield io.mkdirP(binDir);
                 yield io.mv(bin, path.join(binDir, `${path.basename(bin)}`));
-                if (!isWindows) {
+                if (!utils.isWindows()) {
                     yield fs.chmod(path.join(binDir, 'lein'), '0755');
                 }
             }
@@ -1185,7 +1209,7 @@ function installLeiningen(binScripts, destinationFolder) {
                 throw new Error('Not a file');
             }
         }
-        const version_cmd = isWindows
+        const version_cmd = utils.isWindows()
             ? 'powershell .\\lein.ps1 self-install'
             : './lein version';
         const toolDir = path.join(destinationFolder, 'leiningen');
@@ -1278,17 +1302,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCacheVersionString = getCacheVersionString;
 exports.getTempDir = getTempDir;
 exports.isWindows = isWindows;
 exports.isMacOS = isMacOS;
-const os_1 = __importDefault(__nccwpck_require__(857));
 const path = __importStar(__nccwpck_require__(6928));
 const version_1 = __nccwpck_require__(7992);
+const core_1 = __nccwpck_require__(7484);
 function getCacheVersionString(version) {
     const versionArray = version.split('.');
     const major = versionArray[0];
@@ -1300,29 +1321,27 @@ function getTempDir() {
     let tempDirectory = process.env.RUNNER_TEMP;
     if (tempDirectory === undefined) {
         let baseLocation;
-        if (isWindows()) {
+        if (core_1.platform.isWindows) {
             // On windows use the USERPROFILE env variable
             baseLocation = process.env['USERPROFILE']
                 ? process.env['USERPROFILE']
                 : 'C:\\';
         }
+        else if (core_1.platform.isMacOS) {
+            baseLocation = '/Users';
+        }
         else {
-            if (process.platform === 'darwin') {
-                baseLocation = '/Users';
-            }
-            else {
-                baseLocation = '/home';
-            }
+            baseLocation = '/home';
         }
         tempDirectory = path.join(baseLocation, 'actions', 'temp');
     }
     return tempDirectory;
 }
 function isWindows() {
-    return os_1.default.platform() === 'win32';
+    return core_1.platform.isWindows;
 }
 function isMacOS() {
-    return os_1.default.platform() === 'darwin';
+    return core_1.platform.isMacOS;
 }
 
 
@@ -1335,7 +1354,7 @@ function isMacOS() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '12-5';
+exports.VERSION = '13-0';
 
 
 /***/ }),

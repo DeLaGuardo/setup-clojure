@@ -7,8 +7,8 @@ import * as cljKondo from './clj-kondo'
 import * as cljfmt from './cljfmt'
 import * as cljstyle from './cljstyle'
 import * as zprint from './zprint'
-import * as utils from './utils'
 import * as cache from './cache'
+import * as utils from './utils'
 import process from 'node:process'
 
 export async function main(): Promise<void> {
@@ -28,46 +28,46 @@ export async function main(): Promise<void> {
     const tools = []
 
     const githubToken = core.getInput('github-token', {required: true})
-    const githubAuth = `Bearer ${githubToken}`
-    const IS_WINDOWS = utils.isWindows()
+    const githubAuthToken =
+      githubToken?.length > 0 ? `Bearer ${githubToken}` : undefined
 
     if (LEIN_VERSION) {
-      tools.push(lein.setup(LEIN_VERSION, githubAuth))
+      tools.push(lein.setup(LEIN_VERSION, githubAuthToken))
     }
 
     if (BOOT_VERSION) {
-      tools.push(boot.setup(BOOT_VERSION, githubAuth))
+      tools.push(boot.setup(BOOT_VERSION, githubAuthToken))
     }
 
     if (CLI_VERSION) {
-      tools.push(cli.setup(CLI_VERSION, githubAuth))
+      tools.push(cli.setup(CLI_VERSION, githubToken, githubAuthToken))
     }
 
     if (TDEPS_VERSION && !CLI_VERSION) {
-      tools.push(cli.setup(TDEPS_VERSION, githubAuth))
+      tools.push(cli.setup(TDEPS_VERSION, githubToken, githubAuthToken))
     }
 
     if (BB_VERSION) {
-      tools.push(bb.setup(BB_VERSION, githubAuth))
+      tools.push(bb.setup(BB_VERSION, githubAuthToken))
     }
 
     if (CLJ_KONDO_VERSION) {
-      tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuth))
+      tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuthToken))
     }
 
     if (CLJFMT_VERSION) {
-      tools.push(cljfmt.setup(CLJFMT_VERSION, githubAuth))
+      tools.push(cljfmt.setup(CLJFMT_VERSION, githubAuthToken))
     }
 
     if (CLJSTYLE_VERSION) {
-      if (IS_WINDOWS) {
+      if (utils.isWindows()) {
         throw new Error('cljstyle on windows is not supported yet.')
       }
-      tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuth))
+      tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuthToken))
     }
 
     if (ZPRINT_VERSION) {
-      tools.push(zprint.setup(ZPRINT_VERSION, githubAuth))
+      tools.push(zprint.setup(ZPRINT_VERSION, githubAuthToken))
     }
 
     if (tools.length === 0) {
@@ -96,7 +96,6 @@ export async function pre(): Promise<void> {
         ZPRINT_VERSION
       } = getTools()
 
-      const IS_WINDOWS = utils.isWindows()
       const tools = []
 
       if (LEIN_VERSION) {
@@ -128,7 +127,7 @@ export async function pre(): Promise<void> {
       }
 
       if (CLJSTYLE_VERSION) {
-        if (!IS_WINDOWS) {
+        if (!utils.isWindows()) {
           tools.push(cache.restore(cljstyle.identifier, CLJSTYLE_VERSION))
         }
       }
@@ -159,7 +158,6 @@ export async function post(): Promise<void> {
       ZPRINT_VERSION
     } = getTools()
 
-    const IS_WINDOWS = utils.isWindows()
     const tools = []
 
     if (LEIN_VERSION) {
@@ -191,7 +189,7 @@ export async function post(): Promise<void> {
     }
 
     if (CLJSTYLE_VERSION) {
-      if (!IS_WINDOWS) {
+      if (!utils.isWindows()) {
         tools.push(cache.save(cljstyle.identifier, CLJSTYLE_VERSION))
       }
     }
