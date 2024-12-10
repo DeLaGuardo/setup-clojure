@@ -27,7 +27,7 @@ export async function main(): Promise<void> {
 
     const tools = []
 
-    const githubToken = core.getInput('github-token', {required: true})
+    const githubToken = core.getInput('github-token')
     const githubAuthToken =
       githubToken?.length > 0 ? `Bearer ${githubToken}` : undefined
 
