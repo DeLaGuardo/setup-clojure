@@ -279,101 +279,6 @@ function setWindowsRegistry() {
 
 /***/ }),
 
-/***/ 5914:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.save = save;
-exports.restore = restore;
-const cache = __importStar(__nccwpck_require__(5116));
-const core = __importStar(__nccwpck_require__(7484));
-const path = __importStar(__nccwpck_require__(6928));
-const os_1 = __importDefault(__nccwpck_require__(857));
-const version_1 = __nccwpck_require__(7992);
-const cacheDir = process.env['RUNNER_TOOL_CACHE'] || '';
-function save(identifier, version) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            if (version !== 'latest') {
-                yield cache.saveCache(getCachePaths(identifier), getCacheKey(identifier, version));
-            }
-        }
-        catch (err) {
-            const error = err instanceof Error ? err.message : String(err);
-            core.debug(error);
-        }
-    });
-}
-function restore(identifier, version) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            if (version !== 'latest') {
-                yield cache.restoreCache(getCachePaths(identifier), getCacheKey(identifier, version), []);
-            }
-        }
-        catch (err) {
-            const error = err instanceof Error ? err.message : String(err);
-            core.debug(error);
-        }
-    });
-}
-function getCacheKey(identifier, version) {
-    return `setupclojure-${os_1.default.platform()}-${version_1.VERSION}-${identifier}-${version}`;
-}
-function getCachePaths(identifier) {
-    return [path.join(cacheDir, identifier)];
-}
-
-
-/***/ }),
-
 /***/ 4006:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -493,7 +398,6 @@ function getUrls(tag, githubAuth) {
 }
 function setup(requestedVersion, githubToken, githubAuthToken) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug('=== Run setup');
         const version = yield toolVersion(requestedVersion, githubAuthToken);
         const installDir = utils.isWindows() ? 'C:\\tools' : '/tmp/usr/local/opt';
         const toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
@@ -998,9 +902,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.main = main;
-exports.pre = pre;
-exports.post = post;
 const core = __importStar(__nccwpck_require__(7484));
+const cache = __importStar(__nccwpck_require__(5116));
 const lein = __importStar(__nccwpck_require__(3815));
 const boot = __importStar(__nccwpck_require__(7658));
 const cli = __importStar(__nccwpck_require__(4006));
@@ -1008,46 +911,50 @@ const bb = __importStar(__nccwpck_require__(7093));
 const cljKondo = __importStar(__nccwpck_require__(4519));
 const cljfmt = __importStar(__nccwpck_require__(4964));
 const cljstyle = __importStar(__nccwpck_require__(1578));
-const zprint = __importStar(__nccwpck_require__(9283));
-const cache = __importStar(__nccwpck_require__(5914));
+const zprint = __importStar(__nccwpck_require__(1664));
 const utils = __importStar(__nccwpck_require__(9277));
 const node_process_1 = __importDefault(__nccwpck_require__(1708));
+const path = __importStar(__nccwpck_require__(6928));
+const os_1 = __importDefault(__nccwpck_require__(857));
+const version_1 = __nccwpck_require__(7992);
+const cacheDir = node_process_1.default.env['RUNNER_TOOL_CACHE'] || '';
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
+        const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
+        const tools = [];
+        const invalidateCache = core.getBooleanInput('invalidate-cache');
+        const githubToken = core.getInput('github-token');
+        const githubAuthToken = (githubToken === null || githubToken === void 0 ? void 0 : githubToken.length) > 0 ? `Bearer ${githubToken}` : undefined;
         try {
-            const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
-            const tools = [];
-            const githubToken = core.getInput('github-token');
-            const githubAuthToken = (githubToken === null || githubToken === void 0 ? void 0 : githubToken.length) > 0 ? `Bearer ${githubToken}` : undefined;
             if (LEIN_VERSION) {
-                tools.push(lein.setup(LEIN_VERSION, githubAuthToken));
+                tools.push(setupTool(lein.identifier, LEIN_VERSION, invalidateCache, lein.setup.bind(null, LEIN_VERSION, githubAuthToken)));
             }
             if (BOOT_VERSION) {
-                tools.push(boot.setup(BOOT_VERSION, githubAuthToken));
+                tools.push(setupTool(boot.identifier, BOOT_VERSION, invalidateCache, boot.setup.bind(null, BOOT_VERSION, githubAuthToken)));
             }
             if (CLI_VERSION) {
-                tools.push(cli.setup(CLI_VERSION, githubToken, githubAuthToken));
+                tools.push(setupTool(cli.identifier, CLI_VERSION, invalidateCache, cli.setup.bind(null, CLI_VERSION, githubToken, githubAuthToken)));
             }
             if (TDEPS_VERSION && !CLI_VERSION) {
-                tools.push(cli.setup(TDEPS_VERSION, githubToken, githubAuthToken));
+                tools.push(setupTool(cli.identifier, TDEPS_VERSION, invalidateCache, cli.setup.bind(null, TDEPS_VERSION, githubToken, githubAuthToken)));
             }
             if (BB_VERSION) {
-                tools.push(bb.setup(BB_VERSION, githubAuthToken));
+                tools.push(setupTool(bb.identifier, BB_VERSION, invalidateCache, bb.setup.bind(null, BB_VERSION, githubAuthToken)));
             }
             if (CLJ_KONDO_VERSION) {
-                tools.push(cljKondo.setup(CLJ_KONDO_VERSION, githubAuthToken));
+                tools.push(setupTool(cljKondo.identifier, CLJ_KONDO_VERSION, invalidateCache, cljKondo.setup.bind(null, CLJ_KONDO_VERSION, githubAuthToken)));
             }
             if (CLJFMT_VERSION) {
-                tools.push(cljfmt.setup(CLJFMT_VERSION, githubAuthToken));
+                tools.push(setupTool(cljfmt.identifier, CLJFMT_VERSION, invalidateCache, cljfmt.setup.bind(null, CLJFMT_VERSION, githubAuthToken)));
             }
             if (CLJSTYLE_VERSION) {
                 if (utils.isWindows()) {
                     throw new Error('cljstyle on windows is not supported yet.');
                 }
-                tools.push(cljstyle.setup(CLJSTYLE_VERSION, githubAuthToken));
+                tools.push(setupTool(cljstyle.identifier, CLJSTYLE_VERSION, invalidateCache, cljstyle.setup.bind(null, CLJSTYLE_VERSION, githubAuthToken)));
             }
             if (ZPRINT_VERSION) {
-                tools.push(zprint.setup(ZPRINT_VERSION, githubAuthToken));
+                tools.push(setupTool(zprint.identifier, ZPRINT_VERSION, invalidateCache, zprint.setup.bind(null, ZPRINT_VERSION, githubAuthToken)));
             }
             if (tools.length === 0) {
                 throw new Error('You must specify at least one clojure tool.');
@@ -1056,46 +963,30 @@ function main() {
         }
         catch (err) {
             const error = err instanceof Error ? err.message : String(err);
+            core.debug(error);
             core.setFailed(error);
         }
     });
 }
-function pre() {
+function setupTool(toolID, toolVersion, invalidateCache, setupFunction) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!core.getBooleanInput('invalidate-cache')) {
+        let cacheHit = false;
+        try {
+            if (toolVersion !== 'latest' && !invalidateCache) {
+                const res = yield cache.restoreCache(getCachePaths(toolID), getCacheKey(toolID, toolVersion));
+                cacheHit = res !== undefined;
+            }
+        }
+        catch (err) {
+            const error = err instanceof Error ? err.message : String(err);
+            core.debug(error);
+        }
+        yield setupFunction();
+        if (!cacheHit) {
             try {
-                const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
-                const tools = [];
-                if (LEIN_VERSION) {
-                    tools.push(cache.restore(lein.identifier, LEIN_VERSION));
+                if (toolVersion !== 'latest') {
+                    yield cache.saveCache(getCachePaths(toolID), getCacheKey(toolID, toolVersion));
                 }
-                if (BOOT_VERSION) {
-                    tools.push(cache.restore(boot.identifier, BOOT_VERSION));
-                }
-                if (CLI_VERSION) {
-                    tools.push(cache.restore(cli.identifier, CLI_VERSION));
-                }
-                if (TDEPS_VERSION && !CLI_VERSION) {
-                    tools.push(cache.restore(cli.identifier, TDEPS_VERSION));
-                }
-                if (BB_VERSION) {
-                    tools.push(cache.restore(bb.identifier, BB_VERSION));
-                }
-                if (CLJ_KONDO_VERSION) {
-                    tools.push(cache.restore(cljKondo.identifier, CLJ_KONDO_VERSION));
-                }
-                if (CLJFMT_VERSION) {
-                    tools.push(cache.restore(cljfmt.identifier, CLJFMT_VERSION));
-                }
-                if (CLJSTYLE_VERSION) {
-                    if (!utils.isWindows()) {
-                        tools.push(cache.restore(cljstyle.identifier, CLJSTYLE_VERSION));
-                    }
-                }
-                if (ZPRINT_VERSION) {
-                    tools.push(cache.restore(zprint.identifier, ZPRINT_VERSION));
-                }
-                yield Promise.all(tools);
             }
             catch (err) {
                 const error = err instanceof Error ? err.message : String(err);
@@ -1104,49 +995,11 @@ function pre() {
         }
     });
 }
-function post() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { LEIN_VERSION, BOOT_VERSION, TDEPS_VERSION, CLI_VERSION, BB_VERSION, CLJ_KONDO_VERSION, CLJFMT_VERSION, CLJSTYLE_VERSION, ZPRINT_VERSION } = getTools();
-            const tools = [];
-            if (LEIN_VERSION) {
-                tools.push(cache.save(lein.identifier, LEIN_VERSION));
-            }
-            if (BOOT_VERSION) {
-                tools.push(cache.save(boot.identifier, BOOT_VERSION));
-            }
-            if (CLI_VERSION) {
-                tools.push(cache.save(cli.identifier, CLI_VERSION));
-            }
-            if (TDEPS_VERSION && !CLI_VERSION) {
-                tools.push(cache.save(cli.identifier, TDEPS_VERSION));
-            }
-            if (BB_VERSION) {
-                tools.push(cache.save(bb.identifier, BB_VERSION));
-            }
-            if (CLJ_KONDO_VERSION) {
-                tools.push(cache.save(cljKondo.identifier, CLJ_KONDO_VERSION));
-            }
-            if (CLJFMT_VERSION) {
-                tools.push(cache.save(cljfmt.identifier, CLJFMT_VERSION));
-            }
-            if (CLJSTYLE_VERSION) {
-                if (!utils.isWindows()) {
-                    tools.push(cache.save(cljstyle.identifier, CLJSTYLE_VERSION));
-                }
-            }
-            if (ZPRINT_VERSION) {
-                tools.push(cache.save(zprint.identifier, ZPRINT_VERSION));
-            }
-            yield Promise.all(tools);
-            node_process_1.default.exit(0);
-        }
-        catch (err) {
-            const error = err instanceof Error ? err.message : String(err);
-            core.debug(error);
-            node_process_1.default.exit(1);
-        }
-    });
+function getCacheKey(identifier, version) {
+    return `setupclojure-${os_1.default.platform()}-${version_1.VERSION}-${identifier}-${version}`;
+}
+function getCachePaths(identifier) {
+    return [path.join(cacheDir, identifier)];
 }
 function getTools() {
     const LEIN_VERSION = core.getInput('lein');
@@ -1341,39 +1194,6 @@ function leiningenJar(toolPath) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1385,15 +1205,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const entrypoint_1 = __nccwpck_require__(2756);
-const core = __importStar(__nccwpck_require__(7484));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        core.debug('=== Run pre-setup clojure ===');
-        yield (0, entrypoint_1.pre)();
-        core.debug('=== Run setup clojure ===');
         yield (0, entrypoint_1.main)();
-        core.debug('=== Run post-setup clojure ===');
-        yield (0, entrypoint_1.post)();
+        process.exit();
     });
 }
 run();
@@ -1496,7 +1311,7 @@ exports.VERSION = '13-0';
 
 /***/ }),
 
-/***/ 9283:
+/***/ 1664:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -10249,7 +10064,7 @@ exports.isTokenCredential = isTokenCredential;
 
 /***/ }),
 
-/***/ 1664:
+/***/ 9283:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -19667,7 +19482,7 @@ exports.setLogLevel = setLogLevel;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var coreHttp = __nccwpck_require__(1664);
+var coreHttp = __nccwpck_require__(9283);
 var tslib = __nccwpck_require__(3849);
 var coreTracing = __nccwpck_require__(5553);
 var logger$1 = __nccwpck_require__(4505);
@@ -54668,7 +54483,7 @@ module.exports = {
     // GBK (~22000 chars) is an extension of CP936 that added user-mapped chars and some other.
     'gbk': {
         type: '_dbcs',
-        table: function() { return (__nccwpck_require__(4488).concat)(__nccwpck_require__(3533)) },
+        table: function() { return (__nccwpck_require__(4488).concat)(__nccwpck_require__(5914)) },
     },
     'xgbk': 'gbk',
     'isoir58': 'gbk',
@@ -54680,7 +54495,7 @@ module.exports = {
     // http://www.khngai.com/chinese/charmap/tblgbk.php?page=0
     'gb18030': {
         type: '_dbcs',
-        table: function() { return (__nccwpck_require__(4488).concat)(__nccwpck_require__(3533)) },
+        table: function() { return (__nccwpck_require__(4488).concat)(__nccwpck_require__(5914)) },
         gb18030: function() { return __nccwpck_require__(9129) },
         encodeSkipVals: [0x80],
         encodeAdd: {'€': 0xA2E3},
@@ -94644,7 +94459,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"uChars":[128,165,169,178,184,216,226
 
 /***/ }),
 
-/***/ 3533:
+/***/ 5914:
 /***/ ((module) => {
 
 "use strict";

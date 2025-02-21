@@ -23,10 +23,11 @@ export async function save(identifier: string, version: string): Promise<void> {
 export async function restore(
   identifier: string,
   version: string
-): Promise<void> {
+): Promise<boolean> {
+  let response
   try {
     if (version !== 'latest') {
-      await cache.restoreCache(
+      response = await cache.restoreCache(
         getCachePaths(identifier),
         getCacheKey(identifier, version),
         []
@@ -36,6 +37,8 @@ export async function restore(
     const error = err instanceof Error ? err.message : String(err)
     core.debug(error)
   }
+
+  return response !== undefined
 }
 
 function getCacheKey(identifier: string, version: string): string {
