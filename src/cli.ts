@@ -86,7 +86,6 @@ export async function setup(
   githubToken: string,
   githubAuthToken?: string
 ): Promise<void> {
-  core.debug('=== Run setup')
   const version = await toolVersion(requestedVersion, githubAuthToken)
   const installDir = utils.isWindows() ? 'C:\\tools' : '/tmp/usr/local/opt'
   const toolPath = tc.find(

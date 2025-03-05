@@ -1,4 +1,5 @@
 import * as _core from '@actions/core'
+import * as _cache from '@actions/cache'
 import * as _lein from '../src/leiningen'
 import * as _boot from '../src/boot'
 import * as _cli from '../src/cli'
@@ -12,6 +13,9 @@ import {main} from '../src/entrypoint'
 
 jest.mock('@actions/core')
 const core: jest.Mocked<typeof _core> = _core as never
+
+jest.mock('@actions/cache')
+const cache: jest.Mocked<typeof _cache> = _cache as never
 
 jest.mock('../src/leiningen')
 const lein: jest.Mocked<typeof _lein> = _lein as never
@@ -48,6 +52,19 @@ describe('setup-clojure', () => {
     inputs = {}
     core.getInput.mockImplementation(key => inputs[key])
     core.getState.mockImplementation(() => 'main')
+    cache.restoreCache.mockImplementation(
+      async (
+        _paths,
+        _primaryKey,
+        _restoreKeys,
+        _options,
+        _enableCrossOsArchive
+      ) => Promise.resolve('')
+    )
+    cache.saveCache.mockImplementation(
+      async (_paths, _key, _enableCrossOsArchive, _options) =>
+        Promise.resolve(0)
+    )
   })
 
   it('sets up Leiningen', async () => {

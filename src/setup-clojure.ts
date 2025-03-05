@@ -1,9 +1,8 @@
-import {pre, post, main} from './entrypoint'
+import {main} from './entrypoint'
 
 async function run(): Promise<void> {
-  await pre()
   await main()
-  await post()
+  process.exit()
 }
 
 run()
