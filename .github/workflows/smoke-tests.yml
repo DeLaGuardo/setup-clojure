@@ -8,7 +8,7 @@ jobs:
   test-tools-deps:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -19,8 +19,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install clojure tools-deps
         uses: ./
@@ -33,7 +33,7 @@ jobs:
   test-clojure-cli:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -44,8 +44,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install Clojure CLI
         uses: ./
@@ -58,7 +58,7 @@ jobs:
   test-clojure-cli-latest:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -69,8 +69,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install Clojure CLI
         uses: ./
@@ -94,8 +94,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install leiningen
         uses: ./
@@ -107,7 +107,12 @@ jobs:
         run: lein version
 
   test-leiningen-windows:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, windows-11-arm]
+
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@main
@@ -115,8 +120,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install leiningen
         uses: ./
@@ -136,7 +141,7 @@ jobs:
   test-boot:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -147,8 +152,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "11"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install boot
         uses: ./
@@ -162,7 +167,7 @@ jobs:
   test-bb:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -173,8 +178,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install babashka
         uses: ./
@@ -188,7 +193,7 @@ jobs:
   test-clj-kondo:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -199,8 +204,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install clj-kondo
         uses: ./
@@ -214,7 +219,7 @@ jobs:
   test-cljfmt:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -225,8 +230,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install cljfmt
         uses: ./
@@ -251,8 +256,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install cljstyle
         uses: ./
@@ -266,7 +271,7 @@ jobs:
   test-zprint:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest, windows-11-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -277,8 +282,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install zprint
         uses: ./
@@ -299,8 +304,8 @@ jobs:
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "8"
+          distribution: 'zulu'
+          java-version: '21'
 
       - name: Install all the tools
         uses: ./
