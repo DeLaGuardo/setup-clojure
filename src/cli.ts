@@ -31,7 +31,7 @@ async function toolVersion(
     )
     const versionString = res.result?.tag_name
     if (versionString) {
-      return versionString
+      return versionString.replace(/^v/, '')
     }
 
     throw new Error(`Can't obtain latest Clojure CLI version`)
