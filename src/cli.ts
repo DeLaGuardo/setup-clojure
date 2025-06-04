@@ -22,9 +22,9 @@ async function toolVersion(
 ): Promise<string> {
   core.debug('=== Check tool version')
   if (version === 'latest') {
-    const url = utils.isWindows() ?
-      'https://api.github.com/repos/casselc/clj-msi/releases/latest' :
-      'https://api.github.com/repos/clojure/brew-install/releases/latest'
+    const url = utils.isWindows()
+      ? 'https://api.github.com/repos/casselc/clj-msi/releases/latest'
+      : 'https://api.github.com/repos/clojure/brew-install/releases/latest'
     const res = await client.getJson<{tag_name: string}>(
       url,
       githubAuth ? {Authorization: githubAuth} : {}
