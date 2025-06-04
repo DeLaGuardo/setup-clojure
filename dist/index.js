@@ -350,7 +350,10 @@ function toolVersion(version, githubAuth) {
         var _a;
         core.debug('=== Check tool version');
         if (version === 'latest') {
-            const res = yield client.getJson('https://api.github.com/repos/clojure/brew-install/releases/latest', githubAuth ? { Authorization: githubAuth } : {});
+            const url = utils.isWindows()
+                ? 'https://api.github.com/repos/casselc/clj-msi/releases/latest'
+                : 'https://api.github.com/repos/clojure/brew-install/releases/latest';
+            const res = yield client.getJson(url, githubAuth ? { Authorization: githubAuth } : {});
             const versionString = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name;
             if (versionString) {
                 return versionString;
@@ -1306,7 +1309,7 @@ function isMacOS() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '13-2';
+exports.VERSION = '13-3';
 
 
 /***/ }),
