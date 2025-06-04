@@ -46,7 +46,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@13.3
+        uses: DeLaGuardo/setup-clojure@13.4
         with:
           # Install just one or all simultaneously
           # The value must indicate a particular version of the tool, or use 'latest'

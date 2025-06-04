@@ -356,7 +356,7 @@ function toolVersion(version, githubAuth) {
             const res = yield client.getJson(url, githubAuth ? { Authorization: githubAuth } : {});
             const versionString = (_a = res.result) === null || _a === void 0 ? void 0 : _a.tag_name;
             if (versionString) {
-                return versionString;
+                return versionString.replace(/^v/, '');
             }
             throw new Error(`Can't obtain latest Clojure CLI version`);
         }
@@ -1309,7 +1309,7 @@ function isMacOS() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '13-3';
+exports.VERSION = '13-4';
 
 
 /***/ }),
