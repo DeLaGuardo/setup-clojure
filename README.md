@@ -68,6 +68,7 @@ jobs:
             ~/.m2/repository
             ~/.gitlibs
             ~/.deps.clj
+            .cpcache
           # List all files containing dependencies:
           key: cljdeps-${{ hashFiles('deps.edn') }}
           # key: cljdeps-${{ hashFiles('deps.edn', 'bb.edn') }}
