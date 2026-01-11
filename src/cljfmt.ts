@@ -26,13 +26,15 @@ export async function getLatestCljFmt(githubAuth?: string): Promise<string> {
 
 export function getArtifactName(version: string): string {
   const platform = os.platform()
+  const arch = os.arch() === 'arm64' ? 'aarch64' : 'amd64'
+
   switch (platform) {
     case 'win32':
-      return `cljfmt-${version}-win-amd64.zip`
+      return `cljfmt-${version}-win-${arch}.zip`
     case 'darwin':
-      return `cljfmt-${version}-darwin-amd64.tar.gz`
+      return `cljfmt-${version}-darwin-${arch}.tar.gz`
     default:
-      return `cljfmt-${version}-linux-amd64.tar.gz`
+      return `cljfmt-${version}-linux-${arch}.tar.gz`
   }
 }
 
