@@ -27,7 +27,7 @@ export async function getLatestCljstyle(githubAuth?: string): Promise<string> {
 export function getArtifactName(version: string): string {
   const [major, minor] = version.split('.').map(n => parseInt(n))
   const platform = os.platform()
-  const arch = os.arch()
+  const arch = os.arch() === 'arm64' ? 'arm64' : 'amd64'
 
   if (major > 0 || minor > 15) {
     switch (platform) {
