@@ -26,13 +26,26 @@ export async function getLatestCljstyle(githubAuth?: string): Promise<string> {
 
 export function getArtifactName(version: string): string {
   const [major, minor] = version.split('.').map(n => parseInt(n))
-  const archiSuffix = major > 0 || minor > 15 ? '_amd64' : ''
   const platform = os.platform()
-  switch (platform) {
-    case 'darwin':
-      return `cljstyle_${version}_macos${archiSuffix}.zip`
-    default:
-      return `cljstyle_${version}_linux${archiSuffix}.zip`
+  const arch = os.arch()
+
+  if (major > 0 || minor > 15) {
+    switch (platform) {
+      case 'darwin':
+        return `cljstyle_${version}_macos_${arch}.zip`
+      default:
+        return `cljstyle_${version}_linux_${arch}.zip`
+    }
+  } else {
+    if (arch !== 'amd64') {
+      throw new Error('This cljstyle version only supports x86-64 architecture.')
+    }
+    switch (platform) {
+      case 'darwin':
+        return `cljstyle_${version}_macos.tar.gz`
+      default:
+        return `cljstyle_${version}_linux.tar.gz`
+    }
   }
 }
 
