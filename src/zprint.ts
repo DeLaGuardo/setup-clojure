@@ -31,7 +31,11 @@ export function getArtifactName(version: string): string {
     case 'win32':
       return `zprint-filter-${version}`
     case 'darwin':
-      return `zprintm-${version}`
+      if (os.arch() === 'arm64') {
+        return `zprintma-${version}`
+      } else {
+        return `zprintm-${version}`
+      }
     default:
       return `zprintl-${version}`
   }
