@@ -590,13 +590,14 @@ function getLatestCljKondo(githubAuth) {
 }
 function getArtifactName(version) {
     const platform = os.platform();
+    const arch = os.arch() === 'arm64' ? 'aarch64' : 'amd64';
     switch (platform) {
         case 'win32':
-            return `clj-kondo-${version}-windows-amd64.zip`;
+            return `clj-kondo-${version}-windows-${arch}.zip`;
         case 'darwin':
-            return `clj-kondo-${version}-macos-amd64.zip`;
+            return `clj-kondo-${version}-macos-${arch}.zip`;
         default:
-            return `clj-kondo-${version}-linux-amd64.zip`;
+            return `clj-kondo-${version}-linux-${arch}.zip`;
     }
 }
 function getArtifactUrl(version) {
@@ -701,13 +702,14 @@ function getLatestCljFmt(githubAuth) {
 }
 function getArtifactName(version) {
     const platform = os.platform();
+    const arch = os.arch() === 'arm64' ? 'aarch64' : 'amd64';
     switch (platform) {
         case 'win32':
-            return `cljfmt-${version}-win-amd64.zip`;
+            return `cljfmt-${version}-win-${arch}.zip`;
         case 'darwin':
-            return `cljfmt-${version}-darwin-amd64.tar.gz`;
+            return `cljfmt-${version}-darwin-${arch}.tar.gz`;
         default:
-            return `cljfmt-${version}-linux-amd64.tar.gz`;
+            return `cljfmt-${version}-linux-${arch}.tar.gz`;
     }
 }
 function getArtifactUrl(version) {
@@ -818,13 +820,26 @@ function getLatestCljstyle(githubAuth) {
 }
 function getArtifactName(version) {
     const [major, minor] = version.split('.').map(n => parseInt(n));
-    const archiSuffix = major > 0 || minor > 15 ? '_amd64' : '';
     const platform = os.platform();
-    switch (platform) {
-        case 'darwin':
-            return `cljstyle_${version}_macos${archiSuffix}.zip`;
-        default:
-            return `cljstyle_${version}_linux${archiSuffix}.zip`;
+    const arch = os.arch() === 'arm64' ? 'arm64' : 'amd64';
+    if (major > 0 || minor > 15) {
+        switch (platform) {
+            case 'darwin':
+                return `cljstyle_${version}_macos_${arch}.zip`;
+            default:
+                return `cljstyle_${version}_linux_${arch}.zip`;
+        }
+    }
+    else {
+        if (arch !== 'amd64') {
+            throw new Error('This cljstyle version only supports x86-64 architecture.');
+        }
+        switch (platform) {
+            case 'darwin':
+                return `cljstyle_${version}_macos.zip`;
+            default:
+                return `cljstyle_${version}_linux.zip`;
+        }
     }
 }
 function getArtifactUrl(version) {
@@ -1394,7 +1409,12 @@ function getArtifactName(version) {
         case 'win32':
             return `zprint-filter-${version}`;
         case 'darwin':
-            return `zprintm-${version}`;
+            if (os.arch() === 'arm64') {
+                return `zprintma-${version}`;
+            }
+            else {
+                return `zprintm-${version}`;
+            }
         default:
             return `zprintl-${version}`;
     }

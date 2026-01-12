@@ -38,13 +38,15 @@ export function getArtifactName(version: string): string {
     }
   } else {
     if (arch !== 'amd64') {
-      throw new Error('This cljstyle version only supports x86-64 architecture.')
+      throw new Error(
+        'This cljstyle version only supports x86-64 architecture.'
+      )
     }
     switch (platform) {
       case 'darwin':
-        return `cljstyle_${version}_macos.tar.gz`
+        return `cljstyle_${version}_macos.zip`
       default:
-        return `cljstyle_${version}_linux.tar.gz`
+        return `cljstyle_${version}_linux.zip`
     }
   }
 }
