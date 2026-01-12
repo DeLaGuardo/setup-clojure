@@ -26,13 +26,15 @@ export async function getLatestCljKondo(githubAuth?: string): Promise<string> {
 
 export function getArtifactName(version: string): string {
   const platform = os.platform()
+  const arch = os.arch() === 'arm64' ? 'aarch64' : 'amd64'
+  
   switch (platform) {
     case 'win32':
-      return `clj-kondo-${version}-windows-amd64.zip`
+      return `clj-kondo-${version}-windows-${arch}.zip`
     case 'darwin':
-      return `clj-kondo-${version}-macos-amd64.zip`
+      return `clj-kondo-${version}-macos-${arch}.zip`
     default:
-      return `clj-kondo-${version}-linux-amd64.zip`
+      return `clj-kondo-${version}-linux-${arch}.zip`
   }
 }
 
