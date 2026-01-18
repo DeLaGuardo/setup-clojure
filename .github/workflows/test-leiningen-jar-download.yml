@@ -1,0 +1,208 @@
+name: Test Leiningen JAR Download
+
+# This workflow tests the fix for issue #128
+# https://github.com/DeLaGuardo/setup-clojure/issues/128
+#
+# Leiningen is moving from GitHub to Codeberg. This workflow verifies that
+# setup-clojure downloads the JAR directly from GitHub Releases instead of
+# relying on `lein self-install` (which would download from Codeberg for
+# newer versions).
+
+permissions:
+    contents: read
+
+on:
+    push:
+        paths:
+            - "src/leiningen.ts"
+            - ".github/workflows/test-leiningen-jar-download.yml"
+    pull_request:
+        paths:
+            - "src/leiningen.ts"
+            - ".github/workflows/test-leiningen-jar-download.yml"
+    workflow_dispatch:
+
+jobs:
+    test-leiningen-specific-version:
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macOS-latest]
+                version: ["2.9.1", "2.10.0", "2.11.2", "2.12.0"]
+
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Prepare java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "zulu"
+                  java-version: "11"
+
+            - name: Install Leiningen ${{ matrix.version }}
+              uses: ./
+              with:
+                  lein: ${{ matrix.version }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify lein version
+              run: |
+                  echo "Expected version: ${{ matrix.version }}"
+                  lein version
+                  # Verify the version matches (lein version outputs: Leiningen X.Y.Z on Java ...)
+                  lein version 2>&1 | grep -q "Leiningen ${{ matrix.version }}"
+
+            - name: Verify LEIN_JAR is set
+              run: |
+                  echo "LEIN_JAR=$LEIN_JAR"
+                  test -n "$LEIN_JAR" || (echo "LEIN_JAR not set" && exit 1)
+                  test -f "$LEIN_JAR" || (echo "LEIN_JAR file does not exist" && exit 1)
+
+            - name: Verify JAR is in self-installs directory
+              run: |
+                  echo "LEIN_HOME=$LEIN_HOME"
+                  ls -la "$LEIN_HOME/self-installs/"
+                  test -f "$LEIN_HOME/self-installs/leiningen-${{ matrix.version }}-standalone.jar"
+
+    test-leiningen-latest:
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macOS-latest]
+
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Prepare java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "zulu"
+                  java-version: "11"
+
+            - name: Install Leiningen latest
+              uses: ./
+              with:
+                  lein: latest
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify lein works
+              run: lein version
+
+            - name: Verify LEIN_JAR is set
+              run: |
+                  echo "LEIN_JAR=$LEIN_JAR"
+                  test -n "$LEIN_JAR" || (echo "LEIN_JAR not set" && exit 1)
+                  test -f "$LEIN_JAR" || (echo "LEIN_JAR file does not exist" && exit 1)
+
+            - name: Verify JAR is in self-installs directory
+              run: |
+                  echo "LEIN_HOME=$LEIN_HOME"
+                  ls -la "$LEIN_HOME/self-installs/"
+                  # Should have exactly one JAR file
+                  test $(ls "$LEIN_HOME/self-installs/"*.jar | wc -l) -eq 1
+
+    test-leiningen-windows:
+        strategy:
+            matrix:
+                version: ["2.11.2", "2.12.0"]
+
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Prepare java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "zulu"
+                  java-version: "11"
+
+            - name: Install Leiningen ${{ matrix.version }}
+              uses: ./
+              with:
+                  lein: ${{ matrix.version }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify lein version (PowerShell)
+              shell: powershell
+              run: |
+                  lein version
+                  if (-not $env:LEIN_JAR) { throw "LEIN_JAR not set" }
+                  if (-not (Test-Path $env:LEIN_JAR)) { throw "LEIN_JAR file does not exist" }
+
+            - name: Verify lein version (cmd)
+              shell: cmd
+              run: lein version
+
+            - name: Verify JAR location (PowerShell)
+              shell: powershell
+              run: |
+                  Write-Host "LEIN_HOME=$env:LEIN_HOME"
+                  Get-ChildItem "$env:LEIN_HOME\self-installs"
+
+    test-leiningen-caching:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Prepare java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "zulu"
+                  java-version: "11"
+
+            - name: Install Leiningen (first run - should download)
+              uses: ./
+              with:
+                  lein: "2.11.2"
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify first installation
+              run: lein version
+
+            - name: Install Leiningen (second run - should use cache)
+              uses: ./
+              with:
+                  lein: "2.11.2"
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify cached installation
+              run: lein version
+
+    test-leiningen-create-project:
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macOS-latest]
+
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Prepare java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "zulu"
+                  java-version: "11"
+
+            - name: Install Leiningen
+              uses: ./
+              with:
+                  lein: "2.12.0"
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create and test a new project
+              run: |
+                  cd /tmp
+                  lein new app test-project
+                  cd test-project
+                  # Skip 'lein test' as default app template includes a failing test (FIXME)
+                  lein run
