@@ -1123,6 +1123,7 @@ const os = __importStar(__nccwpck_require__(857));
 const fs = __importStar(__nccwpck_require__(2621));
 const utils = __importStar(__nccwpck_require__(9277));
 exports.identifier = 'Leiningen';
+const LEIN_JAR_BASE_URL = 'https://github.com/technomancy/leiningen/releases/download';
 function setup(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
@@ -1130,6 +1131,8 @@ function setup(version, githubAuth) {
             core.info(`Leiningen found in cache ${toolPath}`);
         }
         else {
+            // Resolve 'latest' to actual version number
+            const resolvedVersion = version === 'latest' ? yield getLatestVersion(githubAuth) : version;
             const binScripts = [];
             if (utils.isWindows()) {
                 for (const ext of ['ps1', 'bat']) {
@@ -1139,8 +1142,12 @@ function setup(version, githubAuth) {
             else {
                 binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, path.join(utils.getTempDir(), 'lein'), githubAuth));
             }
+            const jarFileName = `leiningen-${resolvedVersion}-standalone.jar`;
+            const jarUrl = `${LEIN_JAR_BASE_URL}/${resolvedVersion}/${jarFileName}`;
+            core.info(`Downloading Leiningen JAR from ${jarUrl}`);
+            const jarPath = yield tc.downloadTool(jarUrl, path.join(utils.getTempDir(), jarFileName), githubAuth);
             const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
-            const leiningenDir = yield installLeiningen(binScripts, tempDir);
+            const leiningenDir = yield installLeiningen(binScripts, jarPath, resolvedVersion, tempDir);
             core.debug(`Leiningen installed to ${leiningenDir}`);
             toolPath = yield tc.cacheDir(leiningenDir, exports.identifier, utils.getCacheVersionString(version));
         }
@@ -1152,14 +1159,27 @@ function setup(version, githubAuth) {
         core.addPath(path.join(toolPath, 'bin'));
     });
 }
-function installLeiningen(binScripts, destinationFolder) {
+function getLatestVersion(githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch('https://api.github.com/repos/technomancy/leiningen/releases/latest', {
+            headers: githubAuth ? { Authorization: githubAuth } : {}
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to fetch latest Leiningen version: ${response.statusText}`);
+        }
+        const data = (yield response.json());
+        return data.tag_name;
+    });
+}
+function installLeiningen(binScripts, jarPath, version, destinationFolder) {
     return __awaiter(this, void 0, void 0, function* () {
         yield io.mkdirP(destinationFolder);
+        const toolDir = path.join(destinationFolder, 'leiningen');
         for (const binScript of binScripts) {
             const bin = path.normalize(binScript);
             const binStats = yield fs.stat(bin);
             if (binStats.isFile()) {
-                const binDir = path.join(destinationFolder, 'leiningen', 'bin');
+                const binDir = path.join(toolDir, 'bin');
                 yield io.mkdirP(binDir);
                 yield io.mv(bin, path.join(binDir, `${path.basename(bin)}`));
                 if (!utils.isWindows()) {
@@ -1170,10 +1190,13 @@ function installLeiningen(binScripts, destinationFolder) {
                 throw new Error('Not a file');
             }
         }
+        const selfInstallsDir = path.join(toolDir, 'self-installs');
+        yield io.mkdirP(selfInstallsDir);
+        const jarFileName = `leiningen-${version}-standalone.jar`;
+        yield io.mv(jarPath, path.join(selfInstallsDir, jarFileName));
         const version_cmd = utils.isWindows()
-            ? 'powershell .\\lein.ps1 self-install'
+            ? 'powershell .\\lein.ps1 version'
             : './lein version';
-        const toolDir = path.join(destinationFolder, 'leiningen');
         const env = {
             LEIN_HOME: toolDir
         };
