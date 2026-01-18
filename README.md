@@ -105,6 +105,15 @@ jobs:
 
 For more application cases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/main/.github/workflows/smoke-tests.yml)
 
+# Versioning
+
+You can reference this action using either:
+
+- **Full version** (e.g., `DeLaGuardo/setup-clojure@13.4.0`) - pins to a specific release
+- **Major version** (e.g., `DeLaGuardo/setup-clojure@v13`) - automatically receives all minor and patch updates within that major version
+
+Using the major version tag is recommended for most users, as it ensures you receive bug fixes and new features without breaking changes.
+
 # License
 
 The scripts and documentation in this project are released under the [MIT License](LICENSE)
