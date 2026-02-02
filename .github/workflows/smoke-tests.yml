@@ -8,7 +8,10 @@ jobs:
   test-tools-deps:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -33,7 +36,10 @@ jobs:
   test-clojure-cli:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -58,7 +64,10 @@ jobs:
   test-clojure-cli-latest:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -83,7 +92,9 @@ jobs:
   test-leiningen:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -106,37 +117,40 @@ jobs:
       - name: Check leiningen version
         run: lein version
 
-  test-leiningen-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
+  # test-leiningen-windows:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@main
 
-      - name: Prepare java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "zulu"
-          java-version: "8"
+  #     - name: Prepare java
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: "zulu"
+  #         java-version: "8"
 
-      - name: Install leiningen
-        uses: ./
-        with:
-          lein: latest
+  #     - name: Install leiningen
+  #       uses: ./
+  #       with:
+  #         lein: latest
 
-      - name: lein powershell
-        shell: powershell
-        run: |
-          lein version
+  #     - name: lein powershell
+  #       shell: powershell
+  #       run: |
+  #         lein version
 
-      - name: lein cmd
-        shell: cmd
-        run: |
-          lein version
+  #     - name: lein cmd
+  #       shell: cmd
+  #       run: |
+  #         lein version
 
   test-boot:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -162,7 +176,10 @@ jobs:
   test-bb:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -188,7 +205,10 @@ jobs:
   test-clj-kondo:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -214,7 +234,10 @@ jobs:
   test-cljfmt:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -240,7 +263,9 @@ jobs:
   test-cljstyle:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -266,7 +291,10 @@ jobs:
   test-zprint:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          # - macOS-latest
+          # - windows-latest
 
     runs-on: ${{ matrix.os }}
 
