@@ -1124,6 +1124,35 @@ const fs = __importStar(__nccwpck_require__(2621));
 const utils = __importStar(__nccwpck_require__(9277));
 exports.identifier = 'Leiningen';
 const LEIN_JAR_BASE_URL = 'https://github.com/technomancy/leiningen/releases/download';
+function is404Error(error) {
+    return (typeof error === 'object' &&
+        error !== null &&
+        'httpStatusCode' in error &&
+        error.httpStatusCode === 404);
+}
+function downloadStandaloneJar(version, githubAuth) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const jarFileName = `leiningen-${version}-standalone.jar`;
+        const jarPath = path.join(utils.getTempDir(), jarFileName);
+        const jarUrl = `${LEIN_JAR_BASE_URL}/${version}/${jarFileName}`;
+        core.info(`Downloading Leiningen JAR from ${jarUrl}`);
+        try {
+            return yield tc.downloadTool(jarUrl, jarPath, githubAuth);
+        }
+        catch (error) {
+            if (!is404Error(error)) {
+                throw error;
+            }
+            const zipFileName = jarFileName.replace(/\.jar$/, '.zip');
+            const zipUrl = `${LEIN_JAR_BASE_URL}/${version}/${zipFileName}`;
+            const zipPath = path.join(utils.getTempDir(), zipFileName);
+            core.info(`Leiningen JAR returned 404, retrying ZIP artifact from ${zipUrl}`);
+            const downloadedZipPath = yield tc.downloadTool(zipUrl, zipPath, githubAuth);
+            yield io.mv(downloadedZipPath, jarPath);
+            return jarPath;
+        }
+    });
+}
 function setup(version, githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
@@ -1142,10 +1171,7 @@ function setup(version, githubAuth) {
             else {
                 binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, path.join(utils.getTempDir(), 'lein'), githubAuth));
             }
-            const jarFileName = `leiningen-${resolvedVersion}-standalone.jar`;
-            const jarUrl = `${LEIN_JAR_BASE_URL}/${resolvedVersion}/${jarFileName}`;
-            core.info(`Downloading Leiningen JAR from ${jarUrl}`);
-            const jarPath = yield tc.downloadTool(jarUrl, path.join(utils.getTempDir(), jarFileName), githubAuth);
+            const jarPath = yield downloadStandaloneJar(resolvedVersion, githubAuth);
             const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
             const leiningenDir = yield installLeiningen(binScripts, jarPath, resolvedVersion, tempDir);
             core.debug(`Leiningen installed to ${leiningenDir}`);

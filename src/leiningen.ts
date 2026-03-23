@@ -12,6 +12,45 @@ export const identifier = 'Leiningen'
 const LEIN_JAR_BASE_URL =
   'https://github.com/technomancy/leiningen/releases/download'
 
+function is404Error(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'httpStatusCode' in error &&
+    error.httpStatusCode === 404
+  )
+}
+
+async function downloadStandaloneJar(
+  version: string,
+  githubAuth?: string
+): Promise<string> {
+  const jarFileName = `leiningen-${version}-standalone.jar`
+  const jarPath = path.join(utils.getTempDir(), jarFileName)
+  const jarUrl = `${LEIN_JAR_BASE_URL}/${version}/${jarFileName}`
+  core.info(`Downloading Leiningen JAR from ${jarUrl}`)
+
+  try {
+    return await tc.downloadTool(jarUrl, jarPath, githubAuth)
+  } catch (error) {
+    if (!is404Error(error)) {
+      throw error
+    }
+
+    const zipFileName = jarFileName.replace(/\.jar$/, '.zip')
+    const zipUrl = `${LEIN_JAR_BASE_URL}/${version}/${zipFileName}`
+    const zipPath = path.join(utils.getTempDir(), zipFileName)
+
+    core.info(
+      `Leiningen JAR returned 404, retrying ZIP artifact from ${zipUrl}`
+    )
+
+    const downloadedZipPath = await tc.downloadTool(zipUrl, zipPath, githubAuth)
+    await io.mv(downloadedZipPath, jarPath)
+    return jarPath
+  }
+}
+
 export async function setup(
   version: string,
   githubAuth?: string
@@ -54,15 +93,7 @@ export async function setup(
       )
     }
 
-    const jarFileName = `leiningen-${resolvedVersion}-standalone.jar`
-    const jarUrl = `${LEIN_JAR_BASE_URL}/${resolvedVersion}/${jarFileName}`
-    core.info(`Downloading Leiningen JAR from ${jarUrl}`)
-
-    const jarPath = await tc.downloadTool(
-      jarUrl,
-      path.join(utils.getTempDir(), jarFileName),
-      githubAuth
-    )
+    const jarPath = await downloadStandaloneJar(resolvedVersion, githubAuth)
 
     const tempDir: string = path.join(
       utils.getTempDir(),
