@@ -9,6 +9,48 @@ import * as utils from './utils'
 
 export const identifier = 'Leiningen'
 
+const LEIN_JAR_BASE_URL =
+  'https://github.com/technomancy/leiningen/releases/download'
+
+function is404Error(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'httpStatusCode' in error &&
+    error.httpStatusCode === 404
+  )
+}
+
+async function downloadStandaloneJar(
+  version: string,
+  githubAuth?: string
+): Promise<string> {
+  const jarFileName = `leiningen-${version}-standalone.jar`
+  const jarPath = path.join(utils.getTempDir(), jarFileName)
+  const jarUrl = `${LEIN_JAR_BASE_URL}/${version}/${jarFileName}`
+  core.info(`Downloading Leiningen JAR from ${jarUrl}`)
+
+  try {
+    return await tc.downloadTool(jarUrl, jarPath, githubAuth)
+  } catch (error) {
+    if (!is404Error(error)) {
+      throw error
+    }
+
+    const zipFileName = jarFileName.replace(/\.jar$/, '.zip')
+    const zipUrl = `${LEIN_JAR_BASE_URL}/${version}/${zipFileName}`
+    const zipPath = path.join(utils.getTempDir(), zipFileName)
+
+    core.info(
+      `Leiningen JAR returned 404, retrying ZIP artifact from ${zipUrl}`
+    )
+
+    const downloadedZipPath = await tc.downloadTool(zipUrl, zipPath, githubAuth)
+    await io.mv(downloadedZipPath, jarPath)
+    return jarPath
+  }
+}
+
 export async function setup(
   version: string,
   githubAuth?: string
@@ -22,6 +64,10 @@ export async function setup(
   if (toolPath && version !== 'latest') {
     core.info(`Leiningen found in cache ${toolPath}`)
   } else {
+    // Resolve 'latest' to actual version number
+    const resolvedVersion =
+      version === 'latest' ? await getLatestVersion(githubAuth) : version
+
     const binScripts = []
     if (utils.isWindows()) {
       for (const ext of ['ps1', 'bat']) {
@@ -47,11 +93,18 @@ export async function setup(
       )
     }
 
+    const jarPath = await downloadStandaloneJar(resolvedVersion, githubAuth)
+
     const tempDir: string = path.join(
       utils.getTempDir(),
       `temp_${Math.floor(Math.random() * 2000000000)}`
     )
-    const leiningenDir = await installLeiningen(binScripts, tempDir)
+    const leiningenDir = await installLeiningen(
+      binScripts,
+      jarPath,
+      resolvedVersion,
+      tempDir
+    )
     core.debug(`Leiningen installed to ${leiningenDir}`)
     toolPath = await tc.cacheDir(
       leiningenDir,
@@ -70,17 +123,37 @@ export async function setup(
   core.addPath(path.join(toolPath, 'bin'))
 }
 
+async function getLatestVersion(githubAuth?: string): Promise<string> {
+  const response = await fetch(
+    'https://api.github.com/repos/technomancy/leiningen/releases/latest',
+    {
+      headers: githubAuth ? {Authorization: githubAuth} : {}
+    }
+  )
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch latest Leiningen version: ${response.statusText}`
+    )
+  }
+  const data = (await response.json()) as {tag_name: string}
+  return data.tag_name
+}
+
 async function installLeiningen(
   binScripts: string[],
+  jarPath: string,
+  version: string,
   destinationFolder: string
 ): Promise<string> {
   await io.mkdirP(destinationFolder)
+
+  const toolDir = path.join(destinationFolder, 'leiningen')
 
   for (const binScript of binScripts) {
     const bin = path.normalize(binScript)
     const binStats = await fs.stat(bin)
     if (binStats.isFile()) {
-      const binDir = path.join(destinationFolder, 'leiningen', 'bin')
+      const binDir = path.join(toolDir, 'bin')
 
       await io.mkdirP(binDir)
 
@@ -94,11 +167,14 @@ async function installLeiningen(
     }
   }
 
-  const version_cmd = utils.isWindows()
-    ? 'powershell .\\lein.ps1 self-install'
-    : './lein version'
+  const selfInstallsDir = path.join(toolDir, 'self-installs')
+  await io.mkdirP(selfInstallsDir)
+  const jarFileName = `leiningen-${version}-standalone.jar`
+  await io.mv(jarPath, path.join(selfInstallsDir, jarFileName))
 
-  const toolDir = path.join(destinationFolder, 'leiningen')
+  const version_cmd = utils.isWindows()
+    ? 'powershell .\\lein.ps1 version'
+    : './lein version'
 
   const env: {[key: string]: string} = {
     LEIN_HOME: toolDir

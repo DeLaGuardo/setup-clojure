@@ -10,9 +10,17 @@ import {VERSION} from '../src/version'
 const toolPath = join(__dirname, 'runner', 'tools', 'leiningen')
 const tempPath = join(__dirname, 'runner', 'temp', 'leiningen')
 const downloadPath = join(__dirname, 'runner', 'download')
+const jarDownloadPath = join(__dirname, 'runner', 'download', 'leiningen.jar')
+const zipDownloadPath = join(__dirname, 'runner', 'download', 'leiningen.zip')
 const cachePath = join(__dirname, 'runner', 'cache')
 
 import * as leiningen from '../src/leiningen'
+
+function httpError(statusCode: number): Error & {httpStatusCode: number} {
+  return Object.assign(new Error(`Unexpected HTTP response: ${statusCode}`), {
+    httpStatusCode: statusCode
+  })
+}
 
 jest.mock('@actions/core')
 const core: jest.Mocked<typeof _core> = _core as never
@@ -44,6 +52,7 @@ describe('leiningen tests', () => {
   afterEach(async () => {
     jest.spyOn(global.Math, 'random').mockRestore()
     jest.resetAllMocks()
+    global.fetch = undefined as never
     delete process.env['RUNNER_TOOL_CACHE']
     delete process.env['RUNNER_TEMP']
   })
@@ -55,11 +64,20 @@ describe('leiningen tests', () => {
   })
 
   it('Install leiningen with normal version', async () => {
+    // First call downloads lein script, second downloads the JAR
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.downloadTool.mockResolvedValueOnce(jarDownloadPath)
     fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
     await leiningen.setup('2.9.1')
+
+    // Verify JAR was downloaded from GitHub releases
+    expect(tc.downloadTool).toHaveBeenCalledWith(
+      'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.jar',
+      expect.any(String),
+      undefined
+    )
 
     expect(io.mkdirP).toHaveBeenNthCalledWith(
       1,
@@ -68,6 +86,22 @@ describe('leiningen tests', () => {
     expect(io.mkdirP).toHaveBeenNthCalledWith(
       2,
       join(tempPath, 'temp_2000000000', 'leiningen', 'bin')
+    )
+    // Verify self-installs directory was created
+    expect(io.mkdirP).toHaveBeenNthCalledWith(
+      3,
+      join(tempPath, 'temp_2000000000', 'leiningen', 'self-installs')
+    )
+    // Verify JAR was moved to self-installs
+    expect(io.mv).toHaveBeenCalledWith(
+      jarDownloadPath,
+      join(
+        tempPath,
+        'temp_2000000000',
+        'leiningen',
+        'self-installs',
+        'leiningen-2.9.1-standalone.jar'
+      )
     )
     expect(exec.exec.mock.calls[0]).toMatchObject([
       './lein version',
@@ -92,11 +126,32 @@ describe('leiningen tests', () => {
   })
 
   it('Install latest leiningen', async () => {
+    // Mock fetch for getting latest version
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({tag_name: '2.12.0'})
+    })
+
+    // First call downloads lein script, second downloads the JAR
     tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.downloadTool.mockResolvedValueOnce(jarDownloadPath)
     fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
     tc.cacheDir.mockResolvedValueOnce(cachePath)
 
     await leiningen.setup('latest')
+
+    // Verify latest version was fetched
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.github.com/repos/technomancy/leiningen/releases/latest',
+      expect.any(Object)
+    )
+
+    // Verify JAR was downloaded with resolved version
+    expect(tc.downloadTool).toHaveBeenCalledWith(
+      'https://github.com/technomancy/leiningen/releases/download/2.12.0/leiningen-2.12.0-standalone.jar',
+      expect.any(String),
+      undefined
+    )
 
     expect(io.mkdirP).toHaveBeenNthCalledWith(
       1,
@@ -126,6 +181,66 @@ describe('leiningen tests', () => {
       join(cachePath)
     )
     expect(core.addPath).toHaveBeenCalledWith(join(cachePath, 'bin'))
+  })
+
+  it('Falls back to zip artifact when jar returns 404', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.downloadTool.mockRejectedValueOnce(httpError(404))
+    tc.downloadTool.mockResolvedValueOnce(zipDownloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await leiningen.setup('2.9.1')
+
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      2,
+      'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.jar',
+      join(tempPath, 'leiningen-2.9.1-standalone.jar'),
+      undefined
+    )
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      3,
+      'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.zip',
+      join(tempPath, 'leiningen-2.9.1-standalone.zip'),
+      undefined
+    )
+    expect(io.mv).toHaveBeenCalledWith(
+      zipDownloadPath,
+      join(tempPath, 'leiningen-2.9.1-standalone.jar')
+    )
+    expect(io.mv).toHaveBeenCalledWith(
+      join(tempPath, 'leiningen-2.9.1-standalone.jar'),
+      join(
+        tempPath,
+        'temp_2000000000',
+        'leiningen',
+        'self-installs',
+        'leiningen-2.9.1-standalone.jar'
+      )
+    )
+  })
+
+  it('Fails when both jar and zip artifacts return 404', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.downloadTool.mockRejectedValueOnce(httpError(404))
+    tc.downloadTool.mockRejectedValueOnce(httpError(404))
+
+    await expect(leiningen.setup('2.9.1')).rejects.toThrow(
+      'Unexpected HTTP response: 404'
+    )
+
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      2,
+      'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.jar',
+      join(tempPath, 'leiningen-2.9.1-standalone.jar'),
+      undefined
+    )
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      3,
+      'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.zip',
+      join(tempPath, 'leiningen-2.9.1-standalone.zip'),
+      undefined
+    )
   })
 
   it('Uses version of leiningen installed in cache', async () => {
