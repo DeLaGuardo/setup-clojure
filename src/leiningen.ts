@@ -67,28 +67,24 @@ export async function setup(
     // Resolve 'latest' to actual version number
     const resolvedVersion =
       version === 'latest' ? await getLatestVersion(githubAuth) : version
+    const resolvedSourceType =
+      version === 'latest' ? 'branch/stable' : `tag/${version}`
 
     const binScripts = []
     if (utils.isWindows()) {
       for (const ext of ['ps1', 'bat']) {
         binScripts.push(
           await tc.downloadTool(
-            `https://raw.githubusercontent.com/technomancy/leiningen/${
-              version === 'latest' ? 'stable' : version
-            }/bin/lein.${ext}`,
-            path.join(utils.getTempDir(), `lein.${ext}`),
-            githubAuth
+            `https://codeberg.org/leiningen/leiningen/raw/${resolvedSourceType}/bin/lein.${ext}`,
+            path.join(utils.getTempDir(), `lein.${ext}`)
           )
         )
       }
     } else {
       binScripts.push(
         await tc.downloadTool(
-          `https://raw.githubusercontent.com/technomancy/leiningen/${
-            version === 'latest' ? 'stable' : version
-          }/bin/lein`,
-          path.join(utils.getTempDir(), 'lein'),
-          githubAuth
+          `https://codeberg.org/leiningen/leiningen/raw/${resolvedSourceType}/bin/lein`,
+          path.join(utils.getTempDir(), 'lein')
         )
       )
     }

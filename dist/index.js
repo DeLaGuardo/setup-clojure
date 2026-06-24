@@ -1162,14 +1162,15 @@ function setup(version, githubAuth) {
         else {
             // Resolve 'latest' to actual version number
             const resolvedVersion = version === 'latest' ? yield getLatestVersion(githubAuth) : version;
+            const resolvedSourceType = version === 'latest' ? 'branch/stable' : `tag/${version}`;
             const binScripts = [];
             if (utils.isWindows()) {
                 for (const ext of ['ps1', 'bat']) {
-                    binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein.${ext}`, path.join(utils.getTempDir(), `lein.${ext}`), githubAuth));
+                    binScripts.push(yield tc.downloadTool(`https://codeberg.org/leiningen/leiningen/raw/${resolvedSourceType}/bin/lein.${ext}`, path.join(utils.getTempDir(), `lein.${ext}`)));
                 }
             }
             else {
-                binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, path.join(utils.getTempDir(), 'lein'), githubAuth));
+                binScripts.push(yield tc.downloadTool(`https://codeberg.org/leiningen/leiningen/raw/${resolvedSourceType}/bin/lein`, path.join(utils.getTempDir(), 'lein')));
             }
             const jarPath = yield downloadStandaloneJar(resolvedVersion, githubAuth);
             const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
@@ -1373,7 +1374,7 @@ function isMacOS() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '13-6';
+exports.VERSION = '13-7';
 
 
 /***/ }),
