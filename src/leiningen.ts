@@ -51,9 +51,22 @@ async function downloadStandaloneJar(
   }
 }
 
+const CODEBERG_SCRIPT_VERSION = '2.13.0'
+
+function binScriptUrl(
+  version: string,
+  file: string,
+  useCodeberg: boolean
+): string {
+  return useCodeberg
+    ? `https://codeberg.org/api/v1/repos/leiningen/leiningen/raw/bin/${file}?ref=${version}`
+    : `https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/${file}`
+}
+
 export async function setup(
   version: string,
-  githubAuth?: string
+  githubAuth?: string,
+  codebergAuth?: string
 ): Promise<void> {
   let toolPath = tc.find(
     identifier,
@@ -68,27 +81,29 @@ export async function setup(
     const resolvedVersion =
       version === 'latest' ? await getLatestVersion(githubAuth) : version
 
+    const useCodeberg = utils.versionGte(
+      resolvedVersion,
+      CODEBERG_SCRIPT_VERSION
+    )
+    const binAuth = useCodeberg ? codebergAuth : githubAuth
+
     const binScripts = []
     if (utils.isWindows()) {
       for (const ext of ['ps1', 'bat']) {
         binScripts.push(
           await tc.downloadTool(
-            `https://raw.githubusercontent.com/technomancy/leiningen/${
-              version === 'latest' ? 'stable' : version
-            }/bin/lein.${ext}`,
+            binScriptUrl(resolvedVersion, `lein.${ext}`, useCodeberg),
             path.join(utils.getTempDir(), `lein.${ext}`),
-            githubAuth
+            binAuth
           )
         )
       }
     } else {
       binScripts.push(
         await tc.downloadTool(
-          `https://raw.githubusercontent.com/technomancy/leiningen/${
-            version === 'latest' ? 'stable' : version
-          }/bin/lein`,
+          binScriptUrl(resolvedVersion, 'lein', useCodeberg),
           path.join(utils.getTempDir(), 'lein'),
-          githubAuth
+          binAuth
         )
       )
     }

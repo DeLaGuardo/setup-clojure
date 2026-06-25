@@ -943,9 +943,11 @@ function main() {
         const invalidateCache = core.getBooleanInput('invalidate-cache');
         const githubToken = core.getInput('github-token');
         const githubAuthToken = (githubToken === null || githubToken === void 0 ? void 0 : githubToken.length) > 0 ? `Bearer ${githubToken}` : undefined;
+        const codebergToken = core.getInput('codeberg-token');
+        const codebergAuthToken = (codebergToken === null || codebergToken === void 0 ? void 0 : codebergToken.length) > 0 ? `token ${codebergToken}` : undefined;
         try {
             if (LEIN_VERSION) {
-                tools.push(setupTool(lein.identifier, LEIN_VERSION, invalidateCache, lein.setup.bind(null, LEIN_VERSION, githubAuthToken)));
+                tools.push(setupTool(lein.identifier, LEIN_VERSION, invalidateCache, lein.setup.bind(null, LEIN_VERSION, githubAuthToken, codebergAuthToken)));
             }
             if (BOOT_VERSION) {
                 tools.push(setupTool(boot.identifier, BOOT_VERSION, invalidateCache, boot.setup.bind(null, BOOT_VERSION, githubAuthToken)));
@@ -1153,7 +1155,13 @@ function downloadStandaloneJar(version, githubAuth) {
         }
     });
 }
-function setup(version, githubAuth) {
+const CODEBERG_SCRIPT_VERSION = '2.13.0';
+function binScriptUrl(version, file, useCodeberg) {
+    return useCodeberg
+        ? `https://codeberg.org/api/v1/repos/leiningen/leiningen/raw/bin/${file}?ref=${version}`
+        : `https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/${file}`;
+}
+function setup(version, githubAuth, codebergAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find(exports.identifier, utils.getCacheVersionString(version), os.arch());
         if (toolPath && version !== 'latest') {
@@ -1162,14 +1170,16 @@ function setup(version, githubAuth) {
         else {
             // Resolve 'latest' to actual version number
             const resolvedVersion = version === 'latest' ? yield getLatestVersion(githubAuth) : version;
+            const useCodeberg = utils.versionGte(resolvedVersion, CODEBERG_SCRIPT_VERSION);
+            const binAuth = useCodeberg ? codebergAuth : githubAuth;
             const binScripts = [];
             if (utils.isWindows()) {
                 for (const ext of ['ps1', 'bat']) {
-                    binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein.${ext}`, path.join(utils.getTempDir(), `lein.${ext}`), githubAuth));
+                    binScripts.push(yield tc.downloadTool(binScriptUrl(resolvedVersion, `lein.${ext}`, useCodeberg), path.join(utils.getTempDir(), `lein.${ext}`), binAuth));
                 }
             }
             else {
-                binScripts.push(yield tc.downloadTool(`https://raw.githubusercontent.com/technomancy/leiningen/${version === 'latest' ? 'stable' : version}/bin/lein`, path.join(utils.getTempDir(), 'lein'), githubAuth));
+                binScripts.push(yield tc.downloadTool(binScriptUrl(resolvedVersion, 'lein', useCodeberg), path.join(utils.getTempDir(), 'lein'), binAuth));
             }
             const jarPath = yield downloadStandaloneJar(resolvedVersion, githubAuth);
             const tempDir = path.join(utils.getTempDir(), `temp_${Math.floor(Math.random() * 2000000000)}`);
@@ -1324,6 +1334,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCacheVersionString = getCacheVersionString;
 exports.getTempDir = getTempDir;
+exports.versionGte = versionGte;
 exports.isWindows = isWindows;
 exports.isMacOS = isMacOS;
 const path = __importStar(__nccwpck_require__(16928));
@@ -1356,6 +1367,19 @@ function getTempDir() {
     }
     return tempDirectory;
 }
+function versionGte(a, b) {
+    var _a, _b;
+    const parse = (v) => v.split('.').map(segment => parseInt(segment, 10) || 0);
+    const pa = parse(a);
+    const pb = parse(b);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const x = (_a = pa[i]) !== null && _a !== void 0 ? _a : 0;
+        const y = (_b = pb[i]) !== null && _b !== void 0 ? _b : 0;
+        if (x !== y)
+            return x > y;
+    }
+    return true;
+}
 function isWindows() {
     return core_1.platform.isWindows;
 }
@@ -1373,7 +1397,7 @@ function isMacOS() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VERSION = void 0;
-exports.VERSION = '13-6';
+exports.VERSION = '13-8';
 
 
 /***/ }),

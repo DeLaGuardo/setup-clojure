@@ -29,6 +29,19 @@ export function getTempDir(): string {
   return tempDirectory
 }
 
+export function versionGte(a: string, b: string): boolean {
+  const parse = (v: string): number[] =>
+    v.split('.').map(segment => parseInt(segment, 10) || 0)
+  const pa = parse(a)
+  const pb = parse(b)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const x = pa[i] ?? 0
+    const y = pb[i] ?? 0
+    if (x !== y) return x > y
+  }
+  return true
+}
+
 export function isWindows(): boolean {
   return platform.isWindows
 }
