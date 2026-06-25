@@ -73,7 +73,21 @@ describe('setup-clojure', () => {
 
     await main()
 
-    expect(lein.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc')
+    expect(lein.setup).toHaveBeenCalledWith('1.2.3', 'Bearer abc', undefined)
+  })
+
+  it('forwards the codeberg token to Leiningen setup', async () => {
+    inputs['lein'] = '2.13.0'
+    inputs['github-token'] = 'abc'
+    inputs['codeberg-token'] = 'cbtoken'
+
+    await main()
+
+    expect(lein.setup).toHaveBeenCalledWith(
+      '2.13.0',
+      'Bearer abc',
+      'token cbtoken'
+    )
   })
 
   it('sets up Boot', async () => {

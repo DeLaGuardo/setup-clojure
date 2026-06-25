@@ -36,6 +36,10 @@ export async function main(): Promise<void> {
   const githubAuthToken =
     githubToken?.length > 0 ? `Bearer ${githubToken}` : undefined
 
+  const codebergToken = core.getInput('codeberg-token')
+  const codebergAuthToken =
+    codebergToken?.length > 0 ? `token ${codebergToken}` : undefined
+
   try {
     if (LEIN_VERSION) {
       tools.push(
@@ -43,7 +47,12 @@ export async function main(): Promise<void> {
           lein.identifier,
           LEIN_VERSION,
           invalidateCache,
-          lein.setup.bind(null, LEIN_VERSION, githubAuthToken)
+          lein.setup.bind(
+            null,
+            LEIN_VERSION,
+            githubAuthToken,
+            codebergAuthToken
+          )
         )
       )
     }

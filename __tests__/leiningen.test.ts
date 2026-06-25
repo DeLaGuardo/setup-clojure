@@ -72,6 +72,14 @@ describe('leiningen tests', () => {
 
     await leiningen.setup('2.9.1')
 
+    // Versions before 2.13.0 fetch the lein script from GitHub raw
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      1,
+      'https://raw.githubusercontent.com/technomancy/leiningen/2.9.1/bin/lein',
+      join(tempPath, 'lein'),
+      undefined
+    )
+
     // Verify JAR was downloaded from GitHub releases
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.jar',
@@ -240,6 +248,51 @@ describe('leiningen tests', () => {
       'https://github.com/technomancy/leiningen/releases/download/2.9.1/leiningen-2.9.1-standalone.zip',
       join(tempPath, 'leiningen-2.9.1-standalone.zip'),
       undefined
+    )
+  })
+
+  it('Fetches lein 2.13.0 script from the Codeberg API', async () => {
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.downloadTool.mockResolvedValueOnce(jarDownloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await leiningen.setup('2.13.0', 'Bearer gh', 'token cb')
+
+    // 2.13.0+ fetch the lein script from the Codeberg API with the codeberg auth
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      1,
+      'https://codeberg.org/api/v1/repos/leiningen/leiningen/raw/bin/lein?ref=2.13.0',
+      join(tempPath, 'lein'),
+      'token cb'
+    )
+
+    // JAR still comes from GitHub releases, using the github auth
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      2,
+      'https://github.com/technomancy/leiningen/releases/download/2.13.0/leiningen-2.13.0-standalone.jar',
+      join(tempPath, 'leiningen-2.13.0-standalone.jar'),
+      'Bearer gh'
+    )
+  })
+
+  it('Uses Codeberg for latest when it resolves to 2.13.0+', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({tag_name: '2.13.0'})
+    })
+    tc.downloadTool.mockResolvedValueOnce(downloadPath)
+    tc.downloadTool.mockResolvedValueOnce(jarDownloadPath)
+    fs.stat.mockResolvedValueOnce({isFile: () => true} as never)
+    tc.cacheDir.mockResolvedValueOnce(cachePath)
+
+    await leiningen.setup('latest', 'Bearer gh', 'token cb')
+
+    expect(tc.downloadTool).toHaveBeenNthCalledWith(
+      1,
+      'https://codeberg.org/api/v1/repos/leiningen/leiningen/raw/bin/lein?ref=2.13.0',
+      join(tempPath, 'lein'),
+      'token cb'
     )
   })
 

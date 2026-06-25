@@ -38,6 +38,13 @@ inputs:
       More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
     default: ${{ github.token }}
     required: false
+  codeberg-token:
+    description: >+
+      Optional Codeberg API token. Leiningen 2.13.0 and newer fetch their `lein`
+      scripts from the Codeberg API; providing a token raises the rate limit
+      from per-IP to per-user. Generate one at
+      https://codeberg.org/user/settings/applications
+    required: false
   invalidate-cache:
     description: >+
       Set to `true` to fix problems related to wrongly populated tool cache
