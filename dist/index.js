@@ -50,6 +50,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.identifier = void 0;
+exports.linuxCanRunDynamic = linuxCanRunDynamic;
 exports.getLatestBabashka = getLatestBabashka;
 exports.getArtifactName = getArtifactName;
 exports.getArtifactUrl = getArtifactUrl;
@@ -59,7 +60,20 @@ const core = __importStar(__nccwpck_require__(37484));
 const tc = __importStar(__nccwpck_require__(33472));
 const http = __importStar(__nccwpck_require__(54844));
 const os = __importStar(__nccwpck_require__(70857));
+const fs = __importStar(__nccwpck_require__(79896));
 exports.identifier = 'Babashka';
+function linuxCanRunDynamic() {
+    try {
+        if (fs.readdirSync('/lib').some(f => f.startsWith('ld-musl-'))) {
+            return false;
+        }
+        // the dynamic binary hardcodes this interpreter
+        return fs.existsSync('/lib64/ld-linux-x86-64.so.2');
+    }
+    catch (_a) {
+        return false;
+    }
+}
 function getLatestBabashka(githubAuth) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
@@ -84,6 +98,12 @@ function getArtifactName(version) {
         case 'darwin':
             return `babashka-${version}-macos-${arch}.tar.gz`;
         default:
+            // the amd64 dynamic binary links everything statically except glibc,
+            // the fully static musl binary stays the fallback for e.g. alpine
+            // containers
+            if (arch === 'amd64' && linuxCanRunDynamic()) {
+                return `babashka-${version}-linux-${arch}.tar.gz`;
+            }
             return `babashka-${version}-linux-${arch}-static.tar.gz`;
     }
 }
