@@ -46,7 +46,7 @@ jobs:
           java-version: '8'
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@13.4
+        uses: DeLaGuardo/setup-clojure@13.7
         with:
           # Install just one or all simultaneously
           # The value must indicate a particular version of the tool, or use 'latest'
@@ -111,7 +111,7 @@ For more application cases please check [Smoke Test Workflow file](https://githu
 
 You can reference this action using either:
 
-- **Full version** (e.g., `DeLaGuardo/setup-clojure@13.4.0`) - pins to a specific release
+- **Full version** (e.g., `DeLaGuardo/setup-clojure@13.7.0`) - pins to a specific release
 - **Major version** (e.g., `DeLaGuardo/setup-clojure@13`) - automatically receives all minor and patch updates within that major version
 
 Using the major version tag is recommended for most users, as it ensures you receive bug fixes and new features without breaking changes.
