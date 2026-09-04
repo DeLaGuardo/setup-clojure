@@ -1,4 +1,5 @@
 import _os from 'os'
+import _fs from 'fs'
 import * as _core from '@actions/core'
 import * as _tc from '@actions/tool-cache'
 import * as bb from '../src/babashka'
@@ -12,6 +13,23 @@ jest.mock('@actions/http-client', () => ({
 
 jest.mock('os')
 const os: jest.Mocked<typeof _os> = _os as never
+
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
+  readdirSync: jest.fn(),
+  existsSync: jest.fn()
+}))
+const fs: jest.Mocked<typeof _fs> = _fs as never
+
+function mockGlibcSystem(): void {
+  fs.readdirSync.mockReturnValue(['ld-linux-x86-64.so.2'] as never)
+  fs.existsSync.mockReturnValue(true)
+}
+
+function mockMuslSystem(): void {
+  fs.readdirSync.mockReturnValue(['ld-musl-x86_64.so.1'] as never)
+  fs.existsSync.mockReturnValue(true)
+}
 
 jest.mock('@actions/tool-cache')
 const tc: jest.Mocked<typeof _tc> = _tc as never
@@ -67,11 +85,48 @@ describe('babashka tests', () => {
       platform    | artifact
       ${'win32'}  | ${`babashka-1.2.3-windows-amd64.zip`}
       ${'darwin'} | ${`babashka-1.2.3-macos-amd64.tar.gz`}
-      ${'linux'}  | ${`babashka-1.2.3-linux-amd64-static.tar.gz`}
-      ${'foobar'} | ${`babashka-1.2.3-linux-amd64-static.tar.gz`}
+      ${'linux'}  | ${`babashka-1.2.3-linux-amd64.tar.gz`}
+      ${'foobar'} | ${`babashka-1.2.3-linux-amd64.tar.gz`}
     `('$platform -> $artifact', ({platform, artifact}) => {
+      mockGlibcSystem()
       os.platform.mockReturnValueOnce(platform as never)
       expect(bb.getArtifactName('1.2.3')).toBe(artifact)
+    })
+
+    it('uses the static artifact on musl', () => {
+      mockMuslSystem()
+      os.platform.mockReturnValueOnce('linux' as never)
+      expect(bb.getArtifactName('1.2.3')).toBe(
+        'babashka-1.2.3-linux-amd64-static.tar.gz'
+      )
+    })
+
+    it('uses the static artifact without the glibc loader', () => {
+      fs.readdirSync.mockReturnValue([] as never)
+      fs.existsSync.mockReturnValue(false)
+      os.platform.mockReturnValueOnce('linux' as never)
+      expect(bb.getArtifactName('1.2.3')).toBe(
+        'babashka-1.2.3-linux-amd64-static.tar.gz'
+      )
+    })
+
+    it('uses the static artifact when /lib is unreadable', () => {
+      fs.readdirSync.mockImplementation(() => {
+        throw new Error('ENOENT')
+      })
+      os.platform.mockReturnValueOnce('linux' as never)
+      expect(bb.getArtifactName('1.2.3')).toBe(
+        'babashka-1.2.3-linux-amd64-static.tar.gz'
+      )
+    })
+
+    it('uses the static artifact on aarch64', () => {
+      mockGlibcSystem()
+      os.platform.mockReturnValueOnce('linux' as never)
+      os.arch.mockReturnValueOnce('arm64' as never)
+      expect(bb.getArtifactName('1.2.3')).toBe(
+        'babashka-1.2.3-linux-aarch64-static.tar.gz'
+      )
     })
   })
 
@@ -80,9 +135,10 @@ describe('babashka tests', () => {
       platform    | artifact
       ${'win32'}  | ${`babashka-1.2.3-windows-amd64.zip`}
       ${'darwin'} | ${`babashka-1.2.3-macos-amd64.tar.gz`}
-      ${'linux'}  | ${`babashka-1.2.3-linux-amd64-static.tar.gz`}
-      ${'foobar'} | ${`babashka-1.2.3-linux-amd64-static.tar.gz`}
+      ${'linux'}  | ${`babashka-1.2.3-linux-amd64.tar.gz`}
+      ${'foobar'} | ${`babashka-1.2.3-linux-amd64.tar.gz`}
     `('$platform -> $artifact', ({platform, artifact}) => {
+      mockGlibcSystem()
       os.platform.mockReturnValueOnce(platform as never)
       expect(bb.getArtifactUrl('1.2.3')).toBe(
         `https://github.com/babashka/babashka/releases/download/v1.2.3/${artifact}`
@@ -124,6 +180,7 @@ describe('babashka tests', () => {
     })
 
     it('fetches exact version', async () => {
+      mockGlibcSystem()
       tc.downloadTool.mockResolvedValueOnce('/foo/bb.tar.gz')
       tc.extractTar.mockResolvedValueOnce('/bar/baz')
 
@@ -131,7 +188,7 @@ describe('babashka tests', () => {
 
       expect(tc.find).toHaveBeenCalledWith('Babashka', '1.2.3')
       expect(tc.downloadTool).toHaveBeenCalledWith(
-        'https://github.com/babashka/babashka/releases/download/v1.2.3/babashka-1.2.3-linux-amd64-static.tar.gz',
+        'https://github.com/babashka/babashka/releases/download/v1.2.3/babashka-1.2.3-linux-amd64.tar.gz',
         undefined,
         'token 123'
       )
@@ -140,6 +197,7 @@ describe('babashka tests', () => {
     })
 
     it('fetches latest version', async () => {
+      mockGlibcSystem()
       getJson.mockResolvedValueOnce({
         result: {tag_name: 'v9.9.9'}
       })
@@ -154,7 +212,7 @@ describe('babashka tests', () => {
       )
       expect(tc.find).toHaveBeenCalledWith('Babashka', '9.9.9')
       expect(tc.downloadTool).toHaveBeenCalledWith(
-        'https://github.com/babashka/babashka/releases/download/v9.9.9/babashka-9.9.9-linux-amd64-static.tar.gz',
+        'https://github.com/babashka/babashka/releases/download/v9.9.9/babashka-9.9.9-linux-amd64.tar.gz',
         undefined,
         'token 123'
       )

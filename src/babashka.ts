@@ -3,8 +3,22 @@ import * as tc from '@actions/tool-cache'
 import * as http from '@actions/http-client'
 
 import * as os from 'os'
+import * as fs from 'fs'
 
 export const identifier = 'Babashka'
+
+export function linuxCanRunDynamic(): boolean {
+  try {
+    // gcompat adds the glibc loader path on musl, prefer the musl build there
+    if (fs.readdirSync('/lib').some(f => f.startsWith('ld-musl-'))) {
+      return false
+    }
+    // the dynamic binary hardcodes this interpreter
+    return fs.existsSync('/lib64/ld-linux-x86-64.so.2')
+  } catch {
+    return false
+  }
+}
 
 export async function getLatestBabashka(githubAuth?: string): Promise<string> {
   const client = new http.HttpClient('actions/setup-clojure', undefined, {
@@ -35,6 +49,10 @@ export function getArtifactName(version: string): string {
     case 'darwin':
       return `babashka-${version}-macos-${arch}.tar.gz`
     default:
+      // the dynamic binary needs only glibc, alpine and friends get the static one
+      if (arch === 'amd64' && linuxCanRunDynamic()) {
+        return `babashka-${version}-linux-${arch}.tar.gz`
+      }
       return `babashka-${version}-linux-${arch}-static.tar.gz`
   }
 }
