@@ -103,7 +103,7 @@ jobs:
         run: zprint --version
 ```
 
-On Linux amd64 the action installs the dynamic babashka build on glibc systems and the static build on musl systems such as Alpine, or when the glibc loader is missing.
+On Linux amd64 the action installs the dynamic babashka build on glibc and the static build on musl.
 
 For more application cases please check [Smoke Test Workflow file](https://github.com/DeLaGuardo/setup-clojure/blob/main/.github/workflows/smoke-tests.yml)
 

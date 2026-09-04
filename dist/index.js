@@ -64,8 +64,7 @@ const fs = __importStar(__nccwpck_require__(79896));
 exports.identifier = 'Babashka';
 function linuxCanRunDynamic() {
     try {
-        // gcompat provides the glibc loader path on musl and the dynamic binary
-        // runs through it, but the static build is the one built for musl
+        // gcompat adds the glibc loader path on musl, prefer the musl build there
         if (fs.readdirSync('/lib').some(f => f.startsWith('ld-musl-'))) {
             return false;
         }
@@ -100,9 +99,7 @@ function getArtifactName(version) {
         case 'darwin':
             return `babashka-${version}-macos-${arch}.tar.gz`;
         default:
-            // the amd64 dynamic binary links everything statically except glibc,
-            // the fully static musl binary stays the fallback for e.g. alpine
-            // containers
+            // the dynamic binary needs only glibc, alpine and friends get the static one
             if (arch === 'amd64' && linuxCanRunDynamic()) {
                 return `babashka-${version}-linux-${arch}.tar.gz`;
             }
