@@ -9,6 +9,8 @@ export const identifier = 'Babashka'
 
 export function linuxCanRunDynamic(): boolean {
   try {
+    // plain alpine has no /lib64, but gcompat shims the glibc loader path
+    // onto musl and the dynamic binary still fails there
     if (fs.readdirSync('/lib').some(f => f.startsWith('ld-musl-'))) {
       return false
     }

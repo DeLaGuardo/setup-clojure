@@ -28,7 +28,7 @@ function mockGlibcSystem(): void {
 
 function mockMuslSystem(): void {
   fs.readdirSync.mockReturnValue(['ld-musl-x86_64.so.1'] as never)
-  fs.existsSync.mockReturnValue(false)
+  fs.existsSync.mockReturnValue(true)
 }
 
 jest.mock('@actions/tool-cache')
@@ -180,6 +180,7 @@ describe('babashka tests', () => {
     })
 
     it('fetches exact version', async () => {
+      mockGlibcSystem()
       tc.downloadTool.mockResolvedValueOnce('/foo/bb.tar.gz')
       tc.extractTar.mockResolvedValueOnce('/bar/baz')
 
@@ -187,7 +188,7 @@ describe('babashka tests', () => {
 
       expect(tc.find).toHaveBeenCalledWith('Babashka', '1.2.3')
       expect(tc.downloadTool).toHaveBeenCalledWith(
-        'https://github.com/babashka/babashka/releases/download/v1.2.3/babashka-1.2.3-linux-amd64-static.tar.gz',
+        'https://github.com/babashka/babashka/releases/download/v1.2.3/babashka-1.2.3-linux-amd64.tar.gz',
         undefined,
         'token 123'
       )
@@ -196,6 +197,7 @@ describe('babashka tests', () => {
     })
 
     it('fetches latest version', async () => {
+      mockGlibcSystem()
       getJson.mockResolvedValueOnce({
         result: {tag_name: 'v9.9.9'}
       })
@@ -210,7 +212,7 @@ describe('babashka tests', () => {
       )
       expect(tc.find).toHaveBeenCalledWith('Babashka', '9.9.9')
       expect(tc.downloadTool).toHaveBeenCalledWith(
-        'https://github.com/babashka/babashka/releases/download/v9.9.9/babashka-9.9.9-linux-amd64-static.tar.gz',
+        'https://github.com/babashka/babashka/releases/download/v9.9.9/babashka-9.9.9-linux-amd64.tar.gz',
         undefined,
         'token 123'
       )

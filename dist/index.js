@@ -64,6 +64,8 @@ const fs = __importStar(__nccwpck_require__(79896));
 exports.identifier = 'Babashka';
 function linuxCanRunDynamic() {
     try {
+        // plain alpine has no /lib64, but gcompat shims the glibc loader path
+        // onto musl and the dynamic binary still fails there
         if (fs.readdirSync('/lib').some(f => f.startsWith('ld-musl-'))) {
             return false;
         }
